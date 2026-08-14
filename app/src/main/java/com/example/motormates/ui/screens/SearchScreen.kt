@@ -82,7 +82,7 @@ private val sampleSearchCars = listOf(
 )
 
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier) {
+fun SearchScreen(modifier: Modifier = Modifier, onFeedClick: () -> Unit = {}) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(searchCategories.first()) }
 
@@ -103,7 +103,8 @@ fun SearchScreen(modifier: Modifier = Modifier) {
                 query = searchQuery,
                 onQueryChange = { searchQuery = it }
             )
-        }
+        },
+        bottomBar = { SearchBottomBar(onFeedClick = onFeedClick) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -302,7 +303,7 @@ private fun EmptySearchState(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun SearchBottomBar(modifier: Modifier = Modifier) {
+private fun SearchBottomBar(modifier: Modifier = Modifier, onFeedClick: () -> Unit = {}) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -312,7 +313,7 @@ private fun SearchBottomBar(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BottomNavItem(icon = Icons.Filled.Home, label = "Feed", selected = false)
+        BottomNavItem(icon = Icons.Filled.Home, label = "Feed", selected = false, onClick = onFeedClick)
         BottomNavItem(icon = Icons.Filled.Explore, label = "Explorar", selected = true)
         Box(
             modifier = Modifier
@@ -333,10 +334,14 @@ private fun BottomNavItem(
     icon: ImageVector,
     label: String,
     selected: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     val color = if (selected) MotorMatesRed else MotorMatesTextSecondary
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier.clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Icon(imageVector = icon, contentDescription = label, tint = color, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.height(2.dp))
         Text(text = label, color = color, fontSize = 11.sp)
