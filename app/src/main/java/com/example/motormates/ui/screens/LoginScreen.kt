@@ -1,8 +1,10 @@
 package com.example.motormates.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,10 +22,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.theme.MotorMatesRed
+import com.example.motormates.ui.theme.MotorMatesRedLight
 import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 @Composable
-fun LoginScreen(onLoginClick: () -> Unit) {
+fun LoginScreen(onLoginClick: () -> Unit, onRegisterClick: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,6 +56,17 @@ fun LoginScreen(onLoginClick: () -> Unit) {
                 .height(52.dp)
         ) {
             Text(text = "Iniciar sesión", color = Color.White, fontSize = 16.sp)
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Row {
+            Text(text = "¿No tienes cuenta? ", color = MotorMatesTextSecondary, fontSize = 14.sp)
+            Text(
+                text = "Regístrate",
+                color = MotorMatesRedLight,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable(onClick = onRegisterClick)
+            )
         }
     }
 }
