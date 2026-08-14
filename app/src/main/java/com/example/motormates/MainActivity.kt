@@ -46,5 +46,3 @@ fun MotorMatesApp() {
         )
     }
 }
-
-
