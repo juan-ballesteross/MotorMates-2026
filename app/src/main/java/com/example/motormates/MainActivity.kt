@@ -9,10 +9,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.example.motormates.ui.screens.FeedScreen
-import com.example.motormates.ui.screens.LoginScreen
-import com.example.motormates.ui.screens.RegisterScreen
-import com.example.motormates.ui.screens.SearchScreen
+import com.example.motormates.ui.feed.FeedScreen
+import com.example.motormates.ui.login.LoginScreen
+import com.example.motormates.ui.register.RegisterScreen
+import com.example.motormates.ui.search.SearchScreen
 import com.example.motormates.ui.theme.MotorMatesTheme
 
 class MainActivity : ComponentActivity() {
