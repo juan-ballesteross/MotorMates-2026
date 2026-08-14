@@ -4,45 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.example.motormates.ui.screens.FeedScreen
-import com.example.motormates.ui.screens.LoginScreen
-import com.example.motormates.ui.screens.RegisterScreen
+import com.example.motormates.ui.screens.SearchScreen
 import com.example.motormates.ui.theme.MotorMatesTheme
 
+// Nota: para esta entrega, esta rama (Window-Search) solo muestra la pantalla
+// de Busqueda, que es la que le corresponde a este integrante del equipo.
+// El flujo completo con Login/Register/Feed sigue disponible en la rama
+// principal y en las pantallas de los demas integrantes; se debe restaurar
+// aqui cuando se junten todas las pantallas del equipo.
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MotorMatesTheme {
-                MotorMatesApp()
+                SearchScreen()
             }
         }
-    }
-}
-
-private enum class AuthDestination { LOGIN, REGISTER }
-
-@Composable
-fun MotorMatesApp() {
-    var isLoggedIn by remember { mutableStateOf(false) }
-    var authDestination by remember { mutableStateOf(AuthDestination.LOGIN) }
-
-    when {
-        isLoggedIn -> FeedScreen()
-        authDestination == AuthDestination.REGISTER -> RegisterScreen(
-            onBackClick = { authDestination = AuthDestination.LOGIN },
-            onRegisterClick = { isLoggedIn = true },
-            onLoginClick = { authDestination = AuthDestination.LOGIN }
-        )
-        else -> LoginScreen(
-            onLoginClick = { isLoggedIn = true },
-            onRegisterClick = { authDestination = AuthDestination.REGISTER }
-        )
     }
 }
