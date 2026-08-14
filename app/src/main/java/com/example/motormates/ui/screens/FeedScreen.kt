@@ -263,11 +263,3 @@ private fun BottomNavItem(icon: ImageVector, label: String, selected: Boolean) {
         Text(text = label, color = color, fontSize = 11.sp)
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-private fun FeedScreenPreview() {
-    MotorMatesTheme {
-        LoginScreen(onLoginClick = {})
-    }
-}
