@@ -82,8 +82,9 @@ private val samplePost = ReviewPost(
 )
 
 @Composable
-fun FeedScreen(onExploreClick: () -> Unit = {}) {
+fun FeedScreen(modifier: Modifier = Modifier, onExploreClick: () -> Unit = {}) {
     Scaffold(
+        modifier = modifier,
         containerColor = MotorMatesBackground,
         topBar = { FeedTopBar() },
         bottomBar = { FeedBottomBar(onExploreClick = onExploreClick) }
@@ -105,9 +106,9 @@ fun FeedScreen(onExploreClick: () -> Unit = {}) {
 }
 
 @Composable
-private fun FeedTopBar() {
+private fun FeedTopBar(modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MotorMatesBackground)
             .statusBarsPadding()
@@ -128,8 +129,9 @@ private fun FeedTopBar() {
 }
 
 @Composable
-private fun StoriesRow(stories: List<StoryUser>) {
+private fun StoriesRow(stories: List<StoryUser>, modifier: Modifier = Modifier) {
     LazyRow(
+        modifier = modifier,
         contentPadding = PaddingValues(horizontal = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
@@ -140,8 +142,8 @@ private fun StoriesRow(stories: List<StoryUser>) {
 }
 
 @Composable
-private fun StoryItem(story: StoryUser) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+private fun StoryItem(story: StoryUser, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
                 .size(64.dp)
@@ -156,9 +158,9 @@ private fun StoryItem(story: StoryUser) {
 }
 
 @Composable
-private fun ReviewPostCard(post: ReviewPost) {
+private fun ReviewPostCard(post: ReviewPost, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
     ) {
@@ -221,8 +223,8 @@ private fun ReviewPostCard(post: ReviewPost) {
 }
 
 @Composable
-private fun PostActionStat(icon: ImageVector, count: Int) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun PostActionStat(icon: ImageVector, count: Int, modifier: Modifier = Modifier) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(imageVector = icon, contentDescription = null, tint = MotorMatesTextSecondary, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(6.dp))
         Text(text = "$count", color = MotorMatesTextSecondary, fontSize = 13.sp)
@@ -230,9 +232,9 @@ private fun PostActionStat(icon: ImageVector, count: Int) {
 }
 
 @Composable
-private fun FeedBottomBar(onExploreClick: () -> Unit = {}) {
+private fun FeedBottomBar(modifier: Modifier = Modifier, onExploreClick: () -> Unit = {}) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MotorMatesSurface)
             .navigationBarsPadding()
@@ -256,11 +258,17 @@ private fun FeedBottomBar(onExploreClick: () -> Unit = {}) {
 }
 
 @Composable
-private fun BottomNavItem(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit = {}) {
+private fun BottomNavItem(
+    icon: ImageVector,
+    label: String,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
     val color = if (selected) MotorMatesRed else MotorMatesTextSecondary
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable(onClick = onClick)
+        modifier = modifier.clickable(onClick = onClick)
     ) {
         Icon(imageVector = icon, contentDescription = label, tint = color, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.height(2.dp))
