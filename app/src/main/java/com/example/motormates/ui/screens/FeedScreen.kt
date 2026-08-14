@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.ui.theme.MotorMatesBackground
@@ -51,6 +52,7 @@ import com.example.motormates.ui.theme.MotorMatesRed
 import com.example.motormates.ui.theme.MotorMatesRedLight
 import com.example.motormates.ui.theme.MotorMatesSurface
 import com.example.motormates.ui.theme.MotorMatesTextSecondary
+import com.example.motormates.ui.theme.MotorMatesTheme
 
 data class StoryUser(val name: String)
 
@@ -259,5 +261,13 @@ private fun BottomNavItem(icon: ImageVector, label: String, selected: Boolean) {
         Icon(imageVector = icon, contentDescription = label, tint = color, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.height(2.dp))
         Text(text = label, color = color, fontSize = 11.sp)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FeedScreenPreview() {
+    MotorMatesTheme {
+        LoginScreen(onLoginClick = {})
     }
 }
