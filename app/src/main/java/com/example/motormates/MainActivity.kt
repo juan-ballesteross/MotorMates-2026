@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import com.example.motormates.ui.screens.FeedScreen
 import com.example.motormates.ui.screens.LoginScreen
 import com.example.motormates.ui.screens.RegisterScreen
+import com.example.motormates.ui.screens.SearchScreen
 import com.example.motormates.ui.theme.MotorMatesTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,13 +29,21 @@ class MainActivity : ComponentActivity() {
 
 private enum class AuthDestination { LOGIN, REGISTER }
 
+private enum class MainDestination { FEED, SEARCH }
+
 @Composable
 fun MotorMatesApp() {
     var isLoggedIn by remember { mutableStateOf(false) }
     var authDestination by remember { mutableStateOf(AuthDestination.LOGIN) }
+    var mainDestination by remember { mutableStateOf(MainDestination.FEED) }
 
     when {
-        isLoggedIn -> FeedScreen()
+        isLoggedIn && mainDestination == MainDestination.SEARCH -> SearchScreen(
+            onFeedClick = { mainDestination = MainDestination.FEED }
+        )
+        isLoggedIn -> FeedScreen(
+            onExploreClick = { mainDestination = MainDestination.SEARCH }
+        )
         authDestination == AuthDestination.REGISTER -> RegisterScreen(
             onBackClick = { authDestination = AuthDestination.LOGIN },
             onRegisterClick = { isLoggedIn = true },

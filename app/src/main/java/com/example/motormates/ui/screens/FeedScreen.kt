@@ -1,6 +1,7 @@
 package com.example.motormates.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,11 +82,11 @@ private val samplePost = ReviewPost(
 )
 
 @Composable
-fun FeedScreen() {
+fun FeedScreen(onExploreClick: () -> Unit = {}) {
     Scaffold(
         containerColor = MotorMatesBackground,
         topBar = { FeedTopBar() },
-        bottomBar = { FeedBottomBar() }
+        bottomBar = { FeedBottomBar(onExploreClick = onExploreClick) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -229,7 +230,7 @@ private fun PostActionStat(icon: ImageVector, count: Int) {
 }
 
 @Composable
-private fun FeedBottomBar() {
+private fun FeedBottomBar(onExploreClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -240,7 +241,7 @@ private fun FeedBottomBar() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         BottomNavItem(icon = Icons.Filled.Home, label = "Feed", selected = true)
-        BottomNavItem(icon = Icons.Filled.Explore, label = "Explorar", selected = false)
+        BottomNavItem(icon = Icons.Filled.Explore, label = "Explorar", selected = false, onClick = onExploreClick)
         Box(
             modifier = Modifier
                 .size(52.dp)
@@ -255,9 +256,12 @@ private fun FeedBottomBar() {
 }
 
 @Composable
-private fun BottomNavItem(icon: ImageVector, label: String, selected: Boolean) {
+private fun BottomNavItem(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit = {}) {
     val color = if (selected) MotorMatesRed else MotorMatesTextSecondary
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
         Icon(imageVector = icon, contentDescription = label, tint = color, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.height(2.dp))
         Text(text = label, color = color, fontSize = 11.sp)
