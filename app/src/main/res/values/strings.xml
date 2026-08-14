@@ -1,3 +1,71 @@
 <resources>
     <string name="app_name">MotorMates</string>
+
+    <!-- Common / shared bottom navigation -->
+    <string name="common_bottom_nav_feed">Feed</string>
+    <string name="common_bottom_nav_explore">Explorar</string>
+    <string name="common_bottom_nav_alerts">Alertas</string>
+    <string name="common_bottom_nav_profile">Perfil</string>
+    <string name="common_bottom_nav_publish_cd">Publicar</string>
+
+    <!-- Login -->
+    <string name="login_logo_content_description">Logo de MotorMates</string>
+    <string name="login_title">Bienvenido de nuevo</string>
+    <string name="login_subtitle">Inicia sesión para seguir conectado con la comunidad</string>
+    <string name="login_email_label">Correo electrónico</string>
+    <string name="login_email_placeholder">tucorreo@ejemplo.com</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_password_placeholder">••••••••••</string>
+    <string name="login_password_show_cd">Mostrar contraseña</string>
+    <string name="login_password_hide_cd">Ocultar contraseña</string>
+    <string name="login_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="login_button">Iniciar sesión</string>
+    <string name="login_or_divider">o continúa con</string>
+    <string name="login_google_button">Continuar con Google</string>
+    <string name="login_no_account_prefix">¿No tienes cuenta? </string>
+    <string name="login_register_link">Regístrate</string>
+
+    <!-- Register -->
+    <string name="register_top_bar_title">Crear cuenta</string>
+    <string name="register_back_cd">Volver</string>
+    <string name="register_title">Únete a MotorMates</string>
+    <string name="register_subtitle">Comparte tu pasión por los autos con miles de entusiastas</string>
+    <string name="register_fullname_label">Nombre completo</string>
+    <string name="register_fullname_placeholder">Tu nombre</string>
+    <string name="register_email_label">Correo electrónico</string>
+    <string name="register_email_placeholder">tucorreo@ejemplo.com</string>
+    <string name="register_password_label">Contraseña</string>
+    <string name="register_password_placeholder">••••••••</string>
+    <string name="register_confirm_password_label">Confirmar contraseña</string>
+    <string name="register_terms_accept_prefix">Acepto los </string>
+    <string name="register_terms_service">Términos de servicio</string>
+    <string name="register_terms_and"> y la </string>
+    <string name="register_terms_privacy">Política de privacidad</string>
+    <string name="register_button">Crear cuenta</string>
+    <string name="register_has_account_prefix">¿Ya tienes cuenta? </string>
+    <string name="register_login_link">Inicia sesión</string>
+
+    <!-- Feed -->
+    <string name="feed_top_bar_title">MotorMates</string>
+    <string name="feed_search_cd">Buscar</string>
+    <string name="feed_alerts_cd">Alertas</string>
+    <string name="feed_review_prefix">reseñó el </string>
+    <string name="feed_review_time_suffix"> · %1$s</string>
+
+    <!-- Search -->
+    <string name="search_top_bar_title">Buscar</string>
+    <string name="search_placeholder">Marca, modelo o usuario</string>
+    <string name="search_empty_title">No encontramos resultados</string>
+    <string name="search_empty_subtitle">Prueba con otra marca, modelo o categoría</string>
+    <string name="search_car_title">%1$s %2$s</string>
+    <string name="search_car_year_owner">%1$d · %2$s</string>
+
+    <string-array name="search_categories">
+        <item>Todos</item>
+        <item>Deportivos</item>
+        <item>SUV</item>
+        <item>Clásicos</item>
+        <item>Eléctricos</item>
+        <item>Pickup</item>
+    </string-array>
 </resources>
