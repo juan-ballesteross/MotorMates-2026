@@ -22,6 +22,10 @@ fun SearchScreenContent(
     selectedCategory: SearchCategoryKey,
     onSelectCategory: (SearchCategoryKey) -> Unit,
     filteredCars: List<CarListing>,
+<<<<<<< HEAD
+=======
+    onCarClick: (CarListing) -> Unit = {},
+>>>>>>> origin/master
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -39,7 +43,11 @@ fun SearchScreenContent(
         if (filteredCars.isEmpty()) {
             EmptySearchState()
         } else {
+<<<<<<< HEAD
             CarResultsGrid(cars = filteredCars)
+=======
+            CarResultsGrid(cars = filteredCars, onCarClick = onCarClick)
+>>>>>>> origin/master
         }
     }
 }
