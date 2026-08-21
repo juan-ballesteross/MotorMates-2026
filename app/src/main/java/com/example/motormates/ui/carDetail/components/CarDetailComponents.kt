@@ -1,6 +1,5 @@
 package com.example.motormates.ui.carDetail.components
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -153,13 +152,24 @@ fun ReviewItem(review: ReviewUi) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // TODO: reemplazar review.avatarResId por la foto real del usuario
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(MotorMatesSurface)
-                )
+                if (review.avatarResId != 0) {
+                    Image(
+                        painter = painterResource(id = review.avatarResId),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                    )
+                } else {
+
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(MotorMatesSurface)
+                    )
+                }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
                     Text(text = review.nombreUsuario, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
