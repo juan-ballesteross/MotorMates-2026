@@ -9,8 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.motormates.data.mock.sampleUserCars
-import com.example.motormates.data.mock.sampleUserProfile
+import com.example.motormates.data.mock.UserMocks
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
@@ -26,8 +25,8 @@ fun UserScreen(modifier: Modifier = Modifier) {
     var selectedTab by remember { mutableStateOf(ProfileTab.REVIEWS) }
 
     UserScreenContent(
-        profile = sampleUserProfile,
-        cars = sampleUserCars,
+        profile = UserMocks.sampleUserProfile,
+        cars = UserMocks.sampleUserCars,
         selectedTab = selectedTab,
         onSelectTab = { selectedTab = it },
         onEditProfileClick = {},

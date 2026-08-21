@@ -8,8 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.motormates.data.mock.samplePost
-import com.example.motormates.data.mock.sampleStories
+import com.example.motormates.data.mock.FeedMocks
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.feed.components.FeedTopBar
@@ -25,8 +24,8 @@ fun FeedScreen(modifier: Modifier = Modifier) {
     ) {
         FeedTopBar()
         FeedScreenContent(
-            stories = sampleStories,
-            post = samplePost
+            stories = FeedMocks.sampleStories,
+            post = FeedMocks.samplePost
         )
     }
 }

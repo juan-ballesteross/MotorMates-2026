@@ -12,7 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.motormates.data.mock.sampleSearchCars
+import com.example.motormates.data.mock.SearchMocks
 import com.example.motormates.data.model.CarListing
 import com.example.motormates.data.model.SearchCategoryKey
 import com.example.motormates.ui.common.components.MainBottomDestination
@@ -37,7 +37,7 @@ fun SearchScreen(
 
     val categories = rememberSearchCategories()
 
-    val filteredCars = sampleSearchCars.filter { car ->
+    val filteredCars = SearchMocks.sampleSearchCars.filter { car ->
         val matchesCategory = selectedCategory == SearchCategoryKey.ALL || car.category == selectedCategory
         val matchesQuery = searchQuery.isBlank() ||
                 car.brand.contains(searchQuery, ignoreCase = true) ||
