@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,9 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.ui.carDetail.ReviewUi
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesSurface
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 /**
  * Foto del carro con los botones de "volver" y "guardar" flotando encima.
@@ -68,7 +66,7 @@ fun CarImageHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(320.dp)
-                    .background(MotorMatesSurface)
+                    .background(MaterialTheme.colorScheme.surface)
             )
         }
 
@@ -101,6 +99,9 @@ private fun CircleIconButton(
             .clip(CircleShape)
             .background(Color.Black.copy(alpha = 0.5f))
     ) {
+        // Este ícono siempre queda sobre la foto (fondo semitransparente negro fijo),
+        // no sobre una superficie del theme, así que se deja en blanco a propósito
+        // en vez de usar un color que dependa del ColorScheme.
         Icon(imageVector = icon, contentDescription = contentDescription, tint = Color.White)
     }
 }
@@ -113,13 +114,22 @@ fun RatingRow(calificacion: Float, numeroResenas: Int) {
             Icon(
                 imageVector = Icons.Filled.Star,
                 contentDescription = null,
-                tint = MotorMatesRed,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(16.dp)
             )
         }
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = calificacion.toString(), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        Text(text = " · $numeroResenas reseñas", color = MotorMatesTextSecondary, fontSize = 13.sp)
+        Text(
+            text = calificacion.toString(),
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
+        )
+        Text(
+            text = " · $numeroResenas reseñas",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 13.sp
+        )
     }
 }
 
@@ -129,12 +139,12 @@ fun SpecStatCard(valor: String, etiqueta: String) {
     Column(
         modifier = Modifier
             .width(84.dp)
-            .background(MotorMatesSurface, shape = RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
             .padding(vertical = 12.dp, horizontal = 8.dp)
     ) {
-        Text(text = valor, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Text(text = valor, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         Spacer(modifier = Modifier.height(2.dp))
-        Text(text = etiqueta, color = MotorMatesTextSecondary, fontSize = 11.sp)
+        Text(text = etiqueta, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
     }
 }
 
@@ -167,13 +177,18 @@ fun ReviewItem(review: ReviewUi) {
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(MotorMatesSurface)
+                            .background(MaterialTheme.colorScheme.surface)
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
-                    Text(text = review.nombreUsuario, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                    Text(text = review.tiempoTexto, color = MotorMatesTextSecondary, fontSize = 12.sp)
+                    Text(
+                        text = review.nombreUsuario,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
+                    Text(text = review.tiempoTexto, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                 }
             }
 
@@ -182,13 +197,18 @@ fun ReviewItem(review: ReviewUi) {
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,
-                        tint = MotorMatesRed,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(14.dp)
                     )
                 }
             }
         }
         Spacer(modifier = Modifier.height(6.dp))
-        Text(text = review.comentario, color = MotorMatesTextSecondary, fontSize = 13.sp, lineHeight = 18.sp)
+        Text(
+            text = review.comentario,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 13.sp,
+            lineHeight = 18.sp
+        )
     }
 }
