@@ -42,7 +42,28 @@ app/src/main/java/com/example/motormates/
 
 ## Mockups
 
-<p align="center"> <img src="imgs/Splash.png" width="200" alt="Splash Screen"> <img src="imgs/Bienvenida.png" width="200" alt="Pantalla de Bienvenida"> <img src="imgs/Registro.png" width="200" alt="Pantalla de Registro"> </p>
+A continuación se presentan los mockups de las principales pantallas de MotorMates.
+
+<p align="center">
+  <img src="imgs/Splash.png" width="200" alt="Splash">
+  <img src="imgs/Bienvenida.png" width="200" alt="Bienvenida">
+  <img src="imgs/Registro.png" width="200" alt="Registro">
+  <img src="imgs/CodigoVerificacion.png" width="200" alt="Código de Verificación">
+</p>
+
+<p align="center">
+  <img src="imgs/Feed.png" width="200" alt="Feed">
+  <img src="imgs/Explorar.png" width="200" alt="Explorar">
+  <img src="imgs/DetalleVehiculo.png" width="200" alt="Detalle del Vehículo">
+  <img src="imgs/Resena.png" width="200" alt="Reseña">
+</p>
+
+<p align="center">
+  <img src="imgs/Publicar.png" width="200" alt="Publicar">
+  <img src="imgs/Perfil.png" width="200" alt="Perfil">
+  <img src="imgs/RecuperarContrasena.png" width="200" alt="Recuperar Contraseña">
+</p>
+
 
 ## Requisitos
 
