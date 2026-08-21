@@ -16,10 +16,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,9 +27,6 @@ import com.example.motormates.ui.carDetail.components.CarImageHeader
 import com.example.motormates.ui.carDetail.components.RatingRow
 import com.example.motormates.ui.carDetail.components.ReviewItem
 import com.example.motormates.ui.carDetail.components.SpecStatCard
-import com.example.motormates.ui.theme.MotorMatesBackground
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesRedLight
 
 /**
  * Todo el estado viene del padre (state hoisting) — este composable
@@ -56,7 +53,7 @@ fun CarDetailScreenContent(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground),
+            .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(bottom = 24.dp)
     ) {
         item {
@@ -72,8 +69,18 @@ fun CarDetailScreenContent(
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(text = car.marca, color = MotorMatesRed, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text(text = car.modelo, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 24.sp)
+                Text(
+                    text = car.marca,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp
+                )
+                Text(
+                    text = car.modelo,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
 
                 Spacer(modifier = Modifier.height(6.dp))
                 RatingRow(calificacion = car.calificacion, numeroResenas = car.numeroResenas)
@@ -101,13 +108,18 @@ fun CarDetailScreenContent(
 
                 Button(
                     onClick = onWriteReviewClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = MotorMatesRed),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
                 ) {
-                    Text(text = "Escribir reseña", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = "Escribir reseña",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -116,10 +128,15 @@ fun CarDetailScreenContent(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Reseñas de la comunidad", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(
+                        text = "Reseñas de la comunidad",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
                     Text(
                         text = "Ver todos",
-                        color = MotorMatesRedLight,
+                        color = MaterialTheme.colorScheme.secondary,
                         fontSize = 13.sp,
                         modifier = Modifier.padding(top = 2.dp)
                     )
@@ -135,4 +152,3 @@ fun CarDetailScreenContent(
         }
     }
 }
-
