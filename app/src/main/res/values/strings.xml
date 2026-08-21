@@ -60,6 +60,7 @@
     <string name="search_car_title">%1$s %2$s</string>
     <string name="search_car_year_owner">%1$d · %2$s</string>
 
+<<<<<<< HEAD
     <!-- User / Profile -->
     <string name="user_edit_profile_button">Editar perfil</string>
     <string name="user_avatar_cd">Foto de perfil</string>
@@ -72,6 +73,8 @@
     <string name="user_tab_activity">Actividad</string>
     <string name="user_activity_empty">Sin actividad reciente</string>
 
+=======
+>>>>>>> origin/master
     <string-array name="search_categories">
         <item>Todos</item>
         <item>Deportivos</item>
@@ -80,4 +83,33 @@
         <item>Eléctricos</item>
         <item>Pickup</item>
     </string-array>
+<<<<<<< HEAD
+=======
+
+    <!-- Post -->
+    <string name="post_top_bar_title">Nueva publicación</string>
+    <string name="post_cancel_button">Cancelar</string>
+    <string name="post_publish_button">Publicar</string>
+    <string name="post_caption_placeholder">Escribe una descripción para tu publicación...</string>
+    <string name="post_tag_vehicle_button">Etiquetar un vehículo</string>
+    <string name="post_add_location_button">Agregar ubicación</string>
+
+    <!-- Review -->
+    <string name="review_top_bar_title">Nueva reseña</string>
+    <string name="review_close_cd">Cerrar</string>
+    <string name="review_car_year_category">%1$d · %2$s</string>
+    <string name="review_rating_prompt">¿Cómo calificarías este auto?</string>
+    <string name="review_star_cd">Calificación %1$d de 5</string>
+    <string name="review_experience_label">Tu experiencia</string>
+    <string name="review_experience_placeholder">Cuéntanos sobre la conducción, el confort, el diseño...</string>
+    <string name="review_aspects_label">Destaca aspectos</string>
+    <string name="review_aspect_comfort">Confort</string>
+    <string name="review_aspect_design">Diseño</string>
+    <string name="review_aspect_price">Precio</string>
+    <string name="review_aspect_performance">Rendimiento</string>
+    <string name="review_photos_label">Agrega Fotos</string>
+    <string name="review_add_photo_cd">Agregar foto</string>
+    <string name="review_publish_button">Publicar reseña</string>
+    <string name="car_detail_write_review">Escribir reseña</string>
+>>>>>>> origin/master
 </resources>

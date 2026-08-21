@@ -8,6 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+<<<<<<< HEAD
+=======
+import androidx.compose.material3.MaterialTheme
+>>>>>>> origin/master
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -26,6 +30,7 @@ import com.example.motormates.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+<<<<<<< HEAD
 import com.example.motormates.ui.theme.MotorMatesRed
 import com.example.motormates.ui.theme.MotorMatesSurface
 import com.example.motormates.ui.theme.MotorMatesTextSecondary
@@ -33,6 +38,12 @@ import com.example.motormates.ui.theme.MotorMatesTextSecondary
 /**
  * Campo de texto con etiqueta arriba, ícono inicial y fondo de superficie,
  * siguiendo la paleta oscura del resto de la app.
+=======
+
+/**
+ * Campo de texto con etiqueta arriba, ícono inicial y fondo de superficie.
+ * Usa MaterialTheme.colorScheme para que responda al modo claro/oscuro.
+>>>>>>> origin/master
  */
 @Composable
 fun LoginTextField(
@@ -48,14 +59,29 @@ fun LoginTextField(
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
     Column(modifier = modifier) {
+<<<<<<< HEAD
         Text(text = label, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+=======
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
+>>>>>>> origin/master
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
+<<<<<<< HEAD
             placeholder = { Text(text = placeholder, color = MotorMatesTextSecondary) },
             leadingIcon = {
                 Icon(imageVector = leadingIcon, contentDescription = null, tint = MotorMatesTextSecondary)
+=======
+            placeholder = { Text(text = placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+            leadingIcon = {
+                Icon(imageVector = leadingIcon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+>>>>>>> origin/master
             },
             trailingIcon = if (isPassword) {
                 {
@@ -67,7 +93,11 @@ fun LoginTextField(
                             } else {
                                 stringResource(R.string.login_password_show_cd)
                             },
+<<<<<<< HEAD
                             tint = MotorMatesTextSecondary
+=======
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+>>>>>>> origin/master
                         )
                     }
                 }
@@ -77,6 +107,7 @@ fun LoginTextField(
             keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else keyboardType),
             shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
+<<<<<<< HEAD
                 focusedContainerColor = MotorMatesSurface,
                 unfocusedContainerColor = MotorMatesSurface,
                 focusedTextColor = Color.White,
@@ -84,8 +115,21 @@ fun LoginTextField(
                 focusedBorderColor = MotorMatesRed,
                 unfocusedBorderColor = Color.Transparent,
                 cursorColor = MotorMatesRed
+=======
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = Color.Transparent,
+                cursorColor = MaterialTheme.colorScheme.primary
+>>>>>>> origin/master
             ),
             modifier = Modifier.fillMaxWidth()
         )
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/master

@@ -19,7 +19,11 @@ import com.example.motormates.R
 @Composable
 fun LoginLogo(modifier: Modifier = Modifier) {
     Image(
+<<<<<<< HEAD
         painter = painterResource(id = R.drawable.logo_motormates),
+=======
+        painter = painterResource(id = R.drawable.logo_definitivo),
+>>>>>>> origin/master
         contentDescription = stringResource(R.string.login_logo_content_description),
         contentScale = ContentScale.Crop,
         modifier = modifier
