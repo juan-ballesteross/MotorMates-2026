@@ -68,4 +68,12 @@
         <item>Eléctricos</item>
         <item>Pickup</item>
     </string-array>
+
+    <!-- Post -->
+    <string name="post_top_bar_title">Nueva publicación</string>
+    <string name="post_cancel_button">Cancelar</string>
+    <string name="post_publish_button">Publicar</string>
+    <string name="post_caption_placeholder">Escribe una descripción para tu publicación...</string>
+    <string name="post_tag_vehicle_button">Etiquetar un vehículo</string>
+    <string name="post_add_location_button">Agregar ubicación</string>
 </resources>
