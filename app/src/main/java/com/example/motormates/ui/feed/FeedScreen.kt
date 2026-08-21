@@ -16,12 +16,6 @@ import com.example.motormates.ui.feed.components.FeedTopBar
 import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.theme.MotorMatesTheme
 
-/**
- * Ya NO tiene su propio Scaffold — el único Scaffold de la app vive en
- * MainActivity.kt (MotorMatesApp). Esta función solo devuelve el topBar
- * de Feed + su contenido, para que el padre la coloque dentro del
- * Scaffold central junto con el bottomBar compartido.
- */
 @Composable
 fun FeedScreen(modifier: Modifier = Modifier) {
     Column(
