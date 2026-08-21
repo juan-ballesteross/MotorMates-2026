@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.ui.theme.MotorMatesSurface
-import com.example.motormates.ui.user.model.GarageCar
+import com.example.motormates.data.model.GarageCar
 
 /**
  * Tarjeta de auto del garaje/reseñas, usada como celda del grid de dos

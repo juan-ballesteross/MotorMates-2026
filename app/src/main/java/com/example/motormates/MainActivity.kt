@@ -13,6 +13,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.example.motormates.data.model.CarListing
+import com.example.motormates.data.model.toCarDetailUi
+import com.example.motormates.data.model.toReviewCarSummary
 import com.example.motormates.ui.carDetail.CarDetailScreen
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
@@ -21,10 +24,7 @@ import com.example.motormates.ui.login.LoginScreen
 import com.example.motormates.ui.post.PostScreen
 import com.example.motormates.ui.register.RegisterScreen
 import com.example.motormates.ui.review.NewReviewScreen
-import com.example.motormates.ui.review.toCarDetailUi
-import com.example.motormates.ui.review.toReviewCarSummary
 import com.example.motormates.ui.search.SearchScreen
-import com.example.motormates.ui.search.model.CarListing
 import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.theme.MotorMatesTheme
 import com.example.motormates.ui.user.UserScreen

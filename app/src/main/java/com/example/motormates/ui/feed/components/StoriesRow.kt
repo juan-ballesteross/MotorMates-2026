@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.motormates.ui.feed.model.StoryUser
+import com.example.motormates.data.model.StoryUser
 import com.example.motormates.ui.theme.MotorMatesRed
 import com.example.motormates.ui.theme.MotorMatesRedLight
 

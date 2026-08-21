@@ -1,17 +1,7 @@
-package com.example.motormates.ui.feed.model
+package com.example.motormates.data.mock
 
-data class StoryUser(val name: String)
-
-data class ReviewPost(
-    val userName: String,
-    val carName: String,
-    val timeAgo: String,
-    val rating: Int,
-    val caption: String,
-    val likes: Int,
-    val comments: Int,
-    val shares: Int
-)
+import com.example.motormates.data.model.ReviewPost
+import com.example.motormates.data.model.StoryUser
 
 val sampleStories = listOf("Marco", "Elena", "Diego", "Sofía").map { StoryUser(it) }
 

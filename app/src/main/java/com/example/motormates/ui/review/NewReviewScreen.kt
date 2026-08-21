@@ -12,8 +12,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.motormates.data.mock.sampleSearchCars
+import com.example.motormates.data.model.ReviewAspect
+import com.example.motormates.data.model.ReviewCarSummary
+import com.example.motormates.data.model.toReviewCarSummary
 import com.example.motormates.ui.review.components.NewReviewTopBar
-import com.example.motormates.ui.search.model.sampleSearchCars
 import com.example.motormates.ui.theme.MotorMatesTheme
 
 /**

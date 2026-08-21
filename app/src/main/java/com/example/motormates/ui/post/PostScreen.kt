@@ -55,12 +55,10 @@ fun PostScreen(
             caption = caption,
             onCaptionChange = { caption = it },
             taggedVehicle = taggedVehicle,
-            // TODO: reemplazar por navegación a una pantalla real de selección de vehículo.
             onTagVehicleClick = {
                 taggedVehicle = if (taggedVehicle == null) "Porsche 911 GT3" else null
             },
             location = location,
-            // TODO: reemplazar por navegación/GPS real para elegir ubicación.
             onAddLocationClick = {
                 location = if (location == null) "Bogotá, Colombia" else null
             }

@@ -43,8 +43,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
-import com.example.motormates.ui.review.ReviewAspect
-import com.example.motormates.ui.review.ReviewCarSummary
+import com.example.motormates.data.model.ReviewAspect
+import com.example.motormates.data.model.ReviewCarSummary
 import com.example.motormates.ui.theme.MotorMatesRed
 
 /** Colores locales alineados al mockup de "Nueva reseña". */

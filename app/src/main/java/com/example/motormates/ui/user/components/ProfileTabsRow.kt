@@ -23,7 +23,7 @@ import com.example.motormates.R
 import com.example.motormates.ui.theme.MotorMatesRed
 import com.example.motormates.ui.theme.MotorMatesSurface
 import com.example.motormates.ui.theme.MotorMatesTextSecondary
-import com.example.motormates.ui.user.model.ProfileTab
+import com.example.motormates.data.model.ProfileTab
 
 /**
  * Pestañas Reseñas / Garaje / Actividad con indicador rojo bajo la

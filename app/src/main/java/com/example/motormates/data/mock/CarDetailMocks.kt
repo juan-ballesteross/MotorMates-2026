@@ -1,34 +1,8 @@
-package com.example.motormates.ui.carDetail
+package com.example.motormates.data.mock
 
 import com.example.motormates.R
-
-/**
- * Entidades de UI (no son las entidades de la BD) — representan
- * exactamente lo que se muestra en esta pantalla. Los datos de abajo
- * son "quemados" (mock), simulando lo que en el futuro vendrá de la API.
- */
-data class CarDetailUi(
-    val marca: String,
-    val modelo: String,
-    val imagenResId: Int,
-    val calificacion: Float,
-    val numeroResenas: Int,
-    val potencia: String,
-    val aceleracion: String,
-    val velocidadMaxima: String,
-    val traccion: String
-)
-
-data class ReviewUi(
-    val id: Int,
-    val nombreUsuario: String,
-    val avatarResId: Int,
-    val tiempoTexto: String,
-    val calificacion: Int,
-    val comentario: String
-)
-
-// ===== Datos locales quemados =====
+import com.example.motormates.data.model.CarDetailUi
+import com.example.motormates.data.model.ReviewUi
 
 val mockCarDetail = CarDetailUi(
     marca = "PORSCHE",
