@@ -1,6 +1,7 @@
 package com.example.motormates.ui.search.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,7 +41,11 @@ import com.example.motormates.ui.theme.MotorMatesSurface
 import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 @Composable
-fun CarResultsGrid(cars: List<CarListing>, modifier: Modifier = Modifier) {
+fun CarResultsGrid(
+    cars: List<CarListing>,
+    onCarClick: (CarListing) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp),
@@ -49,18 +54,23 @@ fun CarResultsGrid(cars: List<CarListing>, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize()
     ) {
         gridItems(cars) { car ->
-            CarResultCard(car)
+            CarResultCard(car = car, onClick = { onCarClick(car) })
         }
     }
 }
 
 @Composable
-private fun CarResultCard(car: CarListing, modifier: Modifier = Modifier) {
+private fun CarResultCard(
+    car: CarListing,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(MotorMatesSurface)
+            .clickable(onClick = onClick)
     ) {
         Box(
             modifier = Modifier

@@ -12,13 +12,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import com.example.motormates.ui.carDetail.CarDetailScreen
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.feed.FeedScreen
 import com.example.motormates.ui.login.LoginScreen
 import com.example.motormates.ui.post.PostScreen
 import com.example.motormates.ui.register.RegisterScreen
+import com.example.motormates.ui.review.NewReviewScreen
+import com.example.motormates.ui.review.toCarDetailUi
+import com.example.motormates.ui.review.toReviewCarSummary
 import com.example.motormates.ui.search.SearchScreen
+import com.example.motormates.ui.search.model.CarListing
 import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.theme.MotorMatesTheme
 
@@ -36,7 +42,7 @@ class MainActivity : ComponentActivity() {
 
 private enum class AuthDestination { LOGIN, REGISTER }
 
-private enum class MainDestination { FEED, SEARCH, POST }
+private enum class MainDestination { FEED, SEARCH, POST, CAR_DETAIL, NEW_REVIEW }
 
 /**
  * Único Scaffold de toda la app (requisito del sprint). El bottomBar
@@ -49,16 +55,24 @@ fun MotorMatesApp() {
     var isLoggedIn by remember { mutableStateOf(false) }
     var authDestination by remember { mutableStateOf(AuthDestination.LOGIN) }
     var mainDestination by remember { mutableStateOf(MainDestination.FEED) }
+    var selectedCar by remember { mutableStateOf<CarListing?>(null) }
+
+    val showBottomBar = isLoggedIn &&
+            mainDestination != MainDestination.CAR_DETAIL &&
+            mainDestination != MainDestination.NEW_REVIEW
 
     Scaffold(
-        containerColor = MotorMatesBackground,
+        containerColor = if (mainDestination == MainDestination.NEW_REVIEW) {
+            Color.Black
+        } else {
+            MotorMatesBackground
+        },
         bottomBar = {
-            if (isLoggedIn) {
+            if (showBottomBar) {
                 MainBottomNavBar(
-                    selected = if (mainDestination == MainDestination.FEED) {
-                        MainBottomDestination.FEED
-                    } else {
-                        MainBottomDestination.EXPLORE
+                    selected = when (mainDestination) {
+                        MainDestination.FEED, MainDestination.POST -> MainBottomDestination.FEED
+                        else -> MainBottomDestination.EXPLORE
                     },
                     onFeedClick = { mainDestination = MainDestination.FEED },
                     onExploreClick = { mainDestination = MainDestination.SEARCH },
@@ -68,12 +82,37 @@ fun MotorMatesApp() {
         }
     ) { innerPadding ->
         when {
+            isLoggedIn && mainDestination == MainDestination.NEW_REVIEW && selectedCar != null -> {
+                NewReviewScreen(
+                    car = selectedCar!!.toReviewCarSummary(),
+                    onCloseClick = { mainDestination = MainDestination.CAR_DETAIL },
+                    onPublishClick = { _, _, _, _ ->
+                        mainDestination = MainDestination.CAR_DETAIL
+                    },
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
+            isLoggedIn && mainDestination == MainDestination.CAR_DETAIL && selectedCar != null -> {
+                CarDetailScreen(
+                    car = selectedCar!!.toCarDetailUi(),
+                    onBackClick = {
+                        selectedCar = null
+                        mainDestination = MainDestination.SEARCH
+                    },
+                    onWriteReviewClick = { mainDestination = MainDestination.NEW_REVIEW },
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
             isLoggedIn && mainDestination == MainDestination.POST -> PostScreen(
                 onCancelClick = { mainDestination = MainDestination.FEED },
                 onPublishClick = { _ -> mainDestination = MainDestination.FEED },
                 modifier = Modifier.padding(innerPadding)
             )
             isLoggedIn && mainDestination == MainDestination.SEARCH -> SearchScreen(
+                onCarClick = { car ->
+                    selectedCar = car
+                    mainDestination = MainDestination.CAR_DETAIL
+                },
                 modifier = Modifier.padding(innerPadding)
             )
             isLoggedIn -> FeedScreen(

@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.motormates.ui.search.components.SearchTopBar
+import com.example.motormates.ui.search.model.CarListing
 import com.example.motormates.ui.search.model.SearchCategoryKey
 import com.example.motormates.ui.search.model.rememberSearchCategories
 import com.example.motormates.ui.search.model.sampleSearchCars
@@ -21,7 +22,10 @@ import com.example.motormates.ui.theme.MotorMatesBackground
  * búsqueda vive aquí mismo, no en el Scaffold central).
  */
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier) {
+fun SearchScreen(
+    onCarClick: (CarListing) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(SearchCategoryKey.ALL) }
 
@@ -49,7 +53,8 @@ fun SearchScreen(modifier: Modifier = Modifier) {
             categories = categories,
             selectedCategory = selectedCategory,
             onSelectCategory = { selectedCategory = it },
-            filteredCars = filteredCars
+            filteredCars = filteredCars,
+            onCarClick = onCarClick
         )
     }
 }

@@ -20,9 +20,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.motormates.R
 import com.example.motormates.ui.carDetail.components.CarImageHeader
 import com.example.motormates.ui.carDetail.components.RatingRow
 import com.example.motormates.ui.carDetail.components.ReviewItem
@@ -115,7 +117,7 @@ fun CarDetailScreenContent(
                         .height(52.dp)
                 ) {
                     Text(
-                        text = "Escribir reseña",
+                        text = stringResource(R.string.car_detail_write_review),
                         color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
