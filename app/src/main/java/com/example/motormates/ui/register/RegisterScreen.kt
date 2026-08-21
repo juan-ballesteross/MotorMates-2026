@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.motormates.ui.theme.MotorMatesTheme
 
 /**
  * Pantalla de registro. El botón "Crear cuenta" solo se habilita cuando el
@@ -50,4 +52,16 @@ fun RegisterScreen(
         onLoginClick = onLoginClick,
         modifier = modifier
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RegisterScreenPreview() {
+    MotorMatesTheme {
+        RegisterScreen(
+            onBackClick = {},
+            onRegisterClick = {},
+            onLoginClick = {}
+        )
+    }
 }
