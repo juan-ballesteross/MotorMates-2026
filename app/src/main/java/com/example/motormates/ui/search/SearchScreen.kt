@@ -3,18 +3,24 @@ package com.example.motormates.ui.search
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.motormates.ui.common.components.MainBottomDestination
+import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.search.components.SearchTopBar
 import com.example.motormates.ui.search.model.CarListing
 import com.example.motormates.ui.search.model.SearchCategoryKey
 import com.example.motormates.ui.search.model.rememberSearchCategories
 import com.example.motormates.ui.search.model.sampleSearchCars
 import com.example.motormates.ui.theme.MotorMatesBackground
+import com.example.motormates.ui.theme.MotorMatesTheme
 
 /**
  * Ya NO tiene su propio Scaffold. searchQuery/selectedCategory se quedan
@@ -56,5 +62,18 @@ fun SearchScreen(
             filteredCars = filteredCars,
             onCarClick = onCarClick
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SearchScreenPreview() {
+    MotorMatesTheme {
+        Scaffold(
+            containerColor = MotorMatesBackground,
+            bottomBar = { MainBottomNavBar(selected = MainBottomDestination.EXPLORE) }
+        ) { innerPadding ->
+            SearchScreen(modifier = Modifier.padding(innerPadding))
+        }
     }
 }
