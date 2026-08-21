@@ -1,5 +1,22 @@
 package com.example.motormates.ui.theme
 
+<<<<<<< HEAD
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+
+private val DarkColorScheme = darkColorScheme(
+    primary = MotorMatesRed,
+    secondary = MotorMatesRedLight,
+    tertiary = MotorMatesRedLight,
+    background = MotorMatesBackground,
+    surface = MotorMatesSurface,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onBackground = Color.White,
+    onSurface = Color.White
+=======
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -66,10 +83,17 @@ private val LightColorScheme = lightColorScheme(
     inverseSurface = md3_light_inverseSurface,
     inverseOnSurface = md3_light_inverseOnSurface,
     inversePrimary = md3_light_inversePrimary
+>>>>>>> origin/master
 )
 
 @Composable
 fun MotorMatesTheme(
+<<<<<<< HEAD
+    content: @Composable () -> Unit
+) {
+    MaterialTheme(
+        colorScheme = DarkColorScheme,
+=======
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
@@ -81,6 +105,7 @@ fun MotorMatesTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+>>>>>>> origin/master
         typography = Typography,
         content = content
     )
