@@ -40,6 +40,10 @@ app/src/main/java/com/example/motormates/
     └── theme/                    # Color, tipografía y tema de Compose
 ```
 
+## Mockups
+
+<p align="center"> <img src="imgs/Splash.png" width="200" alt="Splash Screen"> <img src="imgs/Bienvenida.png" width="200" alt="Pantalla de Bienvenida"> <img src="imgs/Registro.png" width="200" alt="Pantalla de Registro"> </p>
+
 ## Requisitos
 
 - Android Studio (versión compatible con AGP 9.3.1)
