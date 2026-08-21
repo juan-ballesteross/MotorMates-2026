@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
+import com.example.motormates.data.model.ReviewAspect
+import com.example.motormates.data.model.ReviewCarSummary
 import com.example.motormates.ui.review.components.ReviewAddPhotoButton
 import com.example.motormates.ui.review.components.ReviewAspectChips
 import com.example.motormates.ui.review.components.ReviewCarCard

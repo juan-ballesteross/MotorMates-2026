@@ -34,7 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.motormates.ui.carDetail.ReviewUi
+import com.example.motormates.data.model.ReviewUi
 
 /**
  * Foto del carro con los botones de "volver" y "guardar" flotando encima.

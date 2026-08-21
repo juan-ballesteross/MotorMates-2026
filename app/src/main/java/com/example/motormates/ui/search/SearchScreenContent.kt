@@ -8,12 +8,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.motormates.data.model.CarListing
+import com.example.motormates.data.model.SearchCategory
+import com.example.motormates.data.model.SearchCategoryKey
 import com.example.motormates.ui.search.components.CarResultsGrid
 import com.example.motormates.ui.search.components.CategoryChipsRow
 import com.example.motormates.ui.search.components.EmptySearchState
-import com.example.motormates.ui.search.model.CarListing
-import com.example.motormates.ui.search.model.SearchCategory
-import com.example.motormates.ui.search.model.SearchCategoryKey
 import com.example.motormates.ui.theme.MotorMatesBackground
 
 @Composable

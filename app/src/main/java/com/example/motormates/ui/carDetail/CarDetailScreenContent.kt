@@ -25,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
+import com.example.motormates.data.model.CarDetailUi
+import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.ui.carDetail.components.CarImageHeader
 import com.example.motormates.ui.carDetail.components.RatingRow
 import com.example.motormates.ui.carDetail.components.ReviewItem

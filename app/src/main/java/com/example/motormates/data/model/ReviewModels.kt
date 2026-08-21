@@ -1,9 +1,6 @@
-package com.example.motormates.ui.review
+package com.example.motormates.data.model
 
 import com.example.motormates.R
-import com.example.motormates.ui.carDetail.CarDetailUi
-import com.example.motormates.ui.search.model.CarListing
-import com.example.motormates.ui.search.model.SearchCategoryKey
 
 enum class ReviewAspect {
     COMFORT,

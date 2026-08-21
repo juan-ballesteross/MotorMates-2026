@@ -9,13 +9,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.motormates.data.mock.sampleUserCars
+import com.example.motormates.data.mock.sampleUserProfile
+import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.theme.MotorMatesTheme
-import com.example.motormates.ui.user.model.ProfileTab
-import com.example.motormates.ui.user.model.sampleUserCars
-import com.example.motormates.ui.user.model.sampleUserProfile
 
 /**
  * Ya NO tiene su propio Scaffold — el único Scaffold de la app vive en

@@ -35,7 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
-import com.example.motormates.ui.search.model.CarListing
+import com.example.motormates.data.model.CarListing
 import com.example.motormates.ui.theme.MotorMatesRed
 import com.example.motormates.ui.theme.MotorMatesSurface
 import com.example.motormates.ui.theme.MotorMatesTextSecondary

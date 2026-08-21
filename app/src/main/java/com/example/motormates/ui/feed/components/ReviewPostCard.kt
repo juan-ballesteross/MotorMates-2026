@@ -32,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
-import com.example.motormates.ui.feed.model.ReviewPost
+import com.example.motormates.data.model.ReviewPost
 import com.example.motormates.ui.theme.MotorMatesRed
 import com.example.motormates.ui.theme.MotorMatesRedLight
 import com.example.motormates.ui.theme.MotorMatesSurface

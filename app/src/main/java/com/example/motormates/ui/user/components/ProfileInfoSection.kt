@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.ui.theme.MotorMatesTextSecondary
-import com.example.motormates.ui.user.model.UserProfile
+import com.example.motormates.data.model.UserProfile
 
 /**
  * Nombre, usuario + ubicación y biografía del perfil.

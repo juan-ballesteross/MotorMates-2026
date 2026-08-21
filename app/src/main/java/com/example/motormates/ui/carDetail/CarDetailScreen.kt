@@ -7,6 +7,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.motormates.data.mock.mockCarDetail
+import com.example.motormates.data.mock.mockReviews
+import com.example.motormates.data.model.CarDetailUi
+import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.ui.theme.MotorMatesTheme
 
 /**

@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.motormates.ui.search.model.SearchCategory
-import com.example.motormates.ui.search.model.SearchCategoryKey
+import com.example.motormates.data.model.SearchCategory
+import com.example.motormates.data.model.SearchCategoryKey
 import com.example.motormates.ui.theme.MotorMatesRed
 import com.example.motormates.ui.theme.MotorMatesSurface
 import com.example.motormates.ui.theme.MotorMatesTextSecondary

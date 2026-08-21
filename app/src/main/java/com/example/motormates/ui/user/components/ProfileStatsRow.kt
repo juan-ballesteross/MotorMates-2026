@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.ui.theme.MotorMatesTextSecondary
-import com.example.motormates.ui.user.model.UserProfile
+import com.example.motormates.data.model.UserProfile
 
 /**
  * Fila de estadísticas: reseñas, seguidores y siguiendo.

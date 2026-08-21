@@ -13,6 +13,9 @@ import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.motormates.data.model.GarageCar
+import com.example.motormates.data.model.ProfileTab
+import com.example.motormates.data.model.UserProfile
 import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.user.components.ProfileCarCard
 import com.example.motormates.ui.user.components.ProfileEmptyTabState
@@ -20,9 +23,6 @@ import com.example.motormates.ui.user.components.ProfileHeader
 import com.example.motormates.ui.user.components.ProfileInfoSection
 import com.example.motormates.ui.user.components.ProfileStatsRow
 import com.example.motormates.ui.user.components.ProfileTabsRow
-import com.example.motormates.ui.user.model.GarageCar
-import com.example.motormates.ui.user.model.ProfileTab
-import com.example.motormates.ui.user.model.UserProfile
 
 /**
  * Contenido scrollable de la pantalla de perfil. Se implementa como un
