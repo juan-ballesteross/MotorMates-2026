@@ -30,7 +30,11 @@ fun rememberSearchCategories(): List<SearchCategory> {
 }
 
 val sampleSearchCars = listOf(
+<<<<<<< HEAD
+    CarListing("Porsche", "911 GT3", 2023, "Marco F.", 4.9f, 284, SearchCategoryKey.SPORT),
+=======
     CarListing("Porsche", "911 GT3", 2024, "Marco F.", 4.9f, 284, SearchCategoryKey.SPORT),
+>>>>>>> origin/master
     CarListing("Toyota", "Land Cruiser", 2022, "Elena R.", 4.7f, 156, SearchCategoryKey.SUV),
     CarListing("Ford", "Mustang '67", 1967, "Diego M.", 4.8f, 342, SearchCategoryKey.CLASSIC),
     CarListing("Tesla", "Model 3", 2024, "Sofía T.", 4.6f, 198, SearchCategoryKey.ELECTRIC),
