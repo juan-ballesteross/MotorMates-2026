@@ -14,20 +14,21 @@ import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.ui.theme.MotorMatesTheme
 
 /**
- * Punto de entrada de la pantalla. Aquí sí vive el estado (isBookmarked),
- * y se pasa hacia abajo al composable stateless CarDetailScreenContent.
- * Reemplaza car/reviews por los datos reales cuando conectes la API/Firebase.
+ * Punto de entrada de la pantalla. Aquí sí vive el estado (isBookmarked)
+ * y la pantalla busca sus propios datos (car/reviews) en la capa data,
+ * en vez de recibirlos por parámetro. Reemplaza mockCarDetail/mockReviews
+ * por una llamada real (repositorio/ViewModel) cuando exista la API/Firebase.
  */
 @Composable
 fun CarDetailScreen(
-    car: CarDetailUi = mockCarDetail,
-    reviews: List<ReviewUi> = mockReviews,
     onBackClick: () -> Unit = {},
     onWriteReviewClick: () -> Unit = {},
     onSeeAllReviewsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var isBookmarked by remember { mutableStateOf(false) }
+    val car: CarDetailUi = mockCarDetail
+    val reviews: List<ReviewUi> = mockReviews
 
     CarDetailScreenContent(
         car = car,

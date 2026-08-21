@@ -13,9 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.example.motormates.data.model.CarListing
-import com.example.motormates.data.model.toCarDetailUi
-import com.example.motormates.data.model.toReviewCarSummary
 import com.example.motormates.ui.carDetail.CarDetailScreen
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
@@ -57,7 +54,7 @@ fun MotorMatesApp() {
     var isLoggedIn by remember { mutableStateOf(false) }
     var authDestination by remember { mutableStateOf(AuthDestination.LOGIN) }
     var mainDestination by remember { mutableStateOf(MainDestination.FEED) }
-    var selectedCar by remember { mutableStateOf<CarListing?>(null) }
+    var carSelected by remember { mutableStateOf(false) }
 
     val showBottomBar = isLoggedIn &&
             mainDestination != MainDestination.CAR_DETAIL &&
@@ -86,9 +83,8 @@ fun MotorMatesApp() {
         }
     ) { innerPadding ->
         when {
-            isLoggedIn && mainDestination == MainDestination.NEW_REVIEW && selectedCar != null -> {
+            isLoggedIn && mainDestination == MainDestination.NEW_REVIEW && carSelected -> {
                 NewReviewScreen(
-                    car = selectedCar!!.toReviewCarSummary(),
                     onCloseClick = { mainDestination = MainDestination.CAR_DETAIL },
                     onPublishClick = { _, _, _, _ ->
                         mainDestination = MainDestination.CAR_DETAIL
@@ -96,11 +92,10 @@ fun MotorMatesApp() {
                     modifier = Modifier.padding(innerPadding)
                 )
             }
-            isLoggedIn && mainDestination == MainDestination.CAR_DETAIL && selectedCar != null -> {
+            isLoggedIn && mainDestination == MainDestination.CAR_DETAIL && carSelected -> {
                 CarDetailScreen(
-                    car = selectedCar!!.toCarDetailUi(),
                     onBackClick = {
-                        selectedCar = null
+                        carSelected = false
                         mainDestination = MainDestination.SEARCH
                     },
                     onWriteReviewClick = { mainDestination = MainDestination.NEW_REVIEW },
@@ -113,8 +108,8 @@ fun MotorMatesApp() {
                 modifier = Modifier.padding(innerPadding)
             )
             isLoggedIn && mainDestination == MainDestination.SEARCH -> SearchScreen(
-                onCarClick = { car ->
-                    selectedCar = car
+                onCarClick = { _ ->
+                    carSelected = true
                     mainDestination = MainDestination.CAR_DETAIL
                 },
                 modifier = Modifier.padding(innerPadding)
