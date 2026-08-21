@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.motormates.data.mock.sampleSearchCars
+import com.example.motormates.data.mock.SearchMocks
 import com.example.motormates.data.model.ReviewAspect
 import com.example.motormates.data.model.ReviewCarSummary
 import com.example.motormates.data.model.toReviewCarSummary
@@ -23,7 +23,7 @@ import com.example.motormates.ui.theme.MotorMatesTheme
  * Punto de entrada de "Nueva reseña". Guarda el estado del formulario
  * (calificación, texto, aspectos, fotos) y busca ella misma el auto a
  * reseñar en la capa data, en vez de recibirlo por parámetro. Reemplaza
- * sampleSearchCars por una llamada real (repositorio/ViewModel) cuando
+ * SearchMocks por una llamada real (repositorio/ViewModel) cuando
  * exista la API/Firebase. Por ahora publicar solo cierra la pantalla.
  */
 @Composable
@@ -37,7 +37,7 @@ fun NewReviewScreen(
     ) -> Unit = { _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
-    val car: ReviewCarSummary = sampleSearchCars.first().toReviewCarSummary()
+    val car: ReviewCarSummary = SearchMocks.sampleSearchCars.first().toReviewCarSummary()
     var rating by remember { mutableIntStateOf(4) }
     var experience by remember { mutableStateOf("") }
     var selectedAspects by remember {

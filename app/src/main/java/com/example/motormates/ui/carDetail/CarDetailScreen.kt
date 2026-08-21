@@ -7,8 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.motormates.data.mock.mockCarDetail
-import com.example.motormates.data.mock.mockReviews
+import com.example.motormates.data.mock.CarDetailMocks
 import com.example.motormates.data.model.CarDetailUi
 import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.ui.theme.MotorMatesTheme
@@ -16,7 +15,7 @@ import com.example.motormates.ui.theme.MotorMatesTheme
 /**
  * Punto de entrada de la pantalla. Aquí sí vive el estado (isBookmarked)
  * y la pantalla busca sus propios datos (car/reviews) en la capa data,
- * en vez de recibirlos por parámetro. Reemplaza mockCarDetail/mockReviews
+ * en vez de recibirlos por parámetro. Reemplaza CarDetailMocks
  * por una llamada real (repositorio/ViewModel) cuando exista la API/Firebase.
  */
 @Composable
@@ -27,8 +26,8 @@ fun CarDetailScreen(
     modifier: Modifier = Modifier
 ) {
     var isBookmarked by remember { mutableStateOf(false) }
-    val car: CarDetailUi = mockCarDetail
-    val reviews: List<ReviewUi> = mockReviews
+    val car: CarDetailUi = CarDetailMocks.mockCarDetail
+    val reviews: List<ReviewUi> = CarDetailMocks.mockReviews
 
     CarDetailScreenContent(
         car = car,
