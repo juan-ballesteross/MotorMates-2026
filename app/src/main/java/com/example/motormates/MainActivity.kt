@@ -16,6 +16,7 @@ import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.feed.FeedScreen
 import com.example.motormates.ui.login.LoginScreen
+import com.example.motormates.ui.post.PostScreen
 import com.example.motormates.ui.register.RegisterScreen
 import com.example.motormates.ui.search.SearchScreen
 import com.example.motormates.ui.theme.MotorMatesBackground
@@ -35,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
 private enum class AuthDestination { LOGIN, REGISTER }
 
-private enum class MainDestination { FEED, SEARCH }
+private enum class MainDestination { FEED, SEARCH, POST }
 
 /**
  * Único Scaffold de toda la app (requisito del sprint). El bottomBar
@@ -60,12 +61,18 @@ fun MotorMatesApp() {
                         MainBottomDestination.EXPLORE
                     },
                     onFeedClick = { mainDestination = MainDestination.FEED },
-                    onExploreClick = { mainDestination = MainDestination.SEARCH }
+                    onExploreClick = { mainDestination = MainDestination.SEARCH },
+                    onPublishClick = { mainDestination = MainDestination.POST }
                 )
             }
         }
     ) { innerPadding ->
         when {
+            isLoggedIn && mainDestination == MainDestination.POST -> PostScreen(
+                onCancelClick = { mainDestination = MainDestination.FEED },
+                onPublishClick = { _ -> mainDestination = MainDestination.FEED },
+                modifier = Modifier.padding(innerPadding)
+            )
             isLoggedIn && mainDestination == MainDestination.SEARCH -> SearchScreen(
                 modifier = Modifier.padding(innerPadding)
             )
