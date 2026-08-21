@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -26,13 +27,10 @@ import com.example.motormates.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesSurface
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 /**
- * Campo de texto con etiqueta arriba, ícono inicial y fondo de superficie,
- * siguiendo la paleta oscura del resto de la app.
+ * Campo de texto con etiqueta arriba, ícono inicial y fondo de superficie.
+ * Usa MaterialTheme.colorScheme para que responda al modo claro/oscuro.
  */
 @Composable
 fun LoginTextField(
@@ -48,14 +46,19 @@ fun LoginTextField(
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
     Column(modifier = modifier) {
-        Text(text = label, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text(text = placeholder, color = MotorMatesTextSecondary) },
+            placeholder = { Text(text = placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant) },
             leadingIcon = {
-                Icon(imageVector = leadingIcon, contentDescription = null, tint = MotorMatesTextSecondary)
+                Icon(imageVector = leadingIcon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             },
             trailingIcon = if (isPassword) {
                 {
@@ -67,7 +70,7 @@ fun LoginTextField(
                             } else {
                                 stringResource(R.string.login_password_show_cd)
                             },
-                            tint = MotorMatesTextSecondary
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -77,13 +80,13 @@ fun LoginTextField(
             keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else keyboardType),
             shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MotorMatesSurface,
-                unfocusedContainerColor = MotorMatesSurface,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedBorderColor = MotorMatesRed,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = Color.Transparent,
-                cursorColor = MotorMatesRed
+                cursorColor = MaterialTheme.colorScheme.primary
             ),
             modifier = Modifier.fillMaxWidth()
         )

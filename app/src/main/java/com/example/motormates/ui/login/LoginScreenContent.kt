@@ -17,10 +17,10 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,10 +31,6 @@ import com.example.motormates.ui.login.components.GoogleSignInButton
 import com.example.motormates.ui.login.components.LoginDivider
 import com.example.motormates.ui.login.components.LoginLogo
 import com.example.motormates.ui.login.components.LoginTextField
-import com.example.motormates.ui.theme.MotorMatesBackground
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesRedLight
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 @Composable
 fun LoginScreenContent(
@@ -53,7 +49,7 @@ fun LoginScreenContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
@@ -64,14 +60,14 @@ fun LoginScreenContent(
 
         Text(
             text = stringResource(R.string.login_title),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.login_subtitle),
-            color = MotorMatesTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(28.dp))
@@ -104,7 +100,7 @@ fun LoginScreenContent(
         ) {
             Text(
                 text = stringResource(R.string.login_forgot_password),
-                color = MotorMatesRedLight,
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 13.sp,
                 modifier = Modifier.clickable(onClick = onForgotPasswordClick)
             )
@@ -115,14 +111,19 @@ fun LoginScreenContent(
             onClick = onLoginClick,
             enabled = isFormValid,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MotorMatesRed,
-                disabledContainerColor = MotorMatesRed.copy(alpha = 0.4f)
+                containerColor = MaterialTheme.colorScheme.primary,
+                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
             ),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
         ) {
-            Text(text = stringResource(R.string.login_button), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = stringResource(R.string.login_button),
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -136,10 +137,14 @@ fun LoginScreenContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = stringResource(R.string.login_no_account_prefix), color = MotorMatesTextSecondary, fontSize = 14.sp)
+            Text(
+                text = stringResource(R.string.login_no_account_prefix),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 14.sp
+            )
             Text(
                 text = stringResource(R.string.login_register_link),
-                color = MotorMatesRedLight,
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable(onClick = onRegisterClick)
