@@ -2,17 +2,12 @@ package com.example.motormates.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-<<<<<<< HEAD
-=======
 // ===== Colores de marca (se mantienen, se siguen usando en varias pantallas) =====
->>>>>>> origin/master
 val MotorMatesBackground = Color(0xFF121212)
 val MotorMatesSurface = Color(0xFF1E1E1E)
 val MotorMatesRed = Color(0xFFB3282D)
 val MotorMatesRedLight = Color(0xFFE05257)
 val MotorMatesTextSecondary = Color(0xFF9B9B9B)
-<<<<<<< HEAD
-=======
 
 // ===== Paleta MD3 — DARK =====
 val md3_dark_primary = MotorMatesRed
@@ -85,4 +80,3 @@ val md3_light_scrim = Color(0xFF000000)
 val md3_light_inverseSurface = Color(0xFF392E2D)
 val md3_light_inverseOnSurface = Color(0xFFFFEDEB)
 val md3_light_inversePrimary = Color(0xFFFFB4AB)
->>>>>>> origin/master

@@ -60,7 +60,6 @@
     <string name="search_car_title">%1$s %2$s</string>
     <string name="search_car_year_owner">%1$d · %2$s</string>
 
-<<<<<<< HEAD
     <!-- User / Profile -->
     <string name="user_edit_profile_button">Editar perfil</string>
     <string name="user_avatar_cd">Foto de perfil</string>
@@ -73,8 +72,6 @@
     <string name="user_tab_activity">Actividad</string>
     <string name="user_activity_empty">Sin actividad reciente</string>
 
-=======
->>>>>>> origin/master
     <string-array name="search_categories">
         <item>Todos</item>
         <item>Deportivos</item>
@@ -83,8 +80,6 @@
         <item>Eléctricos</item>
         <item>Pickup</item>
     </string-array>
-<<<<<<< HEAD
-=======
 
     <!-- Post -->
     <string name="post_top_bar_title">Nueva publicación</string>
@@ -111,5 +106,4 @@
     <string name="review_add_photo_cd">Agregar foto</string>
     <string name="review_publish_button">Publicar reseña</string>
     <string name="car_detail_write_review">Escribir reseña</string>
->>>>>>> origin/master
 </resources>
