@@ -19,6 +19,7 @@ import com.example.motormates.data.model.toReviewCarSummary
 import com.example.motormates.ui.alerts.AlertsScreen
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
+import com.example.motormates.ui.editProfile.EditProfileScreen
 import com.example.motormates.ui.feed.FeedScreen
 import com.example.motormates.ui.login.LoginScreen
 import com.example.motormates.ui.post.PostScreen
@@ -115,10 +116,18 @@ fun AppNavigation(
                 )
             }
             composable(ScreenRoute.Profile.route) {
-                UserScreen()
+                UserScreen(
+                    onEditProfileClick = { navController.navigate(ScreenRoute.EditProfile.route) }
+                )
             }
             composable(ScreenRoute.Alerts.route) {
                 AlertsScreen()
+            }
+            composable(ScreenRoute.EditProfile.route) {
+                EditProfileScreen(
+                    onCloseClick = { navController.popBackStack() },
+                    onSaveClick = { navController.popBackStack() }
+                )
             }
             composable(
                 route = ScreenRoute.VehicleDetail.route,
