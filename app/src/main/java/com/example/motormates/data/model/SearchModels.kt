@@ -12,5 +12,6 @@ data class CarListing(
     val ownerName: String,
     val rating: Float,
     val likes: Int,
-    val category: SearchCategoryKey
+    val category: SearchCategoryKey,
+    val imageResId: Int
 )

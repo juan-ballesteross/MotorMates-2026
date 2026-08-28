@@ -8,7 +8,7 @@ object CarDetailMocks {
     val mockCarDetail = CarDetailUi(
         marca = "PORSCHE",
         modelo = "911 GT3",
-        imagenResId = R.drawable.porsche_gt3_rs,
+        imagenResId = VehicleImages.PORSCHE_911_GT3,
         calificacion = 4.9f,
         numeroResenas = 312,
         potencia = "510 hp",
