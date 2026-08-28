@@ -1,14 +1,11 @@
 package com.example.motormates.ui.vehicleDetail.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,32 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun VehicleDetailLoading(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-    }
-}
-
-@Composable
 fun VehicleDetailNotFound(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
     VehicleDetailMessage(
         title = "Vehículo no encontrado",
         message = "Este vehículo no existe o fue eliminado.",
-        onBackClick = onBackClick,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun VehicleDetailError(message: String, onBackClick: () -> Unit, modifier: Modifier = Modifier) {
-    VehicleDetailMessage(
-        title = "Ocurrió un error",
-        message = message,
         onBackClick = onBackClick,
         modifier = modifier
     )

@@ -1,7 +1,5 @@
 package com.example.motormates.data.model
 
-import com.example.motormates.R
-
 enum class ReviewAspect {
     COMFORT,
     DESIGN,
@@ -20,13 +18,13 @@ fun CarListing.toReviewCarSummary(): ReviewCarSummary = ReviewCarSummary(
     title = "$brand $model",
     year = year,
     categoryLabel = category.toSingularLabel(),
-    imageResId = thumbnailResId()
+    imageResId = imageResId
 )
 
 fun CarListing.toCarDetailUi(): CarDetailUi = CarDetailUi(
     marca = brand.uppercase(),
     modelo = model,
-    imagenResId = thumbnailResId(),
+    imagenResId = imageResId,
     calificacion = rating,
     numeroResenas = likes.coerceAtLeast(1),
     potencia = "—",
@@ -34,9 +32,6 @@ fun CarListing.toCarDetailUi(): CarDetailUi = CarDetailUi(
     velocidadMaxima = "—",
     traccion = "—"
 )
-
-private fun CarListing.thumbnailResId(): Int =
-    if (brand.contains("Porsche", ignoreCase = true)) R.drawable.porsche_gt3_rs else 0
 
 fun SearchCategoryKey.toSingularLabel(): String = when (this) {
     SearchCategoryKey.ALL -> ""

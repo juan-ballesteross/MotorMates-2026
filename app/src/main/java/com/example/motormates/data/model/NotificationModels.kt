@@ -1,6 +1,6 @@
 package com.example.motormates.data.model
 
-import com.example.motormates.R
+import com.example.motormates.data.mock.VehicleImages
 
 /** Tipo de evento que generó la notificación — determina el ícono mostrado. */
 enum class NotificationType { LIKE, COMMENT, FOLLOW, RATING }
@@ -33,7 +33,7 @@ val mockNotifications = listOf(
         message = "comentó: \"Totalmente de acuerdo con lo del PDK\"",
         timeAgo = "45 min",
         section = "HOY",
-        thumbnailResId = R.drawable.m3
+        thumbnailResId = VehicleImages.PORSCHE_911_GT3
     ),
     NotificationUi(
         id = "3",
@@ -58,6 +58,6 @@ val mockNotifications = listOf(
         message = "comentó en tu publicación del M3 Competition",
         timeAgo = "4 días",
         section = "ESTA SEMANA",
-        thumbnailResId = R.drawable.gt3
+        thumbnailResId = VehicleImages.M3_COMPETITION
     )
 )

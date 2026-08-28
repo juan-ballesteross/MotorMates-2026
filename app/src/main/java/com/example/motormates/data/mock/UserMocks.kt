@@ -1,6 +1,5 @@
 package com.example.motormates.data.mock
 
-import com.example.motormates.R
 import com.example.motormates.data.model.GarageCar
 import com.example.motormates.data.model.UserProfile
 
@@ -16,7 +15,7 @@ object UserMocks {
     )
 
     val sampleUserCars = listOf(
-        GarageCar("911 GT3", R.drawable.gt3, year = 2024, categoryLabel = "Deportivo"),
-        GarageCar("M3 Competition", R.drawable.m3, year = 2023, categoryLabel = "Deportivo")
+        GarageCar("911 GT3", VehicleImages.PORSCHE_911_GT3, year = 2024, categoryLabel = "Deportivo"),
+        GarageCar("M3 Competition", VehicleImages.M3_COMPETITION, year = 2023, categoryLabel = "Deportivo")
     )
 }
