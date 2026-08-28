@@ -34,7 +34,7 @@ import com.example.motormates.ui.theme.MotorMatesRed
 import com.example.motormates.ui.theme.MotorMatesSurface
 import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
-enum class MainBottomDestination { FEED, EXPLORE, PROFILE }
+enum class MainBottomDestination { FEED, EXPLORE, ALERTS, PROFILE }
 
 @Composable
 fun MainBottomNavBar(
@@ -83,7 +83,7 @@ fun MainBottomNavBar(
         BottomNavItem(
             icon = Icons.Filled.Notifications,
             label = stringResource(R.string.common_bottom_nav_alerts),
-            selected = false,
+            selected = selected == MainBottomDestination.ALERTS,
             onClick = onAlertsClick
         )
         BottomNavItem(

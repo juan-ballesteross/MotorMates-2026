@@ -1,4 +1,4 @@
-package com.example.motormates.ui.carDetail.components
+package com.example.motormates.ui.vehicleDetail.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,11 +37,11 @@ import androidx.compose.ui.unit.sp
 import com.example.motormates.data.model.ReviewUi
 
 /**
- * Foto del carro con los botones de "volver" y "guardar" flotando encima.
+ * Foto del vehículo con los botones de "volver" y "guardar" flotando encima.
  * isBookmarked / onBookmarkClick / onBackClick vienen del padre (state hoisting).
  */
 @Composable
-fun CarImageHeader(
+fun VehicleImageHeader(
     imagenResId: Int,
     isBookmarked: Boolean,
     onBackClick: () -> Unit,
@@ -49,7 +49,7 @@ fun CarImageHeader(
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
-        // TODO: reemplazar imagenResId por la foto real del carro (ver CarDetailModels.kt).
+        // TODO: reemplazar imagenResId por la foto real del vehículo (ver CarDetailModels.kt).
         // Mientras tanto (id == 0) se muestra un rectángulo de color para que el
         // Preview no se rompa por intentar cargar un recurso inexistente.
         if (imagenResId != 0) {

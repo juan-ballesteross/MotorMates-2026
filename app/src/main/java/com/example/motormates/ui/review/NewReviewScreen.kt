@@ -21,13 +21,13 @@ import com.example.motormates.ui.theme.MotorMatesTheme
 
 /**
  * Punto de entrada de "Nueva reseña". Guarda el estado del formulario
- * (calificación, texto, aspectos, fotos) y busca ella misma el auto a
- * reseñar en la capa data, en vez de recibirlo por parámetro. Reemplaza
- * SearchMocks por una llamada real (repositorio/ViewModel) cuando
- * exista la API/Firebase. Por ahora publicar solo cierra la pantalla.
+ * (calificación, texto, aspectos, fotos); el auto reseñado lo resuelve
+ * quien navega hasta acá (ver AppNavigation), a partir del id del
+ * vehículo actual. Por ahora publicar solo cierra la pantalla.
  */
 @Composable
 fun NewReviewScreen(
+    car: ReviewCarSummary,
     onCloseClick: () -> Unit = {},
     onPublishClick: (
         rating: Int,
@@ -37,7 +37,6 @@ fun NewReviewScreen(
     ) -> Unit = { _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
-    val car: ReviewCarSummary = SearchMocks.sampleSearchCars.first().toReviewCarSummary()
     var rating by remember { mutableIntStateOf(4) }
     var experience by remember { mutableStateOf("") }
     var selectedAspects by remember {
@@ -82,6 +81,6 @@ fun NewReviewScreen(
 @Composable
 private fun NewReviewScreenPreview() {
     MotorMatesTheme {
-        NewReviewScreen()
+        NewReviewScreen(car = SearchMocks.sampleSearchCars.first().toReviewCarSummary())
     }
 }
