@@ -1,4 +1,4 @@
-package com.example.motormates.ui.carDetail
+package com.example.motormates.ui.vehicleDetail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,17 +27,17 @@ import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.data.model.CarDetailUi
 import com.example.motormates.data.model.ReviewUi
-import com.example.motormates.ui.carDetail.components.CarImageHeader
-import com.example.motormates.ui.carDetail.components.RatingRow
-import com.example.motormates.ui.carDetail.components.ReviewItem
-import com.example.motormates.ui.carDetail.components.SpecStatCard
+import com.example.motormates.ui.vehicleDetail.components.RatingRow
+import com.example.motormates.ui.vehicleDetail.components.ReviewItem
+import com.example.motormates.ui.vehicleDetail.components.SpecStatCard
+import com.example.motormates.ui.vehicleDetail.components.VehicleImageHeader
 
 /**
  * Todo el estado viene del padre (state hoisting) — este composable
  * no guarda nada con remember, solo pinta lo que le llega.
  */
 @Composable
-fun CarDetailScreenContent(
+fun VehicleDetailContent(
     car: CarDetailUi,
     reviews: List<ReviewUi>,
     isBookmarked: Boolean,
@@ -61,7 +61,7 @@ fun CarDetailScreenContent(
         contentPadding = PaddingValues(bottom = 24.dp)
     ) {
         item {
-            CarImageHeader(
+            VehicleImageHeader(
                 imagenResId = car.imagenResId,
                 isBookmarked = isBookmarked,
                 onBackClick = onBackClick,
