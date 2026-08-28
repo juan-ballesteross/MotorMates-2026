@@ -16,7 +16,7 @@ object UserMocks {
     )
 
     val sampleUserCars = listOf(
-        GarageCar("911 GT3", R.drawable.gt3),
-        GarageCar("M3 Competition", R.drawable.m3)
+        GarageCar("911 GT3", R.drawable.gt3, year = 2024, categoryLabel = "Deportivo"),
+        GarageCar("M3 Competition", R.drawable.m3, year = 2023, categoryLabel = "Deportivo")
     )
 }

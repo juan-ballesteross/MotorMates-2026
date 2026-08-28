@@ -13,6 +13,11 @@ data class UserProfile(
     val followingCount: Int
 )
 
-data class GarageCar(val name: String, val imageRes: Int)
+data class GarageCar(
+    val name: String,
+    val imageRes: Int,
+    val year: Int = 0,
+    val categoryLabel: String = ""
+)
 
 enum class ProfileTab { REVIEWS, GARAGE, ACTIVITY }

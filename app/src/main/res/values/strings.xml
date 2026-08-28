@@ -72,6 +72,21 @@
     <string name="user_tab_activity">Actividad</string>
     <string name="user_activity_empty">Sin actividad reciente</string>
 
+    <!-- Edit profile -->
+    <string name="edit_profile_title">Editar perfil</string>
+    <string name="edit_profile_save_button">Guardar</string>
+    <string name="edit_profile_close_cd">Cerrar</string>
+    <string name="edit_profile_photo_hint">JPG o PNG, mínimo 400×400 px</string>
+    <string name="edit_profile_change_cover_button">Cambiar portada</string>
+    <string name="edit_profile_username_label">Nombre de usuario</string>
+    <string name="edit_profile_username_placeholder">Tu nombre de usuario</string>
+    <string name="edit_profile_bio_label">Biografía</string>
+    <string name="edit_profile_bio_placeholder">Cuéntanos sobre ti y tu pasión por los autos...</string>
+    <string name="edit_profile_bio_counter">%1$d / %2$d</string>
+    <string name="edit_profile_garage_title">Mi garaje</string>
+    <string name="edit_profile_add_vehicle_button">+ Agregar vehículo</string>
+    <string name="edit_profile_edit_vehicle_cd">Editar vehículo</string>
+
     <string-array name="search_categories">
         <item>Todos</item>
         <item>Deportivos</item>

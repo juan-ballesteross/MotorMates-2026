@@ -21,7 +21,10 @@ import com.example.motormates.ui.theme.MotorMatesTheme
  * MainActivity.kt (MotorMatesApp), igual que Feed y Search.
  */
 @Composable
-fun UserScreen(modifier: Modifier = Modifier) {
+fun UserScreen(
+    onEditProfileClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     var selectedTab by remember { mutableStateOf(ProfileTab.REVIEWS) }
 
     UserScreenContent(
@@ -29,7 +32,7 @@ fun UserScreen(modifier: Modifier = Modifier) {
         cars = UserMocks.sampleUserCars,
         selectedTab = selectedTab,
         onSelectTab = { selectedTab = it },
-        onEditProfileClick = {},
+        onEditProfileClick = onEditProfileClick,
         modifier = modifier
     )
 }
