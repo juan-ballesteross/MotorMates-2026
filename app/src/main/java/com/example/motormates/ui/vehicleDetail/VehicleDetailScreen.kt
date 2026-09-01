@@ -1,43 +1,48 @@
 package com.example.motormates.ui.vehicleDetail
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.motormates.data.mock.CarDetailMocks
-import com.example.motormates.data.mock.SearchMocks
-import com.example.motormates.data.model.toCarDetailUi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.ui.theme.MotorMatesTheme
-import com.example.motormates.ui.vehicleDetail.components.VehicleDetailNotFound
 
-/**
- * Punto de entrada de la pantalla de detalle de vehículo. Recibe el
- * vehicleId ya resuelto por AppNavigation y busca el vehículo directamente
- * en los mocks, igual que el resto de pantallas del proyecto.
- */
 @Composable
 fun VehicleDetailScreen(
     vehicleId: Int,
     onBackClick: () -> Unit = {},
     onWriteReviewClick: () -> Unit = {},
     onSeeAllReviewsClick: () -> Unit = {},
+    viewModel: VehicleDetailViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
-    var isBookmarked by remember { mutableStateOf(false) }
-    val car = remember(vehicleId) { SearchMocks.findById(vehicleId)?.toCarDetailUi() }
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val isBookmarked by viewModel.isBookmarked.collectAsStateWithLifecycle()
 
-    if (car == null) {
-        VehicleDetailNotFound(onBackClick = onBackClick, modifier = modifier)
+    LaunchedEffect(vehicleId) {
+        viewModel.getVehicleById(vehicleId)
+        viewModel.getReviews(vehicleId)
+    }
+
+    val vehicle = state.vehicle
+    if (vehicle == null) {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = "Vehículo no encontrado", color = MaterialTheme.colorScheme.onBackground)
+        }
     } else {
         VehicleDetailContent(
-            car = car,
-            reviews = CarDetailMocks.mockReviews,
+            car = vehicle,
+            reviews = state.reviews,
             isBookmarked = isBookmarked,
             onBackClick = onBackClick,
-            onBookmarkClick = { isBookmarked = !isBookmarked },
+            onBookmarkClick = viewModel::bookmarkButtonPress,
             onWriteReviewClick = onWriteReviewClick,
             onSeeAllReviewsClick = onSeeAllReviewsClick,
             modifier = modifier
@@ -47,8 +52,8 @@ fun VehicleDetailScreen(
 
 @Preview(showBackground = true)
 @Composable
-private fun VehicleDetailNotFoundPreview() {
+private fun VehicleDetailScreenPreview() {
     MotorMatesTheme {
-        VehicleDetailNotFound(onBackClick = {})
+        VehicleDetailScreen(vehicleId = 1)
     }
 }
