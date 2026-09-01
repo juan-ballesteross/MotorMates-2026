@@ -2,37 +2,41 @@ package com.example.motormates.ui.login
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.ui.theme.MotorMatesTheme
 
 /**
- * Pantalla de inicio de sesión. El botón "Iniciar sesión" solo se habilita
- * cuando el correo y la contraseña tienen contenido.
+ * Ya no guarda estado con remember — email/password/passwordVisible
+ * viven en LoginViewModel como StateFlow. isFormValid se calcula aquí
+ * mismo porque es un valor derivado (no necesita su propio flow).
+ * onLoginClick/onRegisterClick/onForgotPasswordClick siguen siendo
+ * callbacks de navegación pasados desde afuera — eso no le corresponde
+ * al ViewModel, sino a quien conecte la navegación.
  */
 @Composable
 fun LoginScreen(
-    onLoginClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    onLoginClick: () -> Unit = {},
     onRegisterClick: () -> Unit = {},
-    onForgotPasswordClick: () -> Unit = {}
+    onForgotPasswordClick: () -> Unit = {},
+    viewModel: LoginViewModel = viewModel(),
+    modifier: Modifier = Modifier
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    val email by viewModel.email.collectAsStateWithLifecycle()
+    val password by viewModel.password.collectAsStateWithLifecycle()
+    val passwordVisible by viewModel.passwordVisible.collectAsStateWithLifecycle()
 
     val isFormValid = email.isNotBlank() && password.isNotBlank()
 
     LoginScreenContent(
         email = email,
-        onEmailChange = { email = it },
+        onEmailChange = viewModel::updateEmail,
         password = password,
-        onPasswordChange = { password = it },
+        onPasswordChange = viewModel::updatePassword,
         passwordVisible = passwordVisible,
-        onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
+        onTogglePasswordVisibility = viewModel::togglePasswordVisibility,
         isFormValid = isFormValid,
         onLoginClick = onLoginClick,
         onRegisterClick = onRegisterClick,
@@ -45,6 +49,6 @@ fun LoginScreen(
 @Composable
 private fun LoginScreenPreview() {
     MotorMatesTheme {
-        LoginScreen(onLoginClick = {})
+        LoginScreen()
     }
 }
