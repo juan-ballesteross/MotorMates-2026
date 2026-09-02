@@ -10,13 +10,13 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.motormates.data.model.GarageCar
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
-import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.user.components.ProfileCarCard
 import com.example.motormates.ui.user.components.ProfileEmptyTabState
 import com.example.motormates.ui.user.components.ProfileHeader
@@ -42,7 +42,7 @@ fun UserScreenContent(
         columns = GridCells.Fixed(2),
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground),
+            .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)

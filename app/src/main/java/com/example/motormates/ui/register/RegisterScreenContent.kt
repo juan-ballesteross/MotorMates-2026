@@ -14,10 +14,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -27,10 +27,6 @@ import com.example.motormates.R
 import com.example.motormates.ui.register.components.RegisterTextField
 import com.example.motormates.ui.register.components.RegisterTopBar
 import com.example.motormates.ui.register.components.TermsCheckbox
-import com.example.motormates.ui.theme.MotorMatesBackground
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesRedLight
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 @Composable
 fun RegisterScreenContent(
@@ -54,7 +50,7 @@ fun RegisterScreenContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
@@ -64,14 +60,14 @@ fun RegisterScreenContent(
 
         Text(
             text = stringResource(R.string.register_title),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.register_subtitle),
-            color = MotorMatesTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(28.dp))
@@ -122,14 +118,14 @@ fun RegisterScreenContent(
             onClick = onRegisterClick,
             enabled = isFormValid,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MotorMatesRed,
-                disabledContainerColor = MotorMatesRed.copy(alpha = 0.4f)
+                containerColor = MaterialTheme.colorScheme.primary,
+                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
             ),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
         ) {
-            Text(text = stringResource(R.string.register_button), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.register_button), color = MaterialTheme.colorScheme.onPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -137,10 +133,10 @@ fun RegisterScreenContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = stringResource(R.string.register_has_account_prefix), color = MotorMatesTextSecondary, fontSize = 14.sp)
+            Text(text = stringResource(R.string.register_has_account_prefix), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
             Text(
                 text = stringResource(R.string.register_login_link),
-                color = MotorMatesRedLight,
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable(onClick = onLoginClick)

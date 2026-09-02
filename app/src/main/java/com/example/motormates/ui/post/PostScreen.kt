@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -14,7 +15,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.post.components.PostTopBar
-import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.theme.MotorMatesTheme
 
 /**
@@ -43,7 +43,7 @@ fun PostScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         PostTopBar(
             canPublish = canPublish,
@@ -72,7 +72,7 @@ fun PostScreen(
 private fun PostScreenPreview() {
     MotorMatesTheme {
         Scaffold(
-            containerColor = MotorMatesBackground,
+            containerColor = MaterialTheme.colorScheme.background,
             bottomBar = { MainBottomNavBar(selected = MainBottomDestination.FEED) }
         ) { innerPadding ->
             PostScreen(modifier = Modifier.padding(innerPadding))

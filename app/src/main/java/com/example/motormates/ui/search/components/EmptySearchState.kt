@@ -9,17 +9,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 @Composable
 fun EmptySearchState(modifier: Modifier = Modifier) {
@@ -31,12 +30,12 @@ fun EmptySearchState(modifier: Modifier = Modifier) {
         Icon(
             imageVector = Icons.Filled.SearchOff,
             contentDescription = null,
-            tint = MotorMatesTextSecondary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(48.dp)
         )
         Spacer(modifier = Modifier.height(12.dp))
-        Text(text = stringResource(R.string.search_empty_title), color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        Text(text = stringResource(R.string.search_empty_title), color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = stringResource(R.string.search_empty_subtitle), color = MotorMatesTextSecondary, fontSize = 13.sp)
+        Text(text = stringResource(R.string.search_empty_subtitle), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
     }
 }

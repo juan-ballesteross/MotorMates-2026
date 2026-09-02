@@ -20,12 +20,12 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,10 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.data.model.ReviewPost
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesRedLight
-import com.example.motormates.ui.theme.MotorMatesSurface
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 @Composable
 fun ReviewPostCard(post: ReviewPost, modifier: Modifier = Modifier) {
@@ -50,19 +46,21 @@ fun ReviewPostCard(post: ReviewPost, modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .size(40.dp)
                     .background(
-                        brush = Brush.linearGradient(listOf(MotorMatesRedLight, MotorMatesRed)),
+                        brush = Brush.linearGradient(
+                            listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary)
+                        ),
                         shape = CircleShape
                     )
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column {
-                Text(text = post.userName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text(text = post.userName, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 Row {
-                    Text(text = stringResource(R.string.feed_review_prefix), color = MotorMatesTextSecondary, fontSize = 13.sp)
-                    Text(text = post.carName, color = MotorMatesRedLight, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text(text = stringResource(R.string.feed_review_prefix), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                    Text(text = post.carName, color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     Text(
                         text = stringResource(R.string.feed_review_time_suffix, post.timeAgo),
-                        color = MotorMatesTextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp
                     )
                 }
@@ -73,13 +71,13 @@ fun ReviewPostCard(post: ReviewPost, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(220.dp)
-                .background(color = MotorMatesSurface, shape = RoundedCornerShape(16.dp)),
+                .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Filled.DirectionsCar,
                 contentDescription = null,
-                tint = MotorMatesTextSecondary,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(48.dp)
             )
         }
@@ -89,13 +87,13 @@ fun ReviewPostCard(post: ReviewPost, modifier: Modifier = Modifier) {
                 Icon(
                     imageVector = if (index < post.rating) Icons.Filled.Star else Icons.Filled.StarBorder,
                     contentDescription = null,
-                    tint = MotorMatesRed,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)
                 )
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = post.caption, color = Color.White, fontSize = 14.sp)
+        Text(text = post.caption, color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp)
         Spacer(modifier = Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             PostActionStat(icon = Icons.Filled.FavoriteBorder, count = post.likes)
@@ -110,8 +108,8 @@ fun ReviewPostCard(post: ReviewPost, modifier: Modifier = Modifier) {
 @Composable
 private fun PostActionStat(icon: ImageVector, count: Int, modifier: Modifier = Modifier) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        Icon(imageVector = icon, contentDescription = null, tint = MotorMatesTextSecondary, modifier = Modifier.size(18.dp))
+        Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = "$count", color = MotorMatesTextSecondary, fontSize = 13.sp)
+        Text(text = "$count", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
     }
 }

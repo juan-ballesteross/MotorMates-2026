@@ -11,17 +11,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.data.model.StoryUser
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesRedLight
 
 @Composable
 fun StoriesRow(stories: List<StoryUser>, modifier: Modifier = Modifier) {
@@ -43,11 +41,13 @@ private fun StoryItem(story: StoryUser, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .size(64.dp)
                 .background(
-                    brush = Brush.linearGradient(listOf(MotorMatesRedLight, MotorMatesRed)),
+                    brush = Brush.linearGradient(
+                        listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary)
+                    ),
                     shape = CircleShape
                 )
         )
         Spacer(modifier = Modifier.height(6.dp))
-        Text(text = story.name, color = Color.White, fontSize = 12.sp)
+        Text(text = story.name, color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp)
     }
 }

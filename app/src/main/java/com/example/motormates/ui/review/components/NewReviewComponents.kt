@@ -27,13 +27,13 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -45,14 +45,6 @@ import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.data.model.ReviewAspect
 import com.example.motormates.data.model.ReviewCarSummary
-import com.example.motormates.ui.theme.MotorMatesRed
-
-/** Colores locales alineados al mockup de "Nueva reseña". */
-private val ReviewBlack = Color(0xFF000000)
-private val ReviewSurface = Color(0xFF1C1C1E)
-private val ReviewLabel = Color(0xFF8E8E93)
-private val ReviewStarEmpty = Color(0xFF3A3A3C)
-private val ReviewChipBorder = Color(0xFF3A3A3C)
 
 @Composable
 fun NewReviewTopBar(
@@ -62,14 +54,14 @@ fun NewReviewTopBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(ReviewBlack)
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = stringResource(R.string.review_close_cd),
-            tint = Color.White,
+            tint = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .size(22.dp)
@@ -81,7 +73,7 @@ fun NewReviewTopBar(
         )
         Text(
             text = stringResource(R.string.review_top_bar_title),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.align(Alignment.Center)
@@ -98,7 +90,7 @@ fun ReviewCarCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(ReviewSurface)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -107,7 +99,7 @@ fun ReviewCarCard(
                 .width(72.dp)
                 .height(52.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(Color(0xFF2C2C2E)),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             if (car.imageResId != 0) {
@@ -121,7 +113,7 @@ fun ReviewCarCard(
                 Icon(
                     imageVector = Icons.Filled.DirectionsCar,
                     contentDescription = null,
-                    tint = ReviewLabel,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(26.dp)
                 )
             }
@@ -130,7 +122,7 @@ fun ReviewCarCard(
         Column {
             Text(
                 text = car.title,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -141,7 +133,7 @@ fun ReviewCarCard(
                     car.year,
                     car.categoryLabel
                 ),
-                color = ReviewLabel,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp
             )
         }
@@ -163,7 +155,7 @@ fun ReviewStarRating(
             Icon(
                 imageVector = if (selected) Icons.Filled.Star else Icons.Outlined.StarOutline,
                 contentDescription = stringResource(R.string.review_star_cd, star),
-                tint = if (selected) MotorMatesRed else ReviewStarEmpty,
+                tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier
                     .size(40.dp)
                     .clickable(
@@ -186,13 +178,13 @@ fun ReviewExperienceField(
             .fillMaxWidth()
             .height(128.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(ReviewSurface)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(16.dp)
     ) {
         if (value.isEmpty()) {
             Text(
                 text = stringResource(R.string.review_experience_placeholder),
-                color = ReviewLabel,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 lineHeight = 20.sp
             )
@@ -202,11 +194,11 @@ fun ReviewExperienceField(
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxSize(),
             textStyle = TextStyle(
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 14.sp,
                 lineHeight = 20.sp
             ),
-            cursorBrush = SolidColor(MotorMatesRed)
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
         )
     }
 }
@@ -227,17 +219,17 @@ fun ReviewAspectChips(
             val isSelected = aspect in selected
             Text(
                 text = aspectLabel(aspect),
-                color = if (isSelected) Color.White else ReviewLabel,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier
                     .clip(RoundedCornerShape(24.dp))
-                    .background(if (isSelected) MotorMatesRed else ReviewSurface)
+                    .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
                     .then(
                         if (isSelected) {
                             Modifier
                         } else {
-                            Modifier.border(1.dp, ReviewChipBorder, RoundedCornerShape(24.dp))
+                            Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(24.dp))
                         }
                     )
                     .clickable(
@@ -263,7 +255,7 @@ fun ReviewAddPhotoButton(
         modifier = modifier
             .size(64.dp)
             .clip(RoundedCornerShape(14.dp))
-            .background(ReviewSurface)
+            .background(MaterialTheme.colorScheme.surface)
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
@@ -274,7 +266,7 @@ fun ReviewAddPhotoButton(
         if (photoCount > 0) {
             Text(
                 text = "$photoCount",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )

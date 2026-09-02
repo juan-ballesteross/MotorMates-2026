@@ -12,11 +12,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -30,10 +30,6 @@ import com.example.motormates.ui.review.components.ReviewAspectChips
 import com.example.motormates.ui.review.components.ReviewCarCard
 import com.example.motormates.ui.review.components.ReviewExperienceField
 import com.example.motormates.ui.review.components.ReviewStarRating
-import com.example.motormates.ui.theme.MotorMatesRed
-
-private val ReviewBlack = Color(0xFF000000)
-private val ReviewLabel = Color(0xFF8E8E93)
 
 /**
  * Contenido stateless de "Nueva reseña". Layout y espaciado alineados al mockup.
@@ -56,7 +52,7 @@ fun NewReviewScreenContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(ReviewBlack)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
@@ -66,7 +62,7 @@ fun NewReviewScreenContent(
         Spacer(modifier = Modifier.height(32.dp))
         Text(
             text = stringResource(R.string.review_rating_prompt),
-            color = ReviewLabel,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -81,7 +77,7 @@ fun NewReviewScreenContent(
         Spacer(modifier = Modifier.height(32.dp))
         Text(
             text = stringResource(R.string.review_experience_label),
-            color = ReviewLabel,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -90,7 +86,7 @@ fun NewReviewScreenContent(
         Spacer(modifier = Modifier.height(32.dp))
         Text(
             text = stringResource(R.string.review_aspects_label),
-            color = ReviewLabel,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(14.dp))
@@ -99,7 +95,7 @@ fun NewReviewScreenContent(
         Spacer(modifier = Modifier.height(32.dp))
         Text(
             text = stringResource(R.string.review_photos_label),
-            color = ReviewLabel,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(14.dp))
@@ -110,10 +106,10 @@ fun NewReviewScreenContent(
             onClick = onPublishClick,
             enabled = canPublish,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MotorMatesRed,
-                disabledContainerColor = MotorMatesRed,
-                contentColor = Color.White,
-                disabledContentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.primary,
+                disabledContainerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                disabledContentColor = MaterialTheme.colorScheme.onPrimary
             ),
             shape = RoundedCornerShape(14.dp),
             modifier = Modifier

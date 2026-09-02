@@ -21,12 +21,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -37,9 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import com.example.motormates.R
 import com.example.motormates.data.model.CarListing
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesSurface
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 @Composable
 fun CarResultsGrid(
@@ -70,7 +67,7 @@ private fun CarResultCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(MotorMatesSurface)
+            .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
     ) {
         Image(
@@ -84,7 +81,7 @@ private fun CarResultCard(
         Column(modifier = Modifier.padding(10.dp)) {
             Text(
                 text = stringResource(R.string.search_car_title, car.brand, car.model),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
@@ -92,20 +89,20 @@ private fun CarResultCard(
             )
             Text(
                 text = stringResource(R.string.search_car_year_owner, car.year, car.ownerName),
-                color = MotorMatesTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Star, contentDescription = null, tint = MotorMatesRed, modifier = Modifier.size(14.dp))
+                Icon(Icons.Filled.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "${car.rating}", color = MotorMatesTextSecondary, fontSize = 12.sp)
+                Text(text = "${car.rating}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                 Spacer(modifier = Modifier.width(12.dp))
-                Icon(Icons.Filled.FavoriteBorder, contentDescription = null, tint = MotorMatesTextSecondary, modifier = Modifier.size(14.dp))
+                Icon(Icons.Filled.FavoriteBorder, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "${car.likes}", color = MotorMatesTextSecondary, fontSize = 12.sp)
+                Text(text = "${car.likes}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
             }
         }
     }

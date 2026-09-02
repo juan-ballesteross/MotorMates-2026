@@ -15,12 +15,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -28,8 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
-import com.example.motormates.ui.theme.MotorMatesBackground
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 /**
  * Portada + avatar superpuesto + botón "Editar perfil", replicando el
@@ -58,7 +56,7 @@ fun ProfileHeader(onEditProfileClick: () -> Unit, modifier: Modifier = Modifier)
                 modifier = Modifier
                     .size(84.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .border(3.dp, MotorMatesBackground, RoundedCornerShape(16.dp))
+                    .border(3.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(16.dp))
             ) {
                 Image(
                     painter = painterResource(R.drawable.user_3),
@@ -73,13 +71,13 @@ fun ProfileHeader(onEditProfileClick: () -> Unit, modifier: Modifier = Modifier)
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .border(1.dp, MotorMatesTextSecondary, RoundedCornerShape(10.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(10.dp))
                     .clickable(onClick = onEditProfileClick)
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
                 Text(
                     text = stringResource(R.string.user_edit_profile_button),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
                 )

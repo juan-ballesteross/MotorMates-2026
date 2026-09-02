@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,7 +20,6 @@ import com.example.motormates.R
 import com.example.motormates.ui.post.components.PostActionButton
 import com.example.motormates.ui.post.components.PostCaptionField
 import com.example.motormates.ui.post.components.PostGalleryPreview
-import com.example.motormates.ui.theme.MotorMatesBackground
 
 /**
  * Todo el estado viene del padre (state hoisting) — igual que en
@@ -39,7 +39,7 @@ fun PostScreenContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
     ) {
         PostGalleryPreview()

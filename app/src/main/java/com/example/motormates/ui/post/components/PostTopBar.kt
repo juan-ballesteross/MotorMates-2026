@@ -6,19 +6,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
-import com.example.motormates.ui.theme.MotorMatesBackground
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 /**
  * Barra superior de "Nueva publicación": "Cancelar" a la izquierda, título
@@ -36,13 +33,13 @@ fun PostTopBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(MotorMatesBackground)
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .padding(horizontal = 20.dp, vertical = 14.dp)
     ) {
         Text(
             text = stringResource(R.string.post_cancel_button),
-            color = MotorMatesTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 15.sp,
             modifier = Modifier
                 .align(Alignment.CenterStart)
@@ -50,14 +47,14 @@ fun PostTopBar(
         )
         Text(
             text = stringResource(R.string.post_top_bar_title),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.align(Alignment.Center)
         )
         Text(
             text = stringResource(R.string.post_publish_button),
-            color = if (canPublish) MotorMatesRed else MotorMatesRed.copy(alpha = 0.4f),
+            color = if (canPublish) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier

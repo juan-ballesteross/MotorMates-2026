@@ -20,19 +20,16 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesSurface
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 enum class MainBottomDestination { FEED, EXPLORE, ALERTS, PROFILE }
 
@@ -49,7 +46,7 @@ fun MainBottomNavBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(MotorMatesSurface)
+            .background(MaterialTheme.colorScheme.surface)
             .navigationBarsPadding()
             .padding(horizontal = 12.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -70,14 +67,14 @@ fun MainBottomNavBar(
         Box(
             modifier = Modifier
                 .size(52.dp)
-                .background(MotorMatesRed, CircleShape)
+                .background(MaterialTheme.colorScheme.primary, CircleShape)
                 .clickable(onClick = onPublishClick),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Filled.Add,
                 contentDescription = stringResource(R.string.common_bottom_nav_publish_cd),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onPrimary
             )
         }
         BottomNavItem(
@@ -103,7 +100,7 @@ private fun BottomNavItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    val color = if (selected) MotorMatesRed else MotorMatesTextSecondary
+    val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
     Column(
         modifier = modifier.clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
