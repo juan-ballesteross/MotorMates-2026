@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,7 +22,6 @@ import com.example.motormates.ui.editProfile.components.EditProfileGarageItem
 import com.example.motormates.ui.editProfile.components.EditProfilePhotoSection
 import com.example.motormates.ui.editProfile.components.EditProfileTopBar
 import com.example.motormates.ui.register.components.RegisterTextField
-import com.example.motormates.ui.theme.MotorMatesBackground
 
 /**
  * Contenido scrollable de "Editar perfil". Stateless: recibe todo el estado
@@ -45,7 +44,7 @@ fun EditProfileScreenContent(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground),
+            .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
@@ -69,7 +68,7 @@ fun EditProfileScreenContent(
         item {
             Text(
                 text = stringResource(R.string.edit_profile_garage_title),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -14,7 +15,6 @@ import com.example.motormates.data.model.SearchCategoryKey
 import com.example.motormates.ui.search.components.CarResultsGrid
 import com.example.motormates.ui.search.components.CategoryChipsRow
 import com.example.motormates.ui.search.components.EmptySearchState
-import com.example.motormates.ui.theme.MotorMatesBackground
 
 @Composable
 fun SearchScreenContent(
@@ -28,7 +28,7 @@ fun SearchScreenContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         CategoryChipsRow(

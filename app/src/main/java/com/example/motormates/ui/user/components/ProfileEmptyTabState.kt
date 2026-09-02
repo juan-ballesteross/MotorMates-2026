@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 /**
  * Estado vacío reutilizable para pestañas del perfil sin contenido aún
@@ -36,13 +36,13 @@ fun ProfileEmptyTabState(modifier: Modifier = Modifier) {
         Icon(
             imageVector = Icons.Filled.History,
             contentDescription = null,
-            tint = MotorMatesTextSecondary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(40.dp)
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = stringResource(R.string.user_activity_empty),
-            color = MotorMatesTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp
         )
     }

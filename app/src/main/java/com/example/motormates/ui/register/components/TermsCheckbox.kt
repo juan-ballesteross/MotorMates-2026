@@ -4,11 +4,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -17,9 +17,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesRedLight
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 @Composable
 fun TermsCheckbox(
@@ -27,11 +24,11 @@ fun TermsCheckbox(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val linkStyle = SpanStyle(color = MotorMatesRedLight, fontWeight = FontWeight.SemiBold)
+    val linkStyle = SpanStyle(color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.SemiBold)
     val termsText = buildAnnotatedString {
-        withStyle(SpanStyle(color = MotorMatesTextSecondary)) { append(stringResource(R.string.register_terms_accept_prefix)) }
+        withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) { append(stringResource(R.string.register_terms_accept_prefix)) }
         withStyle(linkStyle) { append(stringResource(R.string.register_terms_service)) }
-        withStyle(SpanStyle(color = MotorMatesTextSecondary)) { append(stringResource(R.string.register_terms_and)) }
+        withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) { append(stringResource(R.string.register_terms_and)) }
         withStyle(linkStyle) { append(stringResource(R.string.register_terms_privacy)) }
     }
 
@@ -40,9 +37,9 @@ fun TermsCheckbox(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = CheckboxDefaults.colors(
-                checkedColor = MotorMatesRed,
-                uncheckedColor = MotorMatesTextSecondary,
-                checkmarkColor = Color.White
+                checkedColor = MaterialTheme.colorScheme.primary,
+                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                checkmarkColor = MaterialTheme.colorScheme.onPrimary
             )
         )
         Text(

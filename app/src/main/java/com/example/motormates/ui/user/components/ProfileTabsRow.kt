@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,9 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesSurface
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 import com.example.motormates.data.model.ProfileTab
 
 /**
@@ -58,7 +56,7 @@ fun ProfileTabsRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(MotorMatesSurface)
+                .background(MaterialTheme.colorScheme.surface)
         )
     }
 }
@@ -77,7 +75,7 @@ private fun ProfileTabItem(
     ) {
         Text(
             text = label,
-            color = if (isSelected) Color.White else MotorMatesTextSecondary,
+            color = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             maxLines = 1
@@ -87,7 +85,7 @@ private fun ProfileTabItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(2.dp)
-                .background(if (isSelected) MotorMatesRed else Color.Transparent)
+                .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
         )
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -30,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,9 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.data.model.GarageCar
-import com.example.motormates.ui.theme.MotorMatesRed
-import com.example.motormates.ui.theme.MotorMatesSurface
-import com.example.motormates.ui.theme.MotorMatesTextSecondary
 
 private const val BIO_MAX_LENGTH = 150
 
@@ -61,7 +58,7 @@ fun EditProfileTopBar(
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = stringResource(R.string.edit_profile_close_cd),
-            tint = Color.White,
+            tint = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .size(22.dp)
@@ -69,14 +66,14 @@ fun EditProfileTopBar(
         )
         Text(
             text = stringResource(R.string.edit_profile_title),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.align(Alignment.Center)
         )
         Text(
             text = stringResource(R.string.edit_profile_save_button),
-            color = MotorMatesRed,
+            color = MaterialTheme.colorScheme.primary,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -103,21 +100,21 @@ fun EditProfilePhotoSection(
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(MotorMatesRed)
+                .background(MaterialTheme.colorScheme.primary)
                 .clickable(onClick = onChangeCoverClick),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Filled.PhotoCamera,
                 contentDescription = null,
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(24.dp)
             )
         }
         Spacer(modifier = Modifier.width(14.dp))
         Text(
             text = stringResource(R.string.edit_profile_photo_hint),
-            color = MotorMatesTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 12.sp,
             modifier = Modifier.weight(1f)
         )
@@ -125,13 +122,13 @@ fun EditProfilePhotoSection(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
-                .border(1.dp, MotorMatesTextSecondary, RoundedCornerShape(10.dp))
+                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(10.dp))
                 .clickable(onClick = onChangeCoverClick)
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             Text(
                 text = stringResource(R.string.edit_profile_change_cover_button),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -148,7 +145,7 @@ fun EditProfileBioField(
     Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.edit_profile_bio_label),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )
@@ -160,25 +157,25 @@ fun EditProfileBioField(
             placeholder = {
                 Text(
                     text = stringResource(R.string.edit_profile_bio_placeholder),
-                    color = MotorMatesTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             minLines = 3,
             shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MotorMatesSurface,
-                unfocusedContainerColor = MotorMatesSurface,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedBorderColor = MotorMatesRed,
-                unfocusedBorderColor = MotorMatesSurface,
-                cursorColor = MotorMatesRed
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.surface,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(R.string.edit_profile_bio_counter, value.length, BIO_MAX_LENGTH),
-            color = MotorMatesTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 12.sp,
             modifier = Modifier
                 .fillMaxWidth()
@@ -198,7 +195,7 @@ fun EditProfileGarageItem(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(MotorMatesSurface)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -207,7 +204,7 @@ fun EditProfileGarageItem(
                 .width(72.dp)
                 .height(52.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(MotorMatesBackgroundVariant),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             if (car.imageRes != 0) {
@@ -221,7 +218,7 @@ fun EditProfileGarageItem(
                 Icon(
                     imageVector = Icons.Filled.DirectionsCar,
                     contentDescription = null,
-                    tint = MotorMatesTextSecondary,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(26.dp)
                 )
             }
@@ -230,21 +227,21 @@ fun EditProfileGarageItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = car.name,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = stringResource(R.string.search_car_year_owner, car.year, car.categoryLabel),
-                color = MotorMatesTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp
             )
         }
         Icon(
             imageVector = Icons.Filled.Edit,
             contentDescription = stringResource(R.string.edit_profile_edit_vehicle_cd),
-            tint = MotorMatesTextSecondary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .size(20.dp)
                 .clickable(onClick = onEditClick)
@@ -261,18 +258,16 @@ fun EditProfileAddVehicleButton(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .border(1.dp, MotorMatesTextSecondary, RoundedCornerShape(14.dp))
+            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
             .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = stringResource(R.string.edit_profile_add_vehicle_button),
-            color = MotorMatesTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )
     }
 }
-
-private val MotorMatesBackgroundVariant = Color(0xFF2C2C2E)

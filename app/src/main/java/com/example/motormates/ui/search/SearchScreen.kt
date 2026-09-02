@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,7 +20,6 @@ import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.search.components.SearchTopBar
 import com.example.motormates.ui.search.model.rememberSearchCategories
-import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.theme.MotorMatesTheme
 
 /**
@@ -49,7 +49,7 @@ fun SearchScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         SearchTopBar(
             query = searchQuery,
@@ -70,7 +70,7 @@ fun SearchScreen(
 private fun SearchScreenPreview() {
     MotorMatesTheme {
         Scaffold(
-            containerColor = MotorMatesBackground,
+            containerColor = MaterialTheme.colorScheme.background,
             bottomBar = { MainBottomNavBar(selected = MainBottomDestination.EXPLORE) }
         ) { innerPadding ->
             SearchScreen(modifier = Modifier.padding(innerPadding))
