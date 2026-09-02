@@ -7,11 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.post.components.PostTopBar
@@ -19,25 +18,25 @@ import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.theme.MotorMatesTheme
 
 /**
- * Punto de entrada de "Nueva publicación". Aquí vive todo el estado local
- * (descripción, vehículo/ubicación etiquetados) y se pasa hacia abajo a los
- * composables stateless PostTopBar y PostScreenContent, igual que
- * CarDetailScreen hace con isBookmarked.
+ * Punto de entrada de "Nueva publicación". El estado (descripción,
+ * vehículo/ubicación etiquetados) vive en PostViewModel y se pasa hacia
+ * abajo a los composables stateless PostTopBar y PostScreenContent, igual
+ * que VehicleDetailScreen hace con isBookmarked.
  *
  * Como todavía no existen pantallas reales para elegir vehículo o ubicación,
- * tocar esos botones solo alterna un valor de ejemplo (mismo patrón que
- * onBookmarkClick en CarDetailScreen); reemplazar por navegación real cuando
- * esas pantallas existan.
+ * tocar esos botones solo alterna un valor de ejemplo (ver PostViewModel);
+ * reemplazar por navegación real cuando esas pantallas existan.
  */
 @Composable
 fun PostScreen(
     onCancelClick: () -> Unit = {},
     onPublishClick: (caption: String) -> Unit = {},
+    viewModel: PostViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
-    var caption by remember { mutableStateOf("") }
-    var taggedVehicle by remember { mutableStateOf<String?>(null) }
-    var location by remember { mutableStateOf<String?>(null) }
+    val caption by viewModel.caption.collectAsStateWithLifecycle()
+    val taggedVehicle by viewModel.taggedVehicle.collectAsStateWithLifecycle()
+    val location by viewModel.location.collectAsStateWithLifecycle()
 
     val canPublish = caption.isNotBlank()
 
@@ -53,15 +52,11 @@ fun PostScreen(
         )
         PostScreenContent(
             caption = caption,
-            onCaptionChange = { caption = it },
+            onCaptionChange = viewModel::updateCaption,
             taggedVehicle = taggedVehicle,
-            onTagVehicleClick = {
-                taggedVehicle = if (taggedVehicle == null) "Porsche 911 GT3" else null
-            },
+            onTagVehicleClick = viewModel::toggleTaggedVehicle,
             location = location,
-            onAddLocationClick = {
-                location = if (location == null) "Bogotá, Colombia" else null
-            }
+            onAddLocationClick = viewModel::toggleLocation
         )
     }
 }
