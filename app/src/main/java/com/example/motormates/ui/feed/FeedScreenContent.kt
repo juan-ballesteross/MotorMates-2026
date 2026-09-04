@@ -20,7 +20,7 @@ import com.example.motormates.ui.feed.components.StoriesRow
 @Composable
 fun FeedScreenContent(
     stories: List<StoryUser>,
-    post: ReviewPost,
+    posts: List<ReviewPost>,
     onCommentsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -33,10 +33,12 @@ fun FeedScreenContent(
         Spacer(modifier = Modifier.height(8.dp))
         StoriesRow(stories)
         Spacer(modifier = Modifier.height(20.dp))
-        ReviewPostCard(
-            post = post,
-            onCommentsClick = onCommentsClick
-        )
-        Spacer(modifier = Modifier.height(20.dp))
+        posts.forEach { post ->
+            ReviewPostCard(
+                post = post,
+                onCommentsClick = onCommentsClick
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+        }
     }
 }

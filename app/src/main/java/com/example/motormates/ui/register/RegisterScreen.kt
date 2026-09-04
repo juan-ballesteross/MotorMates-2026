@@ -8,12 +8,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.ui.theme.MotorMatesTheme
 
-/**
- * Pantalla de registro. Ya no guarda estado con remember — los campos viven
- * en RegisterViewModel como StateFlow. passwordsMatch/isFormValid se calculan
- * aquí mismo porque son valores derivados (no necesitan su propio flow),
- * igual que isFormValid en LoginScreen.
- */
 @Composable
 fun RegisterScreen(
     onBackClick: () -> Unit,
@@ -22,30 +16,26 @@ fun RegisterScreen(
     viewModel: RegisterViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
-    val fullName by viewModel.fullName.collectAsStateWithLifecycle()
-    val email by viewModel.email.collectAsStateWithLifecycle()
-    val password by viewModel.password.collectAsStateWithLifecycle()
-    val confirmPassword by viewModel.confirmPassword.collectAsStateWithLifecycle()
-    val termsAccepted by viewModel.termsAccepted.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val passwordsMatch = confirmPassword.isEmpty() || password == confirmPassword
-    val isFormValid = fullName.isNotBlank() &&
-        email.isNotBlank() &&
-        password.isNotBlank() &&
-        password == confirmPassword &&
-        termsAccepted
+    val passwordsMatch = uiState.confirmPassword.isEmpty() || uiState.password == uiState.confirmPassword
+    val isFormValid = uiState.fullName.isNotBlank() &&
+        uiState.email.isNotBlank() &&
+        uiState.password.isNotBlank() &&
+        uiState.password == uiState.confirmPassword &&
+        uiState.termsAccepted
 
     RegisterScreenContent(
-        fullName = fullName,
+        fullName = uiState.fullName,
         onFullNameChange = viewModel::updateFullName,
-        email = email,
+        email = uiState.email,
         onEmailChange = viewModel::updateEmail,
-        password = password,
+        password = uiState.password,
         onPasswordChange = viewModel::updatePassword,
-        confirmPassword = confirmPassword,
+        confirmPassword = uiState.confirmPassword,
         onConfirmPasswordChange = viewModel::updateConfirmPassword,
         passwordsMatch = passwordsMatch,
-        termsAccepted = termsAccepted,
+        termsAccepted = uiState.termsAccepted,
         onTermsAcceptedChange = viewModel::updateTermsAccepted,
         isFormValid = isFormValid,
         onBackClick = onBackClick,

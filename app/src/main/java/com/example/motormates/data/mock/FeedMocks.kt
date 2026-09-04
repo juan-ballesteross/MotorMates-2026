@@ -24,4 +24,6 @@ object FeedMocks {
         comments = 32,
         shares = 9
     )
+
+    val samplePosts = listOf(samplePost)
 }
