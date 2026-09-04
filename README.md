@@ -64,6 +64,7 @@ A continuación se presentan los mockups de las principales pantallas de MotorMa
   <img src="imgs/RecuperarContrasena.png" width="200" alt="Recuperar Contraseña">
 </p>
 
+El mockup completo de la aplicación puede encontrarse en: https://www.figma.com/design/XQnzsdVDgozx4DGIly9Frd/MotorMates?node-id=0-1&t=FVrxFJMQnO9jtzlo-1
 
 ## Requisitos
 
