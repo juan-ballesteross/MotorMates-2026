@@ -6,5 +6,5 @@ import com.example.motormates.data.model.StoryUser
 
 data class FeedUiState(
     val stories: List<StoryUser> = FeedMocks.sampleStories,
-    val post: ReviewPost = FeedMocks.samplePost
+    val posts: List<ReviewPost> = FeedMocks.samplePosts
 )

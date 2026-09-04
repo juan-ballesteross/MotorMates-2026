@@ -33,7 +33,7 @@ fun FeedScreen(
         FeedTopBar()
         FeedScreenContent(
             stories = uiState.stories,
-            post = uiState.post,
+            posts = uiState.posts,
             onCommentsClick = onCommentsClick
         )
     }

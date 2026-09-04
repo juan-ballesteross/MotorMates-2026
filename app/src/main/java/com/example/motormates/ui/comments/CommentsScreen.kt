@@ -8,26 +8,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.ui.theme.MotorMatesTheme
 
-/**
- * Observa cada StateFlow del ViewModel por separado (comments, totalCount,
- * draftComment) — no hay un único "uiState" combinado, igual que se vio
- * en clase. Las funciones del ViewModel se llaman directamente desde los
- * callbacks que espera el Content.
- */
 @Composable
 fun CommentsScreen(
     onBackClick: () -> Unit = {},
     viewModel: CommentsViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
-    val comments by viewModel.comments.collectAsStateWithLifecycle()
-    val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
-    val draftComment by viewModel.draftComment.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CommentsScreenContent(
-        comments = comments,
-        totalCount = totalCount,
-        draftComment = draftComment,
+        comments = uiState.comments,
+        totalCount = uiState.totalCount,
+        draftComment = uiState.draftComment,
         onBackClick = onBackClick,
         onDraftChange = viewModel::updateDraftComment,
         onSendClick = viewModel::sendButtonPress,

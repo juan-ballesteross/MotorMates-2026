@@ -9,12 +9,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.data.model.GarageCar
 import com.example.motormates.ui.theme.MotorMatesTheme
 
-/**
- * Punto de entrada de "Editar perfil". El estado (username, bio, cars) vive
- * en EditProfileViewModel, sembrado desde UserMocks.sampleUserProfile, igual
- * patrón que LoginScreen. No hay persistencia real: onSaveClick solo navega
- * hacia atrás, tal como onPublishClick en PostScreen no persiste la publicación.
- */
 @Composable
 fun EditProfileScreen(
     onCloseClick: () -> Unit = {},
@@ -24,16 +18,14 @@ fun EditProfileScreen(
     viewModel: EditProfileViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
-    val username by viewModel.username.collectAsStateWithLifecycle()
-    val bio by viewModel.bio.collectAsStateWithLifecycle()
-    val cars by viewModel.cars.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     EditProfileScreenContent(
-        username = username,
+        username = uiState.username,
         onUsernameChange = viewModel::updateUsername,
-        bio = bio,
+        bio = uiState.bio,
         onBioChange = viewModel::updateBio,
-        cars = cars,
+        cars = uiState.cars,
         onCloseClick = onCloseClick,
         onSaveClick = onSaveClick,
         onAddVehicleClick = onAddVehicleClick,

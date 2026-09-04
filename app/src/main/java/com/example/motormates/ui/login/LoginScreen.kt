@@ -8,14 +8,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.ui.theme.MotorMatesTheme
 
-/**
- * Ya no guarda estado con remember — email/password/passwordVisible
- * viven en LoginViewModel como StateFlow. isFormValid se calcula aquí
- * mismo porque es un valor derivado (no necesita su propio flow).
- * onLoginClick/onRegisterClick/onForgotPasswordClick siguen siendo
- * callbacks de navegación pasados desde afuera — eso no le corresponde
- * al ViewModel, sino a quien conecte la navegación.
- */
 @Composable
 fun LoginScreen(
     onLoginClick: () -> Unit = {},
@@ -24,18 +16,16 @@ fun LoginScreen(
     viewModel: LoginViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
-    val email by viewModel.email.collectAsStateWithLifecycle()
-    val password by viewModel.password.collectAsStateWithLifecycle()
-    val passwordVisible by viewModel.passwordVisible.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val isFormValid = email.isNotBlank() && password.isNotBlank()
+    val isFormValid = uiState.email.isNotBlank() && uiState.password.isNotBlank()
 
     LoginScreenContent(
-        email = email,
+        email = uiState.email,
         onEmailChange = viewModel::updateEmail,
-        password = password,
+        password = uiState.password,
         onPasswordChange = viewModel::updatePassword,
-        passwordVisible = passwordVisible,
+        passwordVisible = uiState.passwordVisible,
         onTogglePasswordVisibility = viewModel::togglePasswordVisibility,
         isFormValid = isFormValid,
         onLoginClick = onLoginClick,

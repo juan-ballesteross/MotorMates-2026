@@ -17,16 +17,6 @@ import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.post.components.PostTopBar
 import com.example.motormates.ui.theme.MotorMatesTheme
 
-/**
- * Punto de entrada de "Nueva publicación". El estado (descripción,
- * vehículo/ubicación etiquetados) vive en PostViewModel y se pasa hacia
- * abajo a los composables stateless PostTopBar y PostScreenContent, igual
- * que VehicleDetailScreen hace con isBookmarked.
- *
- * Como todavía no existen pantallas reales para elegir vehículo o ubicación,
- * tocar esos botones solo alterna un valor de ejemplo (ver PostViewModel);
- * reemplazar por navegación real cuando esas pantallas existan.
- */
 @Composable
 fun PostScreen(
     onCancelClick: () -> Unit = {},
@@ -34,11 +24,9 @@ fun PostScreen(
     viewModel: PostViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
-    val caption by viewModel.caption.collectAsStateWithLifecycle()
-    val taggedVehicle by viewModel.taggedVehicle.collectAsStateWithLifecycle()
-    val location by viewModel.location.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val canPublish = caption.isNotBlank()
+    val canPublish = uiState.caption.isNotBlank()
 
     Column(
         modifier = modifier
@@ -48,25 +36,19 @@ fun PostScreen(
         PostTopBar(
             canPublish = canPublish,
             onCancelClick = onCancelClick,
-            onPublishClick = { onPublishClick(caption) }
+            onPublishClick = { onPublishClick(uiState.caption) }
         )
         PostScreenContent(
-            caption = caption,
+            caption = uiState.caption,
             onCaptionChange = viewModel::updateCaption,
-            taggedVehicle = taggedVehicle,
+            taggedVehicle = uiState.taggedVehicle,
             onTagVehicleClick = viewModel::toggleTaggedVehicle,
-            location = location,
+            location = uiState.location,
             onAddLocationClick = viewModel::toggleLocation
         )
     }
 }
 
-/**
- * A diferencia de PostScreen, este preview sí agrega un Scaffold con
- * MainBottomNavBar solo para visualizar cómo se ve la pantalla completa
- * (tal como la muestra el mockup). En la app real ese bottomBar ya lo pone
- * el Scaffold único de MainActivity.kt, así que no se duplica al navegar.
- */
 @Preview(showBackground = true)
 @Composable
 private fun PostScreenPreview() {
