@@ -21,6 +21,7 @@ import com.example.motormates.ui.feed.components.StoriesRow
 fun FeedScreenContent(
     stories: List<StoryUser>,
     post: ReviewPost,
+    onCommentsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -32,7 +33,10 @@ fun FeedScreenContent(
         Spacer(modifier = Modifier.height(8.dp))
         StoriesRow(stories)
         Spacer(modifier = Modifier.height(20.dp))
-        ReviewPostCard(post)
+        ReviewPostCard(
+            post = post,
+            onCommentsClick = onCommentsClick
+        )
         Spacer(modifier = Modifier.height(20.dp))
     }
 }

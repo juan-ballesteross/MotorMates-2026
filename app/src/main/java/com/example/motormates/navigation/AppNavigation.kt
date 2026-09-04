@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.example.motormates.data.mock.SearchMocks
 import com.example.motormates.data.model.toReviewCarSummary
 import com.example.motormates.ui.alerts.AlertsScreen
+import com.example.motormates.ui.comments.CommentsScreen
 import com.example.motormates.ui.editProfile.EditProfileScreen
 import com.example.motormates.ui.feed.FeedScreen
 import com.example.motormates.ui.login.LoginScreen
@@ -53,7 +54,9 @@ fun AppNavigation(
             )
         }
         composable(ScreenRoute.Feed.route) {
-            FeedScreen()
+            FeedScreen(
+                onCommentsClick = { navController.navigate(ScreenRoute.Comments.route) }
+            )
         }
         composable(ScreenRoute.Explore.route) {
             SearchScreen(
@@ -79,6 +82,11 @@ fun AppNavigation(
         }
         composable(ScreenRoute.Alerts.route) {
             AlertsScreen()
+        }
+        composable(ScreenRoute.Comments.route) {
+            CommentsScreen(
+                onBackClick = { navController.popBackStack() }
+            )
         }
         composable(ScreenRoute.EditProfile.route) {
             EditProfileScreen(
