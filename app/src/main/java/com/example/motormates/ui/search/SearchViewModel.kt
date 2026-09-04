@@ -9,12 +9,11 @@ import kotlinx.coroutines.flow.update
 
 class SearchViewModel : ViewModel() {
 
-    private val cars = SearchMocks.sampleSearchCars
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState
 
     init {
-        _uiState.update { it.copy(filteredCars = cars) }
+        _uiState.update { it.copy(filteredCars =  SearchMocks.sampleSearchCars) }
     }
 
     fun updateSearchQuery(input: String) {
@@ -30,7 +29,7 @@ class SearchViewModel : ViewModel() {
     }
 
     private fun SearchUiState.filterCars(): SearchUiState {
-        val filtered = cars.filter { car ->
+        val filtered = filteredCars.filter { car ->
             val matchesCategory = selectedCategory == SearchCategoryKey.ALL || car.category == selectedCategory
             val matchesQuery = searchQuery.isBlank() ||
                 car.brand.contains(searchQuery, ignoreCase = true) ||
