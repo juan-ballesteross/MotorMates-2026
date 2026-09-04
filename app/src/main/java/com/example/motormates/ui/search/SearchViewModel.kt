@@ -2,17 +2,10 @@ package com.example.motormates.ui.search
 
 import androidx.lifecycle.ViewModel
 import com.example.motormates.data.mock.SearchMocks
-import com.example.motormates.data.model.CarListing
 import com.example.motormates.data.model.SearchCategoryKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-
-data class SearchUiState(
-    val searchQuery: String = "",
-    val selectedCategory: SearchCategoryKey = SearchCategoryKey.ALL,
-    val filteredCars: List<CarListing> = SearchMocks.sampleSearchCars
-)
 
 class SearchViewModel : ViewModel() {
 

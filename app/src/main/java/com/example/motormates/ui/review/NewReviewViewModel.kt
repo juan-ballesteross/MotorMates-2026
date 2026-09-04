@@ -6,13 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-data class NewReviewUiState(
-    val rating: Int = 4,
-    val experience: String = "",
-    val selectedAspects: Set<ReviewAspect> = setOf(ReviewAspect.COMFORT, ReviewAspect.PERFORMANCE),
-    val photoCount: Int = 0
-)
-
 class NewReviewViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(NewReviewUiState())

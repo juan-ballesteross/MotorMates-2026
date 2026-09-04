@@ -1,8 +1,7 @@
 package com.example.motormates.ui.feed.components
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +15,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.data.model.StoryUser
@@ -37,15 +38,13 @@ fun StoriesRow(stories: List<StoryUser>, modifier: Modifier = Modifier) {
 @Composable
 private fun StoryItem(story: StoryUser, modifier: Modifier = Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
+        Image(
+            painter = painterResource(story.avatarResId),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(64.dp)
-                .background(
-                    brush = Brush.linearGradient(
-                        listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary)
-                    ),
-                    shape = CircleShape
-                )
+                .clip(CircleShape)
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(text = story.name, color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp)

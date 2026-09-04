@@ -11,6 +11,7 @@ sealed class ScreenRoute(val route: String) {
     object Profile : ScreenRoute("profile")
     object Alerts : ScreenRoute("alerts")
     object EditProfile : ScreenRoute("editProfile")
+    object Comments : ScreenRoute("comments")
 
     object VehicleDetail : ScreenRoute("vehicle/{vehicleId}") {
         const val ARG_VEHICLE_ID = "vehicleId"
