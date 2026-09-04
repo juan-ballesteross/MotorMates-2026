@@ -24,7 +24,6 @@ fun VehicleDetailScreen(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val isBookmarked by viewModel.isBookmarked.collectAsStateWithLifecycle()
 
     LaunchedEffect(vehicleId) {
         viewModel.getVehicleById(vehicleId)
@@ -40,7 +39,7 @@ fun VehicleDetailScreen(
         VehicleDetailContent(
             car = vehicle,
             reviews = state.reviews,
-            isBookmarked = isBookmarked,
+            isBookmarked = state.isBookmarked,
             onBackClick = onBackClick,
             onBookmarkClick = viewModel::bookmarkButtonPress,
             onWriteReviewClick = onWriteReviewClick,

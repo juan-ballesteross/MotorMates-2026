@@ -11,5 +11,6 @@ import com.example.motormates.data.model.ReviewUi
  */
 data class VehicleDetailState(
     val vehicle: CarDetailUi? = null,
-    val reviews: List<ReviewUi> = emptyList()
+    val reviews: List<ReviewUi> = emptyList(),
+    val isBookmarked: Boolean = false
 )

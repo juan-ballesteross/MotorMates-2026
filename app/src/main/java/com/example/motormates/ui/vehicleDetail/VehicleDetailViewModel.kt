@@ -13,10 +13,6 @@ class VehicleDetailViewModel : ViewModel() {
     private val _state = MutableStateFlow(VehicleDetailState())
     val state: StateFlow<VehicleDetailState> = _state
 
-    // Toggle de UI independiente de cuál vehículo se muestre.
-    private val _isBookmarked = MutableStateFlow(false)
-    val isBookmarked: StateFlow<Boolean> = _isBookmarked
-
     /** Busca el vehículo real en SearchMocks. Si no existe, vehicle queda null. */
     fun getVehicleById(id: Int) {
         val listing = SearchMocks.findById(id)
@@ -34,6 +30,6 @@ class VehicleDetailViewModel : ViewModel() {
     }
 
     fun bookmarkButtonPress() {
-        _isBookmarked.value = !_isBookmarked.value
+        _state.update { it.copy(isBookmarked = !it.isBookmarked) }
     }
 }
