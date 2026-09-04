@@ -2,6 +2,8 @@ package com.example.motormates.ui.comments
 
 import androidx.lifecycle.ViewModel
 import com.example.motormates.data.model.CommentUi
+import com.example.motormates.data.model.mockComments
+import com.example.motormates.data.model.mockCommentsTotalCount
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -11,6 +13,15 @@ class CommentsViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(CommentsUiState())
     val uiState: StateFlow<CommentsUiState> = _uiState
+
+    init {
+        _uiState.update {
+            it.copy(
+                comments = mockComments,
+                totalCount = mockCommentsTotalCount
+            )
+        }
+    }
 
     fun updateDraftComment(input: String) {
         _uiState.update { it.copy(draftComment = input) }
