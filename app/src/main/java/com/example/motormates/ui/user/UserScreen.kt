@@ -5,13 +5,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.motormates.data.mock.UserMocks
-import com.example.motormates.data.model.ProfileTab
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.theme.MotorMatesTheme
@@ -23,15 +20,16 @@ import com.example.motormates.ui.theme.MotorMatesTheme
 @Composable
 fun UserScreen(
     onEditProfileClick: () -> Unit = {},
+    viewModel: UserViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
-    var selectedTab by remember { mutableStateOf(ProfileTab.REVIEWS) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     UserScreenContent(
-        profile = UserMocks.sampleUserProfile,
-        cars = UserMocks.sampleUserCars,
-        selectedTab = selectedTab,
-        onSelectTab = { selectedTab = it },
+        profile = uiState.profile,
+        cars = uiState.cars,
+        selectedTab = uiState.selectedTab,
+        onSelectTab = viewModel::updateSelectedTab,
         onEditProfileClick = onEditProfileClick,
         modifier = modifier
     )

@@ -7,16 +7,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.motormates.data.mock.FeedMocks
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.feed.components.FeedTopBar
 import com.example.motormates.ui.theme.MotorMatesTheme
 
 @Composable
-fun FeedScreen(modifier: Modifier = Modifier) {
+fun FeedScreen(
+    viewModel: FeedViewModel = viewModel(),
+    modifier: Modifier = Modifier
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -24,8 +31,8 @@ fun FeedScreen(modifier: Modifier = Modifier) {
     ) {
         FeedTopBar()
         FeedScreenContent(
-            stories = FeedMocks.sampleStories,
-            post = FeedMocks.samplePost
+            stories = uiState.stories,
+            post = uiState.post
         )
     }
 }

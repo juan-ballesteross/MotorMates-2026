@@ -6,12 +6,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.data.mock.SearchMocks
 import com.example.motormates.data.model.ReviewAspect
 import com.example.motormates.data.model.ReviewCarSummary
@@ -35,16 +33,12 @@ fun NewReviewScreen(
         aspects: Set<ReviewAspect>,
         photoCount: Int
     ) -> Unit = { _, _, _, _ -> },
+    viewModel: NewReviewViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
-    var rating by remember { mutableIntStateOf(4) }
-    var experience by remember { mutableStateOf("") }
-    var selectedAspects by remember {
-        mutableStateOf(setOf(ReviewAspect.COMFORT, ReviewAspect.PERFORMANCE))
-    }
-    var photoCount by remember { mutableIntStateOf(0) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val canPublish = rating > 0
+    val canPublish = uiState.rating > 0
 
     Column(
         modifier = modifier
@@ -54,24 +48,25 @@ fun NewReviewScreen(
         NewReviewTopBar(onCloseClick = onCloseClick)
         NewReviewScreenContent(
             car = car,
-            rating = rating,
-            onRatingChange = { rating = it },
-            experience = experience,
-            onExperienceChange = { experience = it },
-            selectedAspects = selectedAspects,
+            rating = uiState.rating,
+            onRatingChange = viewModel::updateRating,
+            experience = uiState.experience,
+            onExperienceChange = viewModel::updateExperience,
+            selectedAspects = uiState.selectedAspects,
             onToggleAspect = { aspect ->
-                selectedAspects = if (aspect in selectedAspects) {
-                    selectedAspects - aspect
-                } else {
-                    selectedAspects + aspect
-                }
+                viewModel.toggleAspect(aspect)
             },
-            photoCount = photoCount,
+            photoCount = uiState.photoCount,
             // Stub local: cada toque suma una "foto" hasta 3 (sin picker real aún).
-            onAddPhotoClick = { if (photoCount < 3) photoCount += 1 },
+            onAddPhotoClick = viewModel::addPhotoButtonPress,
             canPublish = canPublish,
             onPublishClick = {
-                onPublishClick(rating, experience, selectedAspects, photoCount)
+                onPublishClick(
+                    uiState.rating,
+                    uiState.experience,
+                    uiState.selectedAspects,
+                    uiState.photoCount
+                )
             }
         )
     }
