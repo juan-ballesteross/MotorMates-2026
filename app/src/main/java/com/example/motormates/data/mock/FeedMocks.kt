@@ -6,10 +6,11 @@ import com.example.motormates.data.model.StoryUser
 
 object FeedMocks {
     val sampleStories = listOf(
+        StoryUser("Rodrigo", R.drawable.user_3, R.drawable.rodrigo_feed, "Antes de una carrerita"),
         StoryUser("Marco", R.drawable.user1),
         StoryUser("Elena", R.drawable.user2),
         StoryUser("Diego", R.drawable.user_3),
-        StoryUser("Sofía", R.drawable.user1)
+        StoryUser("Sofía", R.drawable.user1, R.drawable.sofia_feed, "Posuda")
     )
 
     val samplePost = ReviewPost(

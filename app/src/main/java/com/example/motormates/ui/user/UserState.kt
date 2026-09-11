@@ -12,7 +12,7 @@ data class UserUiState(
         bio = "",
         reviewsCount = 0,
         followersDisplay = "0",
-        followingCount = 0
+        followingDisplay = "0"
     ),
     val cars: List<GarageCar> = emptyList(),
     val selectedTab: ProfileTab = ProfileTab.REVIEWS

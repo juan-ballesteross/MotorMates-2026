@@ -11,7 +11,7 @@ object UserMocks {
         bio = "Coleccionista de deportivos alemanes. Fines de semana en el circuito.",
         reviewsCount = 47,
         followersDisplay = "1.2K",
-        followingCount = 186
+        followingDisplay = "186"
     )
 
     val sampleUserCars = listOf(
