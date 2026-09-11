@@ -22,7 +22,8 @@ fun FeedScreenContent(
     stories: List<StoryUser>,
     posts: List<ReviewPost>,
     onCommentsClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onStoryClick: (Int) -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -31,7 +32,7 @@ fun FeedScreenContent(
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(8.dp))
-        StoriesRow(stories)
+        StoriesRow(stories, onStoryClick = onStoryClick)
         Spacer(modifier = Modifier.height(20.dp))
         posts.forEach { post ->
             ReviewPostCard(

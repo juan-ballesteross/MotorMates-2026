@@ -16,11 +16,16 @@ import com.example.motormates.ui.editProfile.EditProfileScreen
 import com.example.motormates.ui.feed.FeedScreen
 import com.example.motormates.ui.login.LoginScreen
 import com.example.motormates.ui.post.PostScreen
+import com.example.motormates.ui.publicProfile.PublicProfileScreen
 import com.example.motormates.ui.register.RegisterScreen
 import com.example.motormates.ui.review.NewReviewScreen
 import com.example.motormates.ui.search.SearchScreen
+import com.example.motormates.ui.splash.SplashScreen
+import com.example.motormates.ui.story.StoryScreen
 import com.example.motormates.ui.user.UserScreen
 import com.example.motormates.ui.vehicleDetail.VehicleDetailScreen
+
+private const val OWN_USER_STORY_INDEX = 0
 
 @Composable
 fun AppNavigation(
@@ -29,9 +34,18 @@ fun AppNavigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = ScreenRoute.Login.route,
+        startDestination = ScreenRoute.Splash.route,
         modifier = modifier
     ) {
+        composable(ScreenRoute.Splash.route) {
+            SplashScreen(
+                onSplashFinished = {
+                    navController.navigate(ScreenRoute.Login.route) {
+                        popUpTo(ScreenRoute.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable(ScreenRoute.Login.route) {
             LoginScreen(
                 onLoginClick = {
@@ -55,7 +69,8 @@ fun AppNavigation(
         }
         composable(ScreenRoute.Feed.route) {
             FeedScreen(
-                onCommentsClick = { navController.navigate(ScreenRoute.Comments.route) }
+                onCommentsClick = { navController.navigate(ScreenRoute.Comments.route) },
+                onStoryClick = { index -> navController.navigate(ScreenRoute.Story.createRoute(index)) }
             )
         }
         composable(ScreenRoute.Explore.route) {
@@ -126,6 +141,37 @@ fun AppNavigation(
             } else {
                 LaunchedEffect(Unit) { navController.popBackStack() }
             }
+        }
+        composable(
+            route = ScreenRoute.Story.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.Story.ARG_STORY_INDEX) { type = NavType.IntType }
+            )
+        ) { entry ->
+            val storyIndex = entry.arguments?.getInt(ScreenRoute.Story.ARG_STORY_INDEX) ?: 0
+            StoryScreen(
+                storyIndex = storyIndex,
+                onCloseClick = { navController.popBackStack() },
+                onUserClick = { userIndex ->
+                    if (userIndex == OWN_USER_STORY_INDEX) {
+                        navController.navigate(ScreenRoute.Profile.route)
+                    } else {
+                        navController.navigate(ScreenRoute.PublicProfile.createRoute(userIndex))
+                    }
+                }
+            )
+        }
+        composable(
+            route = ScreenRoute.PublicProfile.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.PublicProfile.ARG_USER_INDEX) { type = NavType.IntType }
+            )
+        ) { entry ->
+            val userIndex = entry.arguments?.getInt(ScreenRoute.PublicProfile.ARG_USER_INDEX) ?: -1
+            PublicProfileScreen(
+                storyIndex = userIndex,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }

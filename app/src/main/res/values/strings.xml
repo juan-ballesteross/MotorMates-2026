@@ -52,6 +52,11 @@
     <string name="feed_review_prefix">reseñó el </string>
     <string name="feed_review_time_suffix"> · %1$s</string>
 
+    <!-- Story -->
+    <string name="story_close_cd">Cerrar historia</string>
+    <string name="story_like_cd">Me gusta</string>
+    <string name="story_send_cd">Enviar</string>
+
     <!-- Search -->
     <string name="search_top_bar_title">Buscar</string>
     <string name="search_placeholder">Marca, modelo o usuario</string>
@@ -71,6 +76,11 @@
     <string name="user_tab_garage">Garaje</string>
     <string name="user_tab_activity">Actividad</string>
     <string name="user_activity_empty">Sin actividad reciente</string>
+
+    <!-- Public profile (perfil de otro usuario) -->
+    <string name="public_profile_follow_button">Seguir</string>
+    <string name="public_profile_message_button">Enviar mensaje</string>
+    <string name="public_profile_back_cd">Volver</string>
 
     <!-- Edit profile -->
     <string name="edit_profile_title">Editar perfil</string>

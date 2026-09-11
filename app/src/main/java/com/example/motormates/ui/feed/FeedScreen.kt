@@ -20,6 +20,7 @@ import com.example.motormates.ui.theme.MotorMatesTheme
 @Composable
 fun FeedScreen(
     onCommentsClick: () -> Unit = {},
+    onStoryClick: (Int) -> Unit = {},
     viewModel: FeedViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -34,7 +35,8 @@ fun FeedScreen(
         FeedScreenContent(
             stories = uiState.stories,
             posts = uiState.posts,
-            onCommentsClick = onCommentsClick
+            onCommentsClick = onCommentsClick,
+            onStoryClick = onStoryClick
         )
     }
 }

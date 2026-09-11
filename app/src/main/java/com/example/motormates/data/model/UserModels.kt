@@ -10,7 +10,7 @@ data class UserProfile(
     val bio: String,
     val reviewsCount: Int,
     val followersDisplay: String,
-    val followingCount: Int
+    val followingDisplay: String
 )
 
 data class GarageCar(

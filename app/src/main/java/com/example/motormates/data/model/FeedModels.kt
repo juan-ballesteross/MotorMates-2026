@@ -2,7 +2,9 @@ package com.example.motormates.data.model
 
 data class StoryUser(
     val name: String,
-    val avatarResId: Int
+    val avatarResId: Int,
+    val imageRes: Int? = null,
+    val caption: String? = null
 )
 
 data class ReviewPost(

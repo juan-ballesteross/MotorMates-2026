@@ -26,7 +26,7 @@ fun ProfileStatsRow(profile: UserProfile, modifier: Modifier = Modifier) {
     ) {
         StatItem(value = "${profile.reviewsCount}", label = stringResource(R.string.user_stat_reviews))
         StatItem(value = profile.followersDisplay, label = stringResource(R.string.user_stat_followers))
-        StatItem(value = "${profile.followingCount}", label = stringResource(R.string.user_stat_following))
+        StatItem(value = profile.followingDisplay, label = stringResource(R.string.user_stat_following))
     }
 }
 
