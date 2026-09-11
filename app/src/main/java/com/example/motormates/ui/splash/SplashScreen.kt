@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.motormates.R
 import kotlinx.coroutines.delay
 
@@ -28,12 +29,13 @@ private const val SPLASH_DURATION_MS = 1200L
 
 @Composable
 fun SplashScreen(
-    onSplashFinished: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onSplashFinished: (isUserLoggedIn: Boolean) -> Unit = {},
+    modifier: Modifier = Modifier,
+    viewModel: SplashViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
         delay(SPLASH_DURATION_MS)
-        onSplashFinished()
+        onSplashFinished(viewModel.isUserLoggedIn())
     }
 
     Box(

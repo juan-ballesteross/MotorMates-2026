@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.data.model.GarageCar
 import com.example.motormates.ui.theme.MotorMatesTheme
 
@@ -15,7 +15,8 @@ fun EditProfileScreen(
     onSaveClick: () -> Unit = {},
     onAddVehicleClick: () -> Unit = {},
     onEditVehicleClick: (GarageCar) -> Unit = {},
-    viewModel: EditProfileViewModel = viewModel(),
+    onLoggedOut: () -> Unit = {},
+    viewModel: EditProfileViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -30,6 +31,7 @@ fun EditProfileScreen(
         onSaveClick = onSaveClick,
         onAddVehicleClick = onAddVehicleClick,
         onEditVehicleClick = onEditVehicleClick,
+        onLogoutClick = { viewModel.logOut(onLoggedOut) },
         modifier = modifier
     )
 }
@@ -38,6 +40,17 @@ fun EditProfileScreen(
 @Composable
 private fun EditProfileScreenPreview() {
     MotorMatesTheme {
-        EditProfileScreen()
+        EditProfileScreenContent(
+            username = "Rodrigo",
+            onUsernameChange = {},
+            bio = "Amante de los autos clásicos",
+            onBioChange = {},
+            cars = emptyList(),
+            onCloseClick = {},
+            onSaveClick = {},
+            onAddVehicleClick = {},
+            onEditVehicleClick = {},
+            onLogoutClick = {}
+        )
     }
 }

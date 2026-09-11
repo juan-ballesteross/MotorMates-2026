@@ -98,6 +98,7 @@
     <string name="edit_profile_garage_title">Mi garaje</string>
     <string name="edit_profile_add_vehicle_button">+ Agregar vehículo</string>
     <string name="edit_profile_edit_vehicle_cd">Editar vehículo</string>
+    <string name="edit_profile_logout_button">Cerrar sesión</string>
 
     <string-array name="search_categories">
         <item>Todos</item>

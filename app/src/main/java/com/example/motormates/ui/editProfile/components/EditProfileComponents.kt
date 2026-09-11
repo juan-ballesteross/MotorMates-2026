@@ -271,3 +271,26 @@ fun EditProfileAddVehicleButton(
         )
     }
 }
+
+@Composable
+fun EditProfileLogoutButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .border(1.dp, MaterialTheme.colorScheme.error, RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(R.string.edit_profile_logout_button),
+            color = MaterialTheme.colorScheme.error,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}

@@ -19,6 +19,7 @@ import com.example.motormates.data.model.GarageCar
 import com.example.motormates.ui.editProfile.components.EditProfileAddVehicleButton
 import com.example.motormates.ui.editProfile.components.EditProfileBioField
 import com.example.motormates.ui.editProfile.components.EditProfileGarageItem
+import com.example.motormates.ui.editProfile.components.EditProfileLogoutButton
 import com.example.motormates.ui.editProfile.components.EditProfilePhotoSection
 import com.example.motormates.ui.editProfile.components.EditProfileTopBar
 import com.example.motormates.ui.register.components.RegisterTextField
@@ -39,6 +40,7 @@ fun EditProfileScreenContent(
     onSaveClick: () -> Unit,
     onAddVehicleClick: () -> Unit,
     onEditVehicleClick: (GarageCar) -> Unit,
+    onLogoutClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -78,6 +80,9 @@ fun EditProfileScreenContent(
         }
         item {
             EditProfileAddVehicleButton(onClick = onAddVehicleClick)
+        }
+        item {
+            EditProfileLogoutButton(onClick = onLogoutClick)
         }
     }
 }

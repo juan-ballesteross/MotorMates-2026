@@ -39,8 +39,9 @@ fun AppNavigation(
     ) {
         composable(ScreenRoute.Splash.route) {
             SplashScreen(
-                onSplashFinished = {
-                    navController.navigate(ScreenRoute.Login.route) {
+                onSplashFinished = { isUserLoggedIn ->
+                    val destination = if (isUserLoggedIn) ScreenRoute.Feed.route else ScreenRoute.Login.route
+                    navController.navigate(destination) {
                         popUpTo(ScreenRoute.Splash.route) { inclusive = true }
                     }
                 }
@@ -106,7 +107,12 @@ fun AppNavigation(
         composable(ScreenRoute.EditProfile.route) {
             EditProfileScreen(
                 onCloseClick = { navController.popBackStack() },
-                onSaveClick = { navController.popBackStack() }
+                onSaveClick = { navController.popBackStack() },
+                onLoggedOut = {
+                    navController.navigate(ScreenRoute.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
         composable(
