@@ -43,6 +43,7 @@
     <string name="register_terms_and"> y la </string>
     <string name="register_terms_privacy">Política de privacidad</string>
     <string name="register_button">Crear cuenta</string>
+    <string name="register_loading_button">Creando cuenta...</string>
     <string name="register_has_account_prefix">¿Ya tienes cuenta? </string>
     <string name="register_login_link">Inicia sesión</string>
 

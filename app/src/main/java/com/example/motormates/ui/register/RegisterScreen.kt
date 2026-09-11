@@ -1,6 +1,7 @@
 package com.example.motormates.ui.register
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,6 +26,12 @@ fun RegisterScreen(
         uiState.password == uiState.confirmPassword &&
         uiState.termsAccepted
 
+    LaunchedEffect(uiState.isRegistered) {
+        if (uiState.isRegistered) {
+            onRegisterClick()
+        }
+    }
+
     RegisterScreenContent(
         fullName = uiState.fullName,
         onFullNameChange = viewModel::updateFullName,
@@ -38,8 +45,10 @@ fun RegisterScreen(
         termsAccepted = uiState.termsAccepted,
         onTermsAcceptedChange = viewModel::updateTermsAccepted,
         isFormValid = isFormValid,
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.errorMessage,
         onBackClick = onBackClick,
-        onRegisterClick = onRegisterClick,
+        onRegisterClick = viewModel::signUp,
         onLoginClick = onLoginClick,
         modifier = modifier
     )
@@ -49,7 +58,21 @@ fun RegisterScreen(
 @Composable
 private fun RegisterScreenPreview() {
     MotorMatesTheme {
-        RegisterScreen(
+        RegisterScreenContent(
+            fullName = "Jose",
+            onFullNameChange = {},
+            email = "jose@example.com",
+            onEmailChange = {},
+            password = "password",
+            onPasswordChange = {},
+            confirmPassword = "password",
+            onConfirmPasswordChange = {},
+            passwordsMatch = true,
+            termsAccepted = true,
+            onTermsAcceptedChange = {},
+            isFormValid = true,
+            isLoading = false,
+            errorMessage = null,
             onBackClick = {},
             onRegisterClick = {},
             onLoginClick = {}

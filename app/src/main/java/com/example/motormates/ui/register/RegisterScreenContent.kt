@@ -42,6 +42,8 @@ fun RegisterScreenContent(
     termsAccepted: Boolean,
     onTermsAcceptedChange: (Boolean) -> Unit,
     isFormValid: Boolean,
+    isLoading: Boolean,
+    errorMessage: String?,
     onBackClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onLoginClick: () -> Unit,
@@ -112,11 +114,21 @@ fun RegisterScreenContent(
             checked = termsAccepted,
             onCheckedChange = onTermsAcceptedChange
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 13.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
         Button(
             onClick = onRegisterClick,
-            enabled = isFormValid,
+            enabled = isFormValid && !isLoading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
@@ -125,7 +137,16 @@ fun RegisterScreenContent(
                 .fillMaxWidth()
                 .height(52.dp)
         ) {
-            Text(text = stringResource(R.string.register_button), color = MaterialTheme.colorScheme.onPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = if (isLoading) {
+                    stringResource(R.string.register_loading_button)
+                } else {
+                    stringResource(R.string.register_button)
+                },
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
         Spacer(modifier = Modifier.height(20.dp))
 
