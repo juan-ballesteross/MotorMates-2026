@@ -41,6 +41,8 @@ fun LoginScreenContent(
     passwordVisible: Boolean,
     onTogglePasswordVisibility: () -> Unit,
     isFormValid: Boolean,
+    isLoading: Boolean,
+    errorMessage: String?,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
@@ -94,6 +96,16 @@ fun LoginScreenContent(
         )
         Spacer(modifier = Modifier.height(10.dp))
 
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 13.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
@@ -109,7 +121,7 @@ fun LoginScreenContent(
 
         Button(
             onClick = onLoginClick,
-            enabled = isFormValid,
+            enabled = isFormValid && !isLoading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
@@ -119,7 +131,11 @@ fun LoginScreenContent(
                 .height(52.dp)
         ) {
             Text(
-                text = stringResource(R.string.login_button),
+                text = if (isLoading) {
+                    stringResource(R.string.login_loading_button)
+                } else {
+                    stringResource(R.string.login_button)
+                },
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold

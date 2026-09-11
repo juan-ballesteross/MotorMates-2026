@@ -1,12 +1,14 @@
 package com.example.motormates.ui.login
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -17,14 +19,47 @@ class LoginViewModel @Inject constructor(
     val uiState: StateFlow<LoginUiState> = _uiState
 
     fun updateEmail(input: String) {
-        _uiState.update { it.copy(email = input) }
+        _uiState.update { it.copy(email = input, errorMessage = null) }
     }
 
     fun updatePassword(input: String) {
-        _uiState.update { it.copy(password = input) }
+        _uiState.update { it.copy(password = input, errorMessage = null) }
     }
 
     fun togglePasswordVisibility() {
         _uiState.update { it.copy(passwordVisible = !it.passwordVisible) }
+    }
+
+    fun signIn() {
+        val currentState = _uiState.value
+        if (currentState.isLoading || currentState.email.isBlank() || currentState.password.isBlank()) return
+
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null,
+                    isLoggedIn = false
+                )
+            }
+
+            val result = authRepository.signIn(currentState.email, currentState.password)
+
+            _uiState.update {
+                if (result.isSuccess) {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = null,
+                        isLoggedIn = true
+                    )
+                } else {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Correo o contrasena incorrectos",
+                        isLoggedIn = false
+                    )
+                }
+            }
+        }
     }
 }

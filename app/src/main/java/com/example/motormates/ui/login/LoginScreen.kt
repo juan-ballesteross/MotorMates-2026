@@ -1,6 +1,7 @@
 package com.example.motormates.ui.login
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,6 +21,12 @@ fun LoginScreen(
 
     val isFormValid = uiState.email.isNotBlank() && uiState.password.isNotBlank()
 
+    LaunchedEffect(uiState.isLoggedIn) {
+        if (uiState.isLoggedIn) {
+            onLoginClick()
+        }
+    }
+
     LoginScreenContent(
         email = uiState.email,
         onEmailChange = viewModel::updateEmail,
@@ -28,7 +35,9 @@ fun LoginScreen(
         passwordVisible = uiState.passwordVisible,
         onTogglePasswordVisibility = viewModel::togglePasswordVisibility,
         isFormValid = isFormValid,
-        onLoginClick = onLoginClick,
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.errorMessage,
+        onLoginClick = viewModel::signIn,
         onRegisterClick = onRegisterClick,
         onForgotPasswordClick = onForgotPasswordClick,
         modifier = modifier
@@ -39,6 +48,19 @@ fun LoginScreen(
 @Composable
 private fun LoginScreenPreview() {
     MotorMatesTheme {
-        LoginScreen()
+        LoginScreenContent(
+            email = "jose@example.com",
+            onEmailChange = {},
+            password = "password",
+            onPasswordChange = {},
+            passwordVisible = false,
+            onTogglePasswordVisibility = {},
+            isFormValid = true,
+            isLoading = false,
+            errorMessage = null,
+            onLoginClick = {},
+            onRegisterClick = {},
+            onForgotPasswordClick = {}
+        )
     }
 }
