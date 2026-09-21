@@ -55,7 +55,12 @@ class LoginViewModel @Inject constructor(
                 } else {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Correo o contrasena incorrectos",
+                        // Antes: mensaje fijo que ignoraba el error real.
+                        // Ahora: usa el mensaje específico que armó el
+                        // Repository (credenciales, red, etc.), con un
+                        // genérico de respaldo solo por si acaso.
+                        errorMessage = result.exceptionOrNull()?.message
+                            ?: "Error al iniciar sesión",
                         isLoggedIn = false
                     )
                 }

@@ -3,9 +3,6 @@ package com.example.motormates.ui.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.repository.AuthRepository
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,15 +73,14 @@ class RegisterViewModel @Inject constructor(
                         isRegistered = true
                     )
                 } else {
-                    val message = when (result.exceptionOrNull()) {
-                        is FirebaseAuthUserCollisionException -> "Ya existe una cuenta con ese correo"
-                        is FirebaseAuthWeakPasswordException -> "La contraseña es muy débil"
-                        is FirebaseAuthInvalidCredentialsException -> "El correo no es válido"
-                        else -> "No se pudo crear la cuenta"
-                    }
                     it.copy(
                         isLoading = false,
-                        errorMessage = message,
+                        // El Repository ya reconoció el tipo de excepción y
+                        // armó el mensaje específico — aquí solo lo leemos,
+                        // no lo volvemos a clasificar (ya se perdió el tipo
+                        // original al envolverlo en un Exception nuevo).
+                        errorMessage = result.exceptionOrNull()?.message
+                            ?: "No se pudo crear la cuenta",
                         isRegistered = false
                     )
                 }
