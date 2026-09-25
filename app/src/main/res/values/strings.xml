@@ -89,7 +89,8 @@
     <string name="edit_profile_save_button">Guardar</string>
     <string name="edit_profile_close_cd">Cerrar</string>
     <string name="edit_profile_photo_hint">JPG o PNG, mínimo 400×400 px</string>
-    <string name="edit_profile_change_cover_button">Cambiar portada</string>
+    <string name="edit_profile_change_photo_button">Cambiar foto</string>
+    <string name="edit_profile_uploading_photo">Subiendo...</string>
     <string name="edit_profile_username_label">Nombre de usuario</string>
     <string name="edit_profile_username_placeholder">Tu nombre de usuario</string>
     <string name="edit_profile_bio_label">Biografía</string>

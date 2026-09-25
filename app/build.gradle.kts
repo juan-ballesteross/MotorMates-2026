@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.storage)
+    implementation(libs.coil.compose)
     implementation(libs.hilt.android)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation("androidx.compose.ui:ui-text-google-fonts:1.12.0")

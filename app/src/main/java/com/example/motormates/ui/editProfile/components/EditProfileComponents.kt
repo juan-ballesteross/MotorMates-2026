@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.data.model.GarageCar
+import coil.compose.AsyncImage
 
 private const val BIO_MAX_LENGTH = 150
 
@@ -89,7 +91,9 @@ fun EditProfileTopBar(
  */
 @Composable
 fun EditProfilePhotoSection(
-    onChangeCoverClick: () -> Unit = {},
+    profileImageUrl: String?,
+    isUploading: Boolean,
+    onChangePhotoClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -101,15 +105,31 @@ fun EditProfilePhotoSection(
                 .size(56.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
-                .clickable(onClick = onChangeCoverClick),
+                .clickable(enabled = !isUploading, onClick = onChangePhotoClick),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Filled.PhotoCamera,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(24.dp)
-            )
+            if (profileImageUrl == null) {
+                Icon(
+                    imageVector = Icons.Filled.PhotoCamera,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                AsyncImage(
+                    model = profileImageUrl,
+                    contentDescription = stringResource(R.string.user_avatar_cd),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            if (isUploading) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp
+                )
+            }
         }
         Spacer(modifier = Modifier.width(14.dp))
         Text(
@@ -123,11 +143,14 @@ fun EditProfilePhotoSection(
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
                 .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(10.dp))
-                .clickable(onClick = onChangeCoverClick)
+                .clickable(enabled = !isUploading, onClick = onChangePhotoClick)
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             Text(
-                text = stringResource(R.string.edit_profile_change_cover_button),
+                text = stringResource(
+                    if (isUploading) R.string.edit_profile_uploading_photo
+                    else R.string.edit_profile_change_photo_button
+                ),
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold

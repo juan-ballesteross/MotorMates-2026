@@ -32,6 +32,7 @@ import com.example.motormates.ui.user.components.ProfileTabsRow
 @Composable
 fun UserScreenContent(
     profile: UserProfile,
+    profileImageUrl: String?,
     cars: List<GarageCar>,
     selectedTab: ProfileTab,
     onSelectTab: (ProfileTab) -> Unit,
@@ -48,7 +49,10 @@ fun UserScreenContent(
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
-            ProfileHeader(onEditProfileClick = onEditProfileClick)
+            ProfileHeader(
+                profileImageUrl = profileImageUrl,
+                onEditProfileClick = onEditProfileClick
+            )
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
             ProfileInfoSection(profile = profile)

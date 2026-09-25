@@ -15,5 +15,6 @@ data class UserUiState(
         followingDisplay = "0"
     ),
     val cars: List<GarageCar> = emptyList(),
-    val selectedTab: ProfileTab = ProfileTab.REVIEWS
+    val selectedTab: ProfileTab = ProfileTab.REVIEWS,
+    val profileImageUrl: String? = null
 )

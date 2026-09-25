@@ -8,7 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.theme.MotorMatesTheme
@@ -20,13 +20,14 @@ import com.example.motormates.ui.theme.MotorMatesTheme
 @Composable
 fun UserScreen(
     onEditProfileClick: () -> Unit = {},
-    viewModel: UserViewModel = viewModel(),
+    viewModel: UserViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     UserScreenContent(
         profile = uiState.profile,
+        profileImageUrl = uiState.profileImageUrl,
         cars = uiState.cars,
         selectedTab = uiState.selectedTab,
         onSelectTab = viewModel::updateSelectedTab,

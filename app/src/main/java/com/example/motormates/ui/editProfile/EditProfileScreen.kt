@@ -1,5 +1,8 @@
 package com.example.motormates.ui.editProfile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -20,6 +23,11 @@ fun EditProfileScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let(viewModel::uploadProfileImage)
+    }
 
     EditProfileScreenContent(
         username = uiState.username,
@@ -27,6 +35,14 @@ fun EditProfileScreen(
         bio = uiState.bio,
         onBioChange = viewModel::updateBio,
         cars = uiState.cars,
+        profileImageUrl = uiState.profileImageUrl,
+        isImageUploading = uiState.isImageUploading,
+        imageUploadError = uiState.imageUploadError,
+        onChangePhotoClick = {
+            photoPickerLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        },
         onCloseClick = onCloseClick,
         onSaveClick = onSaveClick,
         onAddVehicleClick = onAddVehicleClick,
@@ -43,9 +59,13 @@ private fun EditProfileScreenPreview() {
         EditProfileScreenContent(
             username = "Rodrigo",
             onUsernameChange = {},
-            bio = "Amante de los autos clásicos",
+            bio = "Amante de los autos clasicos",
             onBioChange = {},
             cars = emptyList(),
+            profileImageUrl = null,
+            isImageUploading = false,
+            imageUploadError = null,
+            onChangePhotoClick = {},
             onCloseClick = {},
             onSaveClick = {},
             onAddVehicleClick = {},

@@ -49,5 +49,6 @@ private fun FirebaseUser.toAuthUser(displayNameOverride: String? = null): AuthUs
     AuthUser(
         id = uid,
         email = email,
-        displayName = displayNameOverride ?: displayName
+        displayName = displayNameOverride ?: displayName,
+        photoUrl = photoUrl?.toString()
     )

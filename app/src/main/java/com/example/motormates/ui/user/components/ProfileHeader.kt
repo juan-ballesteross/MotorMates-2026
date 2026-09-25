@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
+import coil.compose.AsyncImage
 
 /**
  * Portada + avatar superpuesto + botón "Editar perfil", replicando el
@@ -35,7 +36,11 @@ import com.example.motormates.R
  * usuario (portada, avatar).
  */
 @Composable
-fun ProfileHeader(onEditProfileClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ProfileHeader(
+    profileImageUrl: String?,
+    onEditProfileClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier.fillMaxWidth()) {
         Image(
             painter = painterResource(R.drawable.profile_cover),
@@ -58,9 +63,12 @@ fun ProfileHeader(onEditProfileClick: () -> Unit, modifier: Modifier = Modifier)
                     .clip(RoundedCornerShape(16.dp))
                     .border(3.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(16.dp))
             ) {
-                Image(
-                    painter = painterResource(R.drawable.user_3),
+                AsyncImage(
+                    model = profileImageUrl,
                     contentDescription = stringResource(R.string.user_avatar_cd),
+                    placeholder = painterResource(R.drawable.user_3),
+                    error = painterResource(R.drawable.user_3),
+                    fallback = painterResource(R.drawable.user_3),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()

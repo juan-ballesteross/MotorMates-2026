@@ -36,6 +36,10 @@ fun EditProfileScreenContent(
     bio: String,
     onBioChange: (String) -> Unit,
     cars: List<GarageCar>,
+    profileImageUrl: String?,
+    isImageUploading: Boolean,
+    imageUploadError: String?,
+    onChangePhotoClick: () -> Unit,
     onCloseClick: () -> Unit,
     onSaveClick: () -> Unit,
     onAddVehicleClick: () -> Unit,
@@ -54,7 +58,20 @@ fun EditProfileScreenContent(
             EditProfileTopBar(onCloseClick = onCloseClick, onSaveClick = onSaveClick)
         }
         item {
-            EditProfilePhotoSection()
+            EditProfilePhotoSection(
+                profileImageUrl = profileImageUrl,
+                isUploading = isImageUploading,
+                onChangePhotoClick = onChangePhotoClick
+            )
+        }
+        imageUploadError?.let { error ->
+            item {
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp
+                )
+            }
         }
         item {
             RegisterTextField(
