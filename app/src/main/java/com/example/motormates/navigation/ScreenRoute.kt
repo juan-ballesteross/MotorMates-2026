@@ -12,16 +12,32 @@ sealed class ScreenRoute(val route: String) {
     object Profile : ScreenRoute("profile")
     object Alerts : ScreenRoute("alerts")
     object EditProfile : ScreenRoute("editProfile")
-    object Comments : ScreenRoute("comments")
+
+    /** Lista completa de reseñas de un vehículo. */
+    object Comments : ScreenRoute("comments/{vehicleId}") {
+        const val ARG_VEHICLE_ID = "vehicleId"
+        fun createRoute(vehicleId: Int) = "comments/$vehicleId"
+    }
 
     object VehicleDetail : ScreenRoute("vehicle/{vehicleId}") {
         const val ARG_VEHICLE_ID = "vehicleId"
         fun createRoute(vehicleId: Int) = "vehicle/$vehicleId"
     }
 
-    object NewReview : ScreenRoute("newReview/{vehicleId}") {
+    /**
+     * Sirve para crear y para editar. reviewId viaja como query param
+     * opcional: -1 (su valor por defecto) significa "nueva reseña".
+     * Solo viaja el id, no el texto: el ViewModel vuelve a consultar las
+     * reseñas del vehículo y busca la suya, así se evita tener que
+     * codificar en la URL un comentario escrito por el usuario.
+     */
+    object NewReview : ScreenRoute("newReview/{vehicleId}?reviewId={reviewId}") {
         const val ARG_VEHICLE_ID = "vehicleId"
-        fun createRoute(vehicleId: Int) = "newReview/$vehicleId"
+        const val ARG_REVIEW_ID = "reviewId"
+        const val NO_REVIEW_ID = -1
+
+        fun createRoute(vehicleId: Int, reviewId: Int = NO_REVIEW_ID) =
+            "newReview/$vehicleId?reviewId=$reviewId"
     }
 
     object Story : ScreenRoute("story/{storyIndex}") {
@@ -29,8 +45,9 @@ sealed class ScreenRoute(val route: String) {
         fun createRoute(storyIndex: Int) = "story/$storyIndex"
     }
 
-    object PublicProfile : ScreenRoute("publicProfile/{userIndex}") {
-        const val ARG_USER_INDEX = "userIndex"
-        fun createRoute(userIndex: Int) = "publicProfile/$userIndex"
+    /** Perfil de otro usuario: el id es el de la tabla users del backend. */
+    object PublicProfile : ScreenRoute("publicProfile/{userId}") {
+        const val ARG_USER_ID = "userId"
+        fun createRoute(userId: Int) = "publicProfile/$userId"
     }
 }

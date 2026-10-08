@@ -5,12 +5,14 @@ import com.example.motormates.data.model.ReviewUi
 
 /**
  * Estado combinado (no flows separados) porque vehicle y reviews se
- * buscan juntos a partir del mismo id — mismo criterio que usó el
- * profesor en TweetDetailState. vehicle es nulable porque la búsqueda
- * por id puede no encontrar nada.
+ * consultan juntos a partir del mismo id. vehicle es nulable porque el
+ * backend puede responder 404.
  */
 data class VehicleDetailState(
     val vehicle: CarDetailUi? = null,
     val reviews: List<ReviewUi> = emptyList(),
-    val isBookmarked: Boolean = false
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val isBookmarked: Boolean = false,
+    val pendingDeleteReviewId: Int? = null
 )

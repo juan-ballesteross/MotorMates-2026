@@ -1,38 +1,67 @@
 package com.example.motormates.ui.comments
 
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.motormates.ui.theme.MotorMatesTheme
 
 @Composable
 fun CommentsScreen(
+    vehicleId: Int,
     onBackClick: () -> Unit = {},
-    viewModel: CommentsViewModel = viewModel(),
+    onAuthorClick: (Int) -> Unit = {},
+    onEditReviewClick: (Int) -> Unit = {},
+    reloadSignal: Boolean = false,
+    onReloadHandled: () -> Unit = {},
+    viewModel: CommentsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(vehicleId) {
+        viewModel.load(vehicleId)
+    }
+
+    LaunchedEffect(reloadSignal) {
+        if (reloadSignal) {
+            onReloadHandled()
+            viewModel.load(vehicleId)
+        }
+    }
+
+    val pendingDeleteId = uiState.pendingDeleteReviewId
+    if (pendingDeleteId != null) {
+        AlertDialog(
+            onDismissRequest = viewModel::dismissDeleteReview,
+            title = { Text(text = "Eliminar reseña") },
+            text = { Text(text = "¿Seguro que quieres eliminar tu reseña? Esta acción no se puede deshacer.") },
+            confirmButton = {
+                TextButton(onClick = { viewModel.confirmDeleteReview(vehicleId) }) {
+                    Text(text = "Eliminar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::dismissDeleteReview) {
+                    Text(text = "Cancelar")
+                }
+            }
+        )
+    }
+
     CommentsScreenContent(
-        comments = uiState.comments,
-        totalCount = uiState.totalCount,
-        draftComment = uiState.draftComment,
+        reviews = uiState.reviews,
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.errorMessage,
         onBackClick = onBackClick,
-        onDraftChange = viewModel::updateDraftComment,
-        onSendClick = viewModel::sendButtonPress,
-        onLikeClick = viewModel::likeButtonPress,
-        onReplyClick = viewModel::replyButtonPress,
+        onAuthorClick = onAuthorClick,
+        onEditReviewClick = onEditReviewClick,
+        onDeleteReviewClick = viewModel::askDeleteReview,
         modifier = modifier
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CommentsScreenPreview() {
-    MotorMatesTheme {
-        CommentsScreen()
-    }
 }

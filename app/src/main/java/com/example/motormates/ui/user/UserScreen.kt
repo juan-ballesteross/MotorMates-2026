@@ -20,6 +20,7 @@ import com.example.motormates.ui.theme.MotorMatesTheme
 @Composable
 fun UserScreen(
     onEditProfileClick: () -> Unit = {},
+    onVehicleClick: (Int) -> Unit = {},
     viewModel: UserViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -28,10 +29,14 @@ fun UserScreen(
     UserScreenContent(
         profile = uiState.profile,
         profileImageUrl = uiState.profileImageUrl,
+        reviews = uiState.reviews,
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.errorMessage,
         cars = uiState.cars,
         selectedTab = uiState.selectedTab,
         onSelectTab = viewModel::updateSelectedTab,
         onEditProfileClick = onEditProfileClick,
+        onReviewClick = onVehicleClick,
         modifier = modifier
     )
 }

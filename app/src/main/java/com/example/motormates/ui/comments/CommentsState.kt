@@ -1,9 +1,10 @@
 package com.example.motormates.ui.comments
 
-import com.example.motormates.data.model.CommentUi
+import com.example.motormates.data.model.ReviewUi
 
 data class CommentsUiState(
-    val comments: List<CommentUi> = emptyList(),
-    val totalCount: Int = 0,
-    val draftComment: String = ""
+    val reviews: List<ReviewUi> = emptyList(),
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val pendingDeleteReviewId: Int? = null
 )

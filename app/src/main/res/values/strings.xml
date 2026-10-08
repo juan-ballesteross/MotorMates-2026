@@ -135,4 +135,6 @@
     <string name="review_add_photo_cd">Agregar foto</string>
     <string name="review_publish_button">Publicar reseña</string>
     <string name="car_detail_write_review">Escribir reseña</string>
+    <string name="review_edit_top_bar_title">Editar reseña</string>
+    <string name="review_save_button">Guardar cambios</string>
 </resources>

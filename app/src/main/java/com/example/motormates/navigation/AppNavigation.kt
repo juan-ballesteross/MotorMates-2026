@@ -1,15 +1,17 @@
 package com.example.motormates.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.motormates.data.mock.SearchMocks
-import com.example.motormates.data.model.toReviewCarSummary
+import com.example.motormates.data.model.CURRENT_USER_ID
 import com.example.motormates.ui.alerts.AlertsScreen
 import com.example.motormates.ui.comments.CommentsScreen
 import com.example.motormates.ui.editProfile.EditProfileScreen
@@ -25,13 +27,21 @@ import com.example.motormates.ui.story.StoryScreen
 import com.example.motormates.ui.user.UserScreen
 import com.example.motormates.ui.vehicleDetail.VehicleDetailScreen
 
-private const val OWN_USER_STORY_INDEX = 0
-
 @Composable
 fun AppNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+    // Tocar el autor de una reseña: si soy yo, va a mi propio perfil en vez
+    // del perfil público, mismo criterio que ya usaba la pantalla de historias.
+    fun openAuthor(userId: Int) {
+        if (userId == CURRENT_USER_ID) {
+            navController.navigate(ScreenRoute.Profile.route)
+        } else {
+            navController.navigate(ScreenRoute.PublicProfile.createRoute(userId))
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = ScreenRoute.Splash.route,
@@ -40,7 +50,8 @@ fun AppNavigation(
         composable(ScreenRoute.Splash.route) {
             SplashScreen(
                 onSplashFinished = { isUserLoggedIn ->
-                    val destination = if (isUserLoggedIn) ScreenRoute.Feed.route else ScreenRoute.Login.route
+                    val destination =
+                        if (isUserLoggedIn) ScreenRoute.Feed.route else ScreenRoute.Login.route
                     navController.navigate(destination) {
                         popUpTo(ScreenRoute.Splash.route) { inclusive = true }
                     }
@@ -70,8 +81,9 @@ fun AppNavigation(
         }
         composable(ScreenRoute.Feed.route) {
             FeedScreen(
-                onCommentsClick = { navController.navigate(ScreenRoute.Comments.route) },
-                onStoryClick = { index -> navController.navigate(ScreenRoute.Story.createRoute(index)) }
+                onVehicleClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
+                }
             )
         }
         composable(ScreenRoute.Explore.route) {
@@ -93,16 +105,14 @@ fun AppNavigation(
         }
         composable(ScreenRoute.Profile.route) {
             UserScreen(
-                onEditProfileClick = { navController.navigate(ScreenRoute.EditProfile.route) }
+                onEditProfileClick = { navController.navigate(ScreenRoute.EditProfile.route) },
+                onVehicleClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
+                }
             )
         }
         composable(ScreenRoute.Alerts.route) {
             AlertsScreen()
-        }
-        composable(ScreenRoute.Comments.route) {
-            CommentsScreen(
-                onBackClick = { navController.popBackStack() }
-            )
         }
         composable(ScreenRoute.EditProfile.route) {
             EditProfileScreen(
@@ -122,31 +132,72 @@ fun AppNavigation(
             )
         ) { entry ->
             val vehicleId = entry.arguments?.getInt(ScreenRoute.VehicleDetail.ARG_VEHICLE_ID) ?: -1
+            val reviewsChanged by entry.reviewsChangedState()
+
             VehicleDetailScreen(
                 vehicleId = vehicleId,
                 onBackClick = { navController.popBackStack() },
                 onWriteReviewClick = {
                     navController.navigate(ScreenRoute.NewReview.createRoute(vehicleId))
-                }
+                },
+                onSeeAllReviewsClick = {
+                    navController.navigate(ScreenRoute.Comments.createRoute(vehicleId))
+                },
+                onAuthorClick = { userId -> openAuthor(userId) },
+                onEditReviewClick = { reviewId ->
+                    navController.navigate(ScreenRoute.NewReview.createRoute(vehicleId, reviewId))
+                },
+                reloadSignal = reviewsChanged,
+                onReloadHandled = { entry.clearReviewsChanged() }
+            )
+        }
+        composable(
+            route = ScreenRoute.Comments.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.Comments.ARG_VEHICLE_ID) { type = NavType.IntType }
+            )
+        ) { entry ->
+            val vehicleId = entry.arguments?.getInt(ScreenRoute.Comments.ARG_VEHICLE_ID) ?: -1
+            val reviewsChanged by entry.reviewsChangedState()
+
+            CommentsScreen(
+                vehicleId = vehicleId,
+                onBackClick = { navController.popBackStack() },
+                onAuthorClick = { userId -> openAuthor(userId) },
+                onEditReviewClick = { reviewId ->
+                    navController.navigate(ScreenRoute.NewReview.createRoute(vehicleId, reviewId))
+                },
+                reloadSignal = reviewsChanged,
+                onReloadHandled = { entry.clearReviewsChanged() }
             )
         }
         composable(
             route = ScreenRoute.NewReview.route,
             arguments = listOf(
-                navArgument(ScreenRoute.NewReview.ARG_VEHICLE_ID) { type = NavType.IntType }
+                navArgument(ScreenRoute.NewReview.ARG_VEHICLE_ID) { type = NavType.IntType },
+                navArgument(ScreenRoute.NewReview.ARG_REVIEW_ID) {
+                    type = NavType.IntType
+                    defaultValue = ScreenRoute.NewReview.NO_REVIEW_ID
+                }
             )
         ) { entry ->
             val vehicleId = entry.arguments?.getInt(ScreenRoute.NewReview.ARG_VEHICLE_ID) ?: -1
-            val car = SearchMocks.findById(vehicleId)?.toReviewCarSummary()
-            if (car != null) {
-                NewReviewScreen(
-                    car = car,
-                    onCloseClick = { navController.popBackStack() },
-                    onPublishClick = { _, _, _, _ -> navController.popBackStack() }
-                )
-            } else {
-                LaunchedEffect(Unit) { navController.popBackStack() }
-            }
+            val reviewId = entry.arguments?.getInt(ScreenRoute.NewReview.ARG_REVIEW_ID)
+                ?: ScreenRoute.NewReview.NO_REVIEW_ID
+
+            NewReviewScreen(
+                vehicleId = vehicleId,
+                reviewId = reviewId,
+                onCloseClick = { navController.popBackStack() },
+                onSaved = {
+                    // Se avisa a la pantalla anterior que su lista cambió:
+                    // su LaunchedEffect(vehicleId) no se vuelve a disparar al volver.
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(RESULT_REVIEWS_CHANGED, true)
+                    navController.popBackStack()
+                }
+            )
         }
         composable(
             route = ScreenRoute.Story.route,
@@ -158,26 +209,40 @@ fun AppNavigation(
             StoryScreen(
                 storyIndex = storyIndex,
                 onCloseClick = { navController.popBackStack() },
-                onUserClick = { userIndex ->
-                    if (userIndex == OWN_USER_STORY_INDEX) {
-                        navController.navigate(ScreenRoute.Profile.route)
-                    } else {
-                        navController.navigate(ScreenRoute.PublicProfile.createRoute(userIndex))
-                    }
-                }
+                // Las historias siguen siendo datos locales y su índice no
+                // corresponde a ningún usuario del backend (que además no
+                // expone un endpoint para listarlos), así que se lleva
+                // siempre al perfil propio.
+                onUserClick = { navController.navigate(ScreenRoute.Profile.route) }
             )
         }
         composable(
             route = ScreenRoute.PublicProfile.route,
             arguments = listOf(
-                navArgument(ScreenRoute.PublicProfile.ARG_USER_INDEX) { type = NavType.IntType }
+                navArgument(ScreenRoute.PublicProfile.ARG_USER_ID) { type = NavType.IntType }
             )
         ) { entry ->
-            val userIndex = entry.arguments?.getInt(ScreenRoute.PublicProfile.ARG_USER_INDEX) ?: -1
+            val userId = entry.arguments?.getInt(ScreenRoute.PublicProfile.ARG_USER_ID) ?: -1
             PublicProfileScreen(
-                storyIndex = userIndex,
-                onBackClick = { navController.popBackStack() }
+                userId = userId,
+                onBackClick = { navController.popBackStack() },
+                onVehicleClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
+                }
             )
         }
     }
+}
+
+/**
+ * Lee la bandera que la pantalla de nueva/editar reseña dejó en esta entrada
+ * del back stack antes de cerrarse. Es el patrón de resultado de Navigation
+ * Compose: no hace falta estado compartido entre pantallas.
+ */
+@Composable
+private fun NavBackStackEntry.reviewsChangedState(): State<Boolean> =
+    savedStateHandle.getStateFlow(RESULT_REVIEWS_CHANGED, false).collectAsStateWithLifecycle()
+
+private fun NavBackStackEntry.clearReviewsChanged() {
+    savedStateHandle[RESULT_REVIEWS_CHANGED] = false
 }

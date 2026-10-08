@@ -1,6 +1,5 @@
 package com.example.motormates.ui.review.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,12 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.motormates.R
 import com.example.motormates.data.model.ReviewAspect
 import com.example.motormates.data.model.ReviewCarSummary
@@ -49,7 +48,8 @@ import com.example.motormates.data.model.ReviewCarSummary
 @Composable
 fun NewReviewTopBar(
     onCloseClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    title: String? = null
 ) {
     Box(
         modifier = modifier
@@ -72,7 +72,7 @@ fun NewReviewTopBar(
                 )
         )
         Text(
-            text = stringResource(R.string.review_top_bar_title),
+            text = title ?: stringResource(R.string.review_top_bar_title),
             color = MaterialTheme.colorScheme.onBackground,
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
@@ -102,9 +102,9 @@ fun ReviewCarCard(
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
-            if (car.imageResId != 0) {
-                Image(
-                    painter = painterResource(car.imageResId),
+            if (car.imageUrl != null) {
+                AsyncImage(
+                    model = car.imageUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

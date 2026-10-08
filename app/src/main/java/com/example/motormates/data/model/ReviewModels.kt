@@ -7,30 +7,22 @@ enum class ReviewAspect {
     PERFORMANCE
 }
 
+/** Cabecera del auto que se está reseñando, en la pantalla de nueva reseña. */
 data class ReviewCarSummary(
     val title: String,
     val year: Int,
     val categoryLabel: String,
-    val imageResId: Int
+    val imageUrl: String?
 )
 
-fun CarListing.toReviewCarSummary(): ReviewCarSummary = ReviewCarSummary(
-    title = "$brand $model",
-    year = year,
-    categoryLabel = category.toSingularLabel(),
-    imageResId = imageResId
-)
-
-fun CarListing.toCarDetailUi(): CarDetailUi = CarDetailUi(
-    marca = brand.uppercase(),
-    modelo = model,
-    imagenResId = imageResId,
-    calificacion = rating,
-    numeroResenas = likes.coerceAtLeast(1),
-    potencia = "—",
-    aceleracion = "—",
-    velocidadMaxima = "—",
-    traccion = "—"
+/** Una reseña vista desde un perfil: lo que importa es el auto, no el autor. */
+data class UserReviewUi(
+    val id: Int,
+    val vehicleId: Int,
+    val vehicleName: String,
+    val rating: Int,
+    val comment: String,
+    val timeAgo: String
 )
 
 fun SearchCategoryKey.toSingularLabel(): String = when (this) {

@@ -1,6 +1,7 @@
 package com.example.motormates.ui.vehicleDetail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +33,9 @@ import com.example.motormates.ui.vehicleDetail.components.ReviewItem
 import com.example.motormates.ui.vehicleDetail.components.SpecStatCard
 import com.example.motormates.ui.vehicleDetail.components.VehicleImageHeader
 
+/** Cuántas reseñas se muestran aquí antes de mandar a la lista completa. */
+private const val INLINE_REVIEWS_LIMIT = 3
+
 /**
  * Todo el estado viene del padre (state hoisting) — este composable
  * no guarda nada con remember, solo pinta lo que le llega.
@@ -45,6 +49,9 @@ fun VehicleDetailContent(
     onBookmarkClick: () -> Unit,
     onWriteReviewClick: () -> Unit,
     onSeeAllReviewsClick: () -> Unit,
+    onAuthorClick: (Int) -> Unit,
+    onEditReviewClick: (Int) -> Unit,
+    onDeleteReviewClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val specs = listOf(
@@ -62,7 +69,7 @@ fun VehicleDetailContent(
     ) {
         item {
             VehicleImageHeader(
-                imagenResId = car.imagenResId,
+                imageUrl = car.imageUrl,
                 isBookmarked = isBookmarked,
                 onBackClick = onBackClick,
                 onBookmarkClick = onBookmarkClick
@@ -84,6 +91,11 @@ fun VehicleDetailContent(
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp
+                )
+                Text(
+                    text = "${car.anio} · ${car.categoria}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -138,20 +150,42 @@ fun VehicleDetailContent(
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
-                    Text(
-                        text = "Ver todos",
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
+                    // Solo tiene sentido ofrecer "ver todas" si hay más de las
+                    // que caben aquí.
+                    if (reviews.size > INLINE_REVIEWS_LIMIT) {
+                        Text(
+                            text = "Ver todas",
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = 13.sp,
+                            modifier = Modifier
+                                .padding(top = 2.dp)
+                                .clickable(onClick = onSeeAllReviewsClick)
+                        )
+                    }
                 }
             }
         }
 
+        if (reviews.isEmpty()) {
+            item {
+                Text(
+                    text = "Todavía no hay reseñas. Sé el primero en escribir una.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                )
+            }
+        }
+
         // Lista de reseñas dentro del MISMO LazyColumn (no se anida otro lazy adentro).
-        items(reviews) { review ->
+        items(reviews.take(INLINE_REVIEWS_LIMIT), key = { it.id }) { review ->
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                ReviewItem(review = review)
+                ReviewItem(
+                    review = review,
+                    onAuthorClick = onAuthorClick,
+                    onEditClick = onEditReviewClick,
+                    onDeleteClick = onDeleteReviewClick
+                )
             }
         }
     }

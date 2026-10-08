@@ -1,34 +1,35 @@
 package com.example.motormates.ui.comments
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.motormates.data.model.CommentUi
-import com.example.motormates.ui.comments.components.CommentInputBar
-import com.example.motormates.ui.comments.components.CommentItem
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.ui.comments.components.CommentsTopBar
+import com.example.motormates.ui.vehicleDetail.components.ReviewItem
 
-/**
- * Stateless: recibe cada campo por separado (comments, totalCount,
- * draftComment) tal como los expone el ViewModel — no arma nada,
- * no sabe que existe CommentsViewModel.
- */
 @Composable
 fun CommentsScreenContent(
-    comments: List<CommentUi>,
-    totalCount: Int,
-    draftComment: String,
+    reviews: List<ReviewUi>,
+    isLoading: Boolean,
+    errorMessage: String?,
     onBackClick: () -> Unit,
-    onDraftChange: (String) -> Unit,
-    onSendClick: () -> Unit,
-    onLikeClick: (String) -> Unit,
-    onReplyClick: (String) -> Unit,
+    onAuthorClick: (Int) -> Unit,
+    onEditReviewClick: (Int) -> Unit,
+    onDeleteReviewClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -36,24 +37,55 @@ fun CommentsScreenContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        CommentsTopBar(totalCount = totalCount, onBackClick = onBackClick)
-        HorizontalDivider(color = MaterialTheme.colorScheme.surface)
+        CommentsTopBar(totalCount = reviews.size, onBackClick = onBackClick)
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(comments) { comment ->
-                CommentItem(
-                    comment = comment,
-                    onLikeClick = { onLikeClick(comment.id) },
-                    onReplyClick = { onReplyClick(comment.id) }
+        when {
+            isLoading -> Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+
+            errorMessage != null -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.surface)
+            }
+
+            reviews.isEmpty() -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Este vehículo todavía no tiene reseñas",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            else -> LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
+            ) {
+                items(reviews, key = { it.id }) { review ->
+                    ReviewItem(
+                        review = review,
+                        onAuthorClick = onAuthorClick,
+                        onEditClick = onEditReviewClick,
+                        onDeleteClick = onDeleteReviewClick
+                    )
+                }
             }
         }
-
-        CommentInputBar(
-            value = draftComment,
-            onValueChange = onDraftChange,
-            onSendClick = onSendClick
-        )
     }
 }

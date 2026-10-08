@@ -25,18 +25,29 @@ fun ProfileInfoSection(profile: UserProfile, modifier: Modifier = Modifier) {
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = "${profile.handle} · ${profile.location}",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 13.sp
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = profile.bio,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 14.sp,
-            lineHeight = 19.sp
-        )
+        // El backend solo guarda nombre y correo, así que ubicación y bio
+        // llegan vacías: se omiten en vez de pintar un " · " colgando.
+        val subtitle = listOf(profile.handle, profile.location)
+            .filter { it.isNotBlank() }
+            .joinToString(" · ")
+
+        if (subtitle.isNotBlank()) {
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 13.sp
+            )
+        }
+
+        if (profile.bio.isNotBlank()) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = profile.bio,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 14.sp,
+                lineHeight = 19.sp
+            )
+        }
     }
 }

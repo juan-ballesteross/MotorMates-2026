@@ -26,12 +26,30 @@ fun VehicleDetailNotFound(onBackClick: () -> Unit, modifier: Modifier = Modifier
     )
 }
 
+/** Error de red o del servidor: a diferencia del 404, aquí sí se puede reintentar. */
+@Composable
+fun VehicleDetailError(
+    message: String,
+    onRetryClick: () -> Unit,
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    VehicleDetailMessage(
+        title = "No se pudo cargar",
+        message = message,
+        onBackClick = onBackClick,
+        onRetryClick = onRetryClick,
+        modifier = modifier
+    )
+}
+
 @Composable
 private fun VehicleDetailMessage(
     title: String,
     message: String,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRetryClick: (() -> Unit)? = null
 ) {
     Box(
         modifier = modifier
@@ -55,9 +73,17 @@ private fun VehicleDetailMessage(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 8.dp)
             )
+            if (onRetryClick != null) {
+                Button(
+                    onClick = onRetryClick,
+                    modifier = Modifier.padding(top = 20.dp)
+                ) {
+                    Text(text = "Reintentar")
+                }
+            }
             Button(
                 onClick = onBackClick,
-                modifier = Modifier.padding(top = 20.dp)
+                modifier = Modifier.padding(top = 12.dp)
             ) {
                 Text(text = "Volver")
             }

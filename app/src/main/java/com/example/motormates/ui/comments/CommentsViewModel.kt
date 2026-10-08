@@ -1,67 +1,75 @@
 package com.example.motormates.ui.comments
 
 import androidx.lifecycle.ViewModel
-import com.example.motormates.data.model.CommentUi
-import com.example.motormates.data.model.mockComments
-import com.example.motormates.data.model.mockCommentsTotalCount
+import androidx.lifecycle.viewModelScope
+import com.example.motormates.data.model.toReviewUi
+import com.example.motormates.data.repository.ReviewRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import java.util.UUID
+import kotlinx.coroutines.launch
 
-class CommentsViewModel : ViewModel() {
+/**
+ * Lista completa de reseñas de un vehículo. Pinta los mismos ReviewUi que
+ * el detalle, con el mismo componente, en vez de un modelo de comentario
+ * aparte: así las estrellas y los botones de editar/eliminar salen gratis.
+ */
+@HiltViewModel
+class CommentsViewModel @Inject constructor(
+    private val reviewRepository: ReviewRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CommentsUiState())
     val uiState: StateFlow<CommentsUiState> = _uiState
 
-    init {
-        _uiState.update {
-            it.copy(
-                comments = mockComments,
-                totalCount = mockCommentsTotalCount
-            )
+    fun load(vehicleId: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            val result = reviewRepository.getReviewsByVehicle(vehicleId)
+            _uiState.update { current ->
+                result.fold(
+                    onSuccess = { reviews ->
+                        current.copy(
+                            isLoading = false,
+                            errorMessage = null,
+                            reviews = reviews.map { it.toReviewUi() }
+                        )
+                    },
+                    onFailure = { error ->
+                        current.copy(
+                            isLoading = false,
+                            errorMessage = error.message ?: "No se pudieron cargar las reseñas"
+                        )
+                    }
+                )
+            }
         }
     }
 
-    fun updateDraftComment(input: String) {
-        _uiState.update { it.copy(draftComment = input) }
+    fun askDeleteReview(reviewId: Int) {
+        _uiState.update { it.copy(pendingDeleteReviewId = reviewId) }
     }
 
-    fun sendButtonPress() {
-        val text = _uiState.value.draftComment.trim()
-        if (text.isBlank()) return
-
-        val newComment = CommentUi(
-            id = UUID.randomUUID().toString(),
-            authorName = "Tú",
-            timeAgo = "ahora",
-            text = text
-        )
-
-        _uiState.update { current ->
-            current.copy(
-                comments = current.comments + newComment,
-                totalCount = current.totalCount + 1,
-                draftComment = ""
-            )
-        }
+    fun dismissDeleteReview() {
+        _uiState.update { it.copy(pendingDeleteReviewId = null) }
     }
 
-    fun likeButtonPress(commentId: String) {
-        _uiState.update { current ->
-            current.copy(
-                comments = current.comments.map { comment ->
-                    if (comment.id == commentId) {
-                        comment.copy(isLiked = !comment.isLiked)
-                    } else {
-                        comment
+    fun confirmDeleteReview(vehicleId: Int) {
+        val reviewId = _uiState.value.pendingDeleteReviewId ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(pendingDeleteReviewId = null) }
+
+            reviewRepository.deleteReview(reviewId).fold(
+                onSuccess = { load(vehicleId) },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(errorMessage = error.message ?: "No se pudo eliminar la reseña")
                     }
                 }
             )
         }
-    }
-
-    fun replyButtonPress(commentId: String) {
-        // TODO: cuando se defina "Responder", se implementa aquí.
     }
 }

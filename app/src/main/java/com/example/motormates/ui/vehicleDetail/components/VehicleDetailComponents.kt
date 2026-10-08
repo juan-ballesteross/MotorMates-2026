@@ -1,7 +1,7 @@
 package com.example.motormates.ui.vehicleDetail.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +18,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,10 +33,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.motormates.data.model.ReviewUi
 
 /**
@@ -42,19 +45,18 @@ import com.example.motormates.data.model.ReviewUi
  */
 @Composable
 fun VehicleImageHeader(
-    imagenResId: Int,
+    imageUrl: String?,
     isBookmarked: Boolean,
     onBackClick: () -> Unit,
     onBookmarkClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
-        // TODO: reemplazar imagenResId por la foto real del vehículo (ver CarDetailModels.kt).
-        // Mientras tanto (id == 0) se muestra un rectángulo de color para que el
-        // Preview no se rompa por intentar cargar un recurso inexistente.
-        if (imagenResId != 0) {
-            Image(
-                painter = painterResource(id = imagenResId),
+        // Los vehículos sembrados en el backend tienen imageUrl en null, así
+        // que el placeholder es el caso normal, no la excepción.
+        if (imageUrl != null) {
+            AsyncImage(
+                model = imageUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -66,8 +68,16 @@ fun VehicleImageHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(320.dp)
-                    .background(MaterialTheme.colorScheme.surface)
-            )
+                    .background(MaterialTheme.colorScheme.surface),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.DirectionsCar,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(64.dp)
+                )
+            }
         }
 
         Row(
@@ -149,8 +159,19 @@ fun SpecStatCard(valor: String, etiqueta: String) {
 }
 
 /** Ítem de reseña de un usuario. Se usa dentro del mismo LazyColumn de la pantalla (no anida otro lazy). */
+/**
+ * Una reseña en la lista. El nombre y el avatar abren el perfil del autor.
+ * Los botones de editar y eliminar solo aparecen si la reseña es mía
+ * (isMine lo resuelve el mapper comparando contra CURRENT_USER_ID), porque
+ * el backend no verifica el dueño en PUT ni en DELETE.
+ */
 @Composable
-fun ReviewItem(review: ReviewUi) {
+fun ReviewItem(
+    review: ReviewUi,
+    onAuthorClick: (Int) -> Unit = {},
+    onEditClick: (Int) -> Unit = {},
+    onDeleteClick: (Int) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -161,10 +182,13 @@ fun ReviewItem(review: ReviewUi) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (review.avatarResId != 0) {
-                    Image(
-                        painter = painterResource(id = review.avatarResId),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { onAuthorClick(review.userId) }
+            ) {
+                if (review.avatarUrl != null) {
+                    AsyncImage(
+                        model = review.avatarUrl,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -172,7 +196,7 @@ fun ReviewItem(review: ReviewUi) {
                             .clip(CircleShape)
                     )
                 } else {
-
+                    // El backend no guarda foto de usuario.
                     Box(
                         modifier = Modifier
                             .size(36.dp)
@@ -188,11 +212,15 @@ fun ReviewItem(review: ReviewUi) {
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp
                     )
-                    Text(text = review.tiempoTexto, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                    Text(
+                        text = review.tiempoTexto,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp
+                    )
                 }
             }
 
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 repeat(review.calificacion) {
                     Icon(
                         imageVector = Icons.Filled.Star,
@@ -201,14 +229,35 @@ fun ReviewItem(review: ReviewUi) {
                         modifier = Modifier.size(14.dp)
                     )
                 }
+                if (review.isMine) {
+                    IconButton(onClick = { onEditClick(review.id) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = "Editar mi reseña",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    IconButton(onClick = { onDeleteClick(review.id) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Eliminar mi reseña",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
             }
         }
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = review.comentario,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 13.sp,
-            lineHeight = 18.sp
-        )
+
+        if (review.comentario.isNotBlank()) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = review.comentario,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 13.sp,
+                lineHeight = 18.sp
+            )
+        }
     }
 }

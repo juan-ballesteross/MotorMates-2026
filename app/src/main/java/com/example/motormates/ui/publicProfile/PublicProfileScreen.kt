@@ -2,53 +2,72 @@ package com.example.motormates.ui.publicProfile
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.R
-import com.example.motormates.ui.theme.MotorMatesTheme
 
 @Composable
 fun PublicProfileScreen(
-    storyIndex: Int,
+    userId: Int,
     onBackClick: () -> Unit = {},
-    viewModel: PublicProfileViewModel = viewModel(),
+    onVehicleClick: (Int) -> Unit = {},
+    viewModel: PublicProfileViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(storyIndex) {
-        viewModel.loadProfile(storyIndex)
+    LaunchedEffect(userId) {
+        viewModel.loadProfile(userId)
     }
 
     val profile = uiState.profile
-    val avatarResId = uiState.avatarResId
-    if (profile != null && avatarResId != null) {
-        PublicProfileScreenContent(
-            coverResId = R.drawable.sofia_profile_cover,
-            avatarResId = avatarResId,
+    when {
+        profile == null && uiState.isLoading -> Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+
+        profile == null -> Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = uiState.errorMessage ?: "No se pudo cargar el perfil",
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        else -> PublicProfileScreenContent(
+            // Decoración: el backend no guarda portada ni avatar de usuario.
+            coverResId = R.drawable.profile_cover,
+            avatarResId = R.drawable.user_3,
             profile = profile,
-            cars = uiState.cars,
+            reviews = uiState.reviews,
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.errorMessage,
             selectedTab = uiState.selectedTab,
             onSelectTab = viewModel::updateSelectedTab,
             onBackClick = onBackClick,
             onFollowClick = {},
             onMessageClick = {},
+            onReviewClick = onVehicleClick,
             modifier = modifier
         )
-    } else {
-        Box(modifier = modifier.fillMaxSize())
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PublicProfileScreenPreview() {
-    MotorMatesTheme {
-        PublicProfileScreen(storyIndex = 4)
     }
 }

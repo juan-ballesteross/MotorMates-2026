@@ -47,7 +47,9 @@ fun NewReviewScreenContent(
     onAddPhotoClick: () -> Unit,
     canPublish: Boolean,
     onPublishClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isEditing: Boolean = false,
+    errorMessage: String? = null
 ) {
     Column(
         modifier = modifier
@@ -101,6 +103,17 @@ fun NewReviewScreenContent(
         Spacer(modifier = Modifier.height(14.dp))
         ReviewAddPhotoButton(photoCount = photoCount, onClick = onAddPhotoClick)
 
+        if (errorMessage != null) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
         Spacer(modifier = Modifier.height(40.dp))
         Button(
             onClick = onPublishClick,
@@ -117,7 +130,9 @@ fun NewReviewScreenContent(
                 .height(56.dp)
         ) {
             Text(
-                text = stringResource(R.string.review_publish_button),
+                text = stringResource(
+                    if (isEditing) R.string.review_save_button else R.string.review_publish_button
+                ),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )

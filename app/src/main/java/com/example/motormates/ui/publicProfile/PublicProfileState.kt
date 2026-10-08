@@ -1,12 +1,13 @@
 package com.example.motormates.ui.publicProfile
 
-import com.example.motormates.data.model.GarageCar
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
+import com.example.motormates.data.model.UserReviewUi
 
 data class PublicProfileUiState(
-    val avatarResId: Int? = null,
     val profile: UserProfile? = null,
-    val cars: List<GarageCar> = emptyList(),
-    val selectedTab: ProfileTab = ProfileTab.REVIEWS
+    val reviews: List<UserReviewUi> = emptyList(),
+    val selectedTab: ProfileTab = ProfileTab.REVIEWS,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 )

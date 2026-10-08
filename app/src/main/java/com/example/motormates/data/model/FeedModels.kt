@@ -19,3 +19,17 @@ data class ReviewPost(
     val comments: Int,
     val shares: Int
 )
+
+/**
+ * Un vehículo listo para pintar en la tarjeta del Home. Se mantiene aparte
+ * del modelo de dominio Vehicle para que la pantalla no dependa de cómo
+ * viene armado el dato en la capa de datos.
+ */
+data class FeedVehicleUi(
+    val id: Int,
+    val brand: String,
+    val model: String,
+    val year: Int,
+    val category: String,
+    val imageUrl: String?
+)

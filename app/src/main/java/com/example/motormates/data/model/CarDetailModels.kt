@@ -7,7 +7,9 @@ package com.example.motormates.data.model
 data class CarDetailUi(
     val marca: String,
     val modelo: String,
-    val imagenResId: Int,
+    val anio: Int,
+    val categoria: String,
+    val imageUrl: String?,
     val calificacion: Float,
     val numeroResenas: Int,
     val potencia: String,
@@ -16,46 +18,18 @@ data class CarDetailUi(
     val traccion: String
 )
 
+/**
+ * Una reseña lista para pintar. isMine lo resuelve el mapper comparando
+ * contra CURRENT_USER_ID, para que ninguna pantalla tenga que deducirlo.
+ * avatarUrl va nulable porque el backend no guarda fotos de usuario.
+ */
 data class ReviewUi(
     val id: Int,
+    val userId: Int,
     val nombreUsuario: String,
-    val avatarResId: Int,
+    val avatarUrl: String? = null,
     val tiempoTexto: String,
     val calificacion: Int,
-    val comentario: String
-)
-
-// toCarDetailUi() ya existe en ReviewModels.kt — no se duplica aquí.
-
-// ===== Datos locales quemados (fallback mientras no hay id, o para Preview) =====
-
-val mockCarDetail = CarDetailUi(
-    marca = "PORSCHE",
-    modelo = "911 GT3",
-    imagenResId = 0,
-    calificacion = 4.9f,
-    numeroResenas = 312,
-    potencia = "510 hp",
-    aceleracion = "3.4 s",
-    velocidadMaxima = "318 km/h",
-    traccion = "RWD"
-)
-
-val mockReviews = listOf(
-    ReviewUi(
-        id = 1,
-        nombreUsuario = "Sofía Reyes",
-        avatarResId = 0,
-        tiempoTexto = "hace 3 días",
-        calificacion = 5,
-        comentario = "El mejor GT3 que he probado. El escape en modo Sport es adictivo."
-    ),
-    ReviewUi(
-        id = 2,
-        nombreUsuario = "Iván Pérez",
-        avatarResId = 0,
-        tiempoTexto = "hace 5 días",
-        calificacion = 5,
-        comentario = "El mejor GT3 que he probado. El escape en modo Sport es adictivo."
-    )
+    val comentario: String,
+    val isMine: Boolean = false
 )

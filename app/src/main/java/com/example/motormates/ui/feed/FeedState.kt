@@ -1,9 +1,9 @@
 package com.example.motormates.ui.feed
 
-import com.example.motormates.data.model.ReviewPost
-import com.example.motormates.data.model.StoryUser
+import com.example.motormates.data.model.FeedVehicleUi
 
 data class FeedUiState(
-    val stories: List<StoryUser> = emptyList(),
-    val posts: List<ReviewPost> = emptyList()
+    val vehicles: List<FeedVehicleUi> = emptyList(),
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 )
