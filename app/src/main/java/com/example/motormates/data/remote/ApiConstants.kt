@@ -1,8 +1,5 @@
 package com.example.motormates.data.remote
 
-/**
- * 10.0.2.2 es el alias que el emulador de Android usa para el localhost
- * de la máquina anfitriona: "localhost" apuntaría al propio emulador.
- * La barra final es obligatoria para Retrofit.baseUrl().
- */
-const val BASE_URL = "http://10.0.2.2:3000/"
+/*si se hace en emulador, cambiar a "http://10.0.2.2:3000/"*/
+
+const val BASE_URL = "http://192.168.10.23:3000/"

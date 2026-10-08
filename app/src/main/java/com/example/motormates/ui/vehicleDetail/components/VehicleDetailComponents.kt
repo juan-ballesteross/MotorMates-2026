@@ -1,5 +1,6 @@
 package com.example.motormates.ui.vehicleDetail.components
 
+import java.util.Locale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -130,7 +131,7 @@ fun RatingRow(calificacion: Float, numeroResenas: Int) {
         }
         Spacer(modifier = Modifier.width(6.dp))
         Text(
-            text = calificacion.toString(),
+            text = String.format(Locale.US, "%.1f", calificacion),
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp

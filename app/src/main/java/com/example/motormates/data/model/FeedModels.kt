@@ -1,6 +1,7 @@
 package com.example.motormates.data.model
 
 data class StoryUser(
+    val userId: Int,
     val name: String,
     val avatarResId: Int,
     val imageRes: Int? = null,

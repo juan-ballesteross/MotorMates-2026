@@ -11,6 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.motormates.data.mock.FeedMocks
 import com.example.motormates.data.model.CURRENT_USER_ID
 import com.example.motormates.ui.alerts.AlertsScreen
 import com.example.motormates.ui.comments.CommentsScreen
@@ -83,6 +84,9 @@ fun AppNavigation(
             FeedScreen(
                 onVehicleClick = { vehicleId ->
                     navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
+                },
+                onStoryClick = { index ->
+                    navController.navigate(ScreenRoute.Story.createRoute(index))
                 }
             )
         }
@@ -209,11 +213,9 @@ fun AppNavigation(
             StoryScreen(
                 storyIndex = storyIndex,
                 onCloseClick = { navController.popBackStack() },
-                // Las historias siguen siendo datos locales y su índice no
-                // corresponde a ningún usuario del backend (que además no
-                // expone un endpoint para listarlos), así que se lleva
-                // siempre al perfil propio.
-                onUserClick = { navController.navigate(ScreenRoute.Profile.route) }
+                onUserClick = { index ->
+                    FeedMocks.sampleStories.getOrNull(index)?.let { openAuthor(it.userId) }
+                }
             )
         }
         composable(

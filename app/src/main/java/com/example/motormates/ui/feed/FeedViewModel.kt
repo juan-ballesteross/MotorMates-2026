@@ -2,6 +2,7 @@ package com.example.motormates.ui.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.motormates.data.mock.FeedMocks
 import com.example.motormates.data.model.toFeedVehicleUi
 import com.example.motormates.data.repository.VehicleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,8 @@ class FeedViewModel @Inject constructor(
     val uiState: StateFlow<FeedUiState> = _uiState
 
     init {
+        // Las historias siguen siendo datos locales, el backend no las modela.
+        _uiState.update { it.copy(stories = FeedMocks.sampleStories) }
         loadVehicles()
     }
 

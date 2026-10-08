@@ -20,16 +20,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.motormates.data.model.FeedVehicleUi
+import com.example.motormates.data.model.StoryUser
+import com.example.motormates.ui.feed.components.StoriesRow
 import com.example.motormates.ui.feed.components.VehicleFeedCard
 import com.example.motormates.ui.theme.MotorMatesBackground
 
 @Composable
 fun FeedScreenContent(
+    stories: List<StoryUser>,
     vehicles: List<FeedVehicleUi>,
     isLoading: Boolean,
     errorMessage: String?,
     modifier: Modifier = Modifier,
     onVehicleClick: (Int) -> Unit = {},
+    onStoryClick: (Int) -> Unit = {},
     onRetryClick: () -> Unit = {}
 ) {
     LazyColumn(
@@ -39,6 +43,8 @@ fun FeedScreenContent(
         verticalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(top = 8.dp, bottom = 20.dp)
     ) {
+        item { StoriesRow(stories, onStoryClick = onStoryClick) }
+
         // Lo que viene del backend tiene cuatro estados: cargando, error,
         // vacío o lista con datos.
         when {

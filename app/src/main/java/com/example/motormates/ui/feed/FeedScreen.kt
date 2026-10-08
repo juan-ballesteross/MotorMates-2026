@@ -14,6 +14,7 @@ import com.example.motormates.ui.feed.components.FeedTopBar
 @Composable
 fun FeedScreen(
     onVehicleClick: (Int) -> Unit = {},
+    onStoryClick: (Int) -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -26,10 +27,12 @@ fun FeedScreen(
     ) {
         FeedTopBar()
         FeedScreenContent(
+            stories = uiState.stories,
             vehicles = uiState.vehicles,
             isLoading = uiState.isLoading,
             errorMessage = uiState.errorMessage,
             onVehicleClick = onVehicleClick,
+            onStoryClick = onStoryClick,
             onRetryClick = viewModel::loadVehicles
         )
     }
