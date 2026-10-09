@@ -1,6 +1,7 @@
-package com.example.motormates.data.remote
+package com.example.motormates.data.remote.datasource
 
 import com.example.motormates.data.remote.dto.VehicleDto
+import com.example.motormates.data.remote.service.VehicleApiService
 import javax.inject.Inject
 
 class VehicleRetrofitDataSource @Inject constructor(

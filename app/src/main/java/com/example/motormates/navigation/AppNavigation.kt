@@ -107,12 +107,19 @@ fun AppNavigation(
                 }
             )
         }
-        composable(ScreenRoute.Profile.route) {
+        composable(ScreenRoute.Profile.route) { entry ->
+            val reviewsChanged by entry.reviewsChangedState()
+
             UserScreen(
                 onEditProfileClick = { navController.navigate(ScreenRoute.EditProfile.route) },
                 onVehicleClick = { vehicleId ->
                     navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
-                }
+                },
+                onEditReviewClick = { vehicleId, reviewId ->
+                    navController.navigate(ScreenRoute.NewReview.createRoute(vehicleId, reviewId))
+                },
+                reloadSignal = reviewsChanged,
+                onReloadHandled = { entry.clearReviewsChanged() }
             )
         }
         composable(ScreenRoute.Alerts.route) {

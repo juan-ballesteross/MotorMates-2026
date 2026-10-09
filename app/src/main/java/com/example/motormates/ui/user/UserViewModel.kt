@@ -73,4 +73,28 @@ class UserViewModel @Inject constructor(
     fun updateSelectedTab(tab: ProfileTab) {
         _uiState.update { it.copy(selectedTab = tab) }
     }
+
+    fun askDeleteReview(reviewId: Int) {
+        _uiState.update { it.copy(pendingDeleteReviewId = reviewId) }
+    }
+
+    fun dismissDeleteReview() {
+        _uiState.update { it.copy(pendingDeleteReviewId = null) }
+    }
+
+    fun confirmDeleteReview() {
+        val reviewId = _uiState.value.pendingDeleteReviewId ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(pendingDeleteReviewId = null) }
+
+            reviewRepository.deleteReview(reviewId).fold(
+                onSuccess = { load() },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(errorMessage = error.message ?: "No se pudo eliminar la reseña")
+                    }
+                }
+            )
+        }
+    }
 }

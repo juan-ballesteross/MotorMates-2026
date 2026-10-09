@@ -1,12 +1,8 @@
-package com.example.motormates.data.remote
+package com.example.motormates.data.remote.datasource
 
 import com.example.motormates.data.remote.dto.UserDto
+import com.example.motormates.data.remote.service.UserApiService
 import javax.inject.Inject
-
-interface UserRemoteDataSource {
-
-    suspend fun getUserById(id: Int): UserDto
-}
 
 class UserRetrofitDataSource @Inject constructor(
     private val service: UserApiService

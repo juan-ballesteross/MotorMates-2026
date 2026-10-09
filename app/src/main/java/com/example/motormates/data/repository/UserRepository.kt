@@ -1,7 +1,7 @@
 package com.example.motormates.data.repository
 
 import com.example.motormates.data.model.BackendUser
-import com.example.motormates.data.remote.UserRemoteDataSource
+import com.example.motormates.data.remote.datasource.UserRemoteDataSource
 import com.example.motormates.data.remote.mapper.toDomain
 import java.io.IOException
 import javax.inject.Inject

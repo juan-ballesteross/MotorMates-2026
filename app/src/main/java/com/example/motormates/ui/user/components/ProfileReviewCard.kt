@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +37,10 @@ import com.example.motormates.data.model.UserReviewUi
 fun ProfileReviewCard(
     review: UserReviewUi,
     modifier: Modifier = Modifier,
-    onClick: (Int) -> Unit = {}
+    onClick: (Int) -> Unit = {},
+    isEditable: Boolean = false,
+    onEditClick: (Int) -> Unit = {},
+    onDeleteClick: (Int) -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -55,7 +61,7 @@ fun ProfileReviewCard(
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp
             )
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 repeat(review.rating) {
                     Icon(
                         imageVector = Icons.Filled.Star,
@@ -63,6 +69,24 @@ fun ProfileReviewCard(
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(14.dp)
                     )
+                }
+                if (isEditable) {
+                    IconButton(onClick = { onEditClick(review.id) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = "Editar mi reseña",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    IconButton(onClick = { onDeleteClick(review.id) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Eliminar mi reseña",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }

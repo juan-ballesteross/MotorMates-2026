@@ -1,4 +1,4 @@
-package com.example.motormates.data.remote
+package com.example.motormates.data.remote.service
 
 import com.example.motormates.data.remote.dto.CreateReviewRequest
 import com.example.motormates.data.remote.dto.ReviewDto

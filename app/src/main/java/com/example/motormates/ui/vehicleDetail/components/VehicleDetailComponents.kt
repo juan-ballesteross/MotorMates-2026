@@ -38,8 +38,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
 import com.example.motormates.data.model.ReviewUi
+import com.example.motormates.data.model.localAvatarResFor
 
 /**
  * Foto del vehículo con los botones de "volver" y "guardar" flotando encima.
@@ -201,22 +204,25 @@ fun ReviewItem(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.clickable { onAuthorClick(review.userId) }
             ) {
-                if (review.avatarUrl != null) {
-                    AsyncImage(
+                val avatarModifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                val localAvatarRes = localAvatarResFor(review.userId)
+                when {
+                    review.avatarUrl != null -> AsyncImage(
                         model = review.avatarUrl,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
+                        modifier = avatarModifier
                     )
-                } else {
-                    // El backend no guarda foto de usuario.
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface)
+                    localAvatarRes != null -> Image(
+                        painter = painterResource(localAvatarRes),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = avatarModifier
+                    )
+                    else -> Box(
+                        modifier = avatarModifier.background(MaterialTheme.colorScheme.surface)
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))

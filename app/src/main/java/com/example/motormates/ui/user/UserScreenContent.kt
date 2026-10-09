@@ -49,6 +49,8 @@ fun UserScreenContent(
     onSelectTab: (ProfileTab) -> Unit,
     onEditProfileClick: () -> Unit,
     onReviewClick: (Int) -> Unit = {},
+    onEditReviewClick: (Int) -> Unit = {},
+    onDeleteReviewClick: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -111,7 +113,13 @@ fun UserScreenContent(
                     key = { it.id },
                     span = { GridItemSpan(maxLineSpan) }
                 ) { review ->
-                    ProfileReviewCard(review = review, onClick = onReviewClick)
+                    ProfileReviewCard(
+                        review = review,
+                        onClick = onReviewClick,
+                        isEditable = true,
+                        onEditClick = onEditReviewClick,
+                        onDeleteClick = onDeleteReviewClick
+                    )
                 }
             }
             // El garaje se queda local: el backend no modela los autos del usuario.

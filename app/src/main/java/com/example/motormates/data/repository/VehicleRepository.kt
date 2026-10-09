@@ -1,7 +1,7 @@
 package com.example.motormates.data.repository
 
 import com.example.motormates.data.model.Vehicle
-import com.example.motormates.data.remote.VehicleRemoteDataSource
+import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
 import com.example.motormates.data.remote.mapper.toDomain
 import java.io.IOException
 import javax.inject.Inject

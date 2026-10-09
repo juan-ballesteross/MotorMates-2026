@@ -21,5 +21,6 @@ data class UserUiState(
     val selectedTab: ProfileTab = ProfileTab.REVIEWS,
     val profileImageUrl: String? = null,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val pendingDeleteReviewId: Int? = null
 )

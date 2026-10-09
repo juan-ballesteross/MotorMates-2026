@@ -1,7 +1,7 @@
 package com.example.motormates.data.repository
 
 import com.example.motormates.data.model.Review
-import com.example.motormates.data.remote.ReviewRemoteDataSource
+import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
 import com.example.motormates.data.remote.dto.CreateReviewRequest
 import com.example.motormates.data.remote.dto.UpdateReviewRequest
 import com.example.motormates.data.remote.mapper.toDomain

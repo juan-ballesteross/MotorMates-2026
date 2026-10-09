@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,8 +34,22 @@ import com.example.motormates.ui.vehicleDetail.components.ReviewItem
 import com.example.motormates.ui.vehicleDetail.components.SpecStatCard
 import com.example.motormates.ui.vehicleDetail.components.VehicleImageHeader
 
-/** Cuántas reseñas se muestran aquí antes de mandar a la lista completa. */
-private const val INLINE_REVIEWS_LIMIT = 3
+/**
+ * Cuántas reseñas se muestran aquí antes de mandar a la lista completa.
+ * Se adapta al alto de pantalla: en celulares chicos se muestran menos
+ * tarjetas antes de ofrecer "Ver todas", en pantallas grandes (o tablets)
+ * caben más.
+ */
+@Composable
+private fun inlineReviewsLimit(): Int {
+    val screenHeightDp = LocalConfiguration.current.screenHeightDp
+    return when {
+        screenHeightDp < 600 -> 2
+        screenHeightDp < 750 -> 3
+        screenHeightDp < 900 -> 4
+        else -> 5
+    }
+}
 
 /**
  * Todo el estado viene del padre (state hoisting) — este composable
@@ -54,6 +69,7 @@ fun VehicleDetailContent(
     onDeleteReviewClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val inlineReviewsLimit = inlineReviewsLimit()
     val specs = listOf(
         car.potencia to "Potencia",
         car.aceleracion to "0-100 km/h",
@@ -152,7 +168,7 @@ fun VehicleDetailContent(
                     )
                     // Solo tiene sentido ofrecer "ver todas" si hay más de las
                     // que caben aquí.
-                    if (reviews.size > INLINE_REVIEWS_LIMIT) {
+                    if (reviews.size > inlineReviewsLimit) {
                         Text(
                             text = "Ver todas",
                             color = MaterialTheme.colorScheme.secondary,
@@ -178,7 +194,7 @@ fun VehicleDetailContent(
         }
 
         // Lista de reseñas dentro del MISMO LazyColumn (no se anida otro lazy adentro).
-        items(reviews.take(INLINE_REVIEWS_LIMIT), key = { it.id }) { review ->
+        items(reviews.take(inlineReviewsLimit), key = { it.id }) { review ->
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 ReviewItem(
                     review = review,

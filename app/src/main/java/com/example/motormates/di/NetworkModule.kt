@@ -1,15 +1,15 @@
 package com.example.motormates.di
 
 import com.example.motormates.data.remote.BASE_URL
-import com.example.motormates.data.remote.ReviewApiService
-import com.example.motormates.data.remote.ReviewRemoteDataSource
-import com.example.motormates.data.remote.ReviewRetrofitDataSource
-import com.example.motormates.data.remote.UserApiService
-import com.example.motormates.data.remote.UserRemoteDataSource
-import com.example.motormates.data.remote.UserRetrofitDataSource
-import com.example.motormates.data.remote.VehicleApiService
-import com.example.motormates.data.remote.VehicleRemoteDataSource
-import com.example.motormates.data.remote.VehicleRetrofitDataSource
+import com.example.motormates.data.remote.service.ReviewApiService
+import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
+import com.example.motormates.data.remote.datasource.ReviewRetrofitDataSource
+import com.example.motormates.data.remote.service.UserApiService
+import com.example.motormates.data.remote.datasource.UserRemoteDataSource
+import com.example.motormates.data.remote.datasource.UserRetrofitDataSource
+import com.example.motormates.data.remote.service.VehicleApiService
+import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
+import com.example.motormates.data.remote.datasource.VehicleRetrofitDataSource
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.ReviewRepositoryImpl
 import com.example.motormates.data.repository.UserRepository

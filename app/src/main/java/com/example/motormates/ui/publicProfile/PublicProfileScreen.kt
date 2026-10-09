@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.motormates.R
+import com.example.motormates.data.model.localAvatarResFor
 
 @Composable
 fun PublicProfileScreen(
@@ -54,9 +55,11 @@ fun PublicProfileScreen(
         }
 
         else -> PublicProfileScreenContent(
-            // Decoración: el backend no guarda portada ni avatar de usuario.
+            // La portada sí es puro adorno (el backend no la guarda), pero
+            // el avatar usa el mismo mapeo fijo por userId que las Historias
+            // y las reseñas, para no mostrar siempre la misma foto.
             coverResId = R.drawable.profile_cover,
-            avatarResId = R.drawable.user_3,
+            avatarResId = localAvatarResFor(userId) ?: R.drawable.user_3,
             profile = profile,
             reviews = uiState.reviews,
             isLoading = uiState.isLoading,

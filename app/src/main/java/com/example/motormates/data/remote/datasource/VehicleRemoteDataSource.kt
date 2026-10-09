@@ -1,4 +1,4 @@
-package com.example.motormates.data.remote
+package com.example.motormates.data.remote.datasource
 
 import com.example.motormates.data.remote.dto.VehicleDto
 

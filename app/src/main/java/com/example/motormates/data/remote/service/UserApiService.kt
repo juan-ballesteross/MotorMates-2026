@@ -1,4 +1,4 @@
-package com.example.motormates.data.remote
+package com.example.motormates.data.remote.service
 
 import com.example.motormates.data.remote.dto.UserDto
 import retrofit2.http.GET
