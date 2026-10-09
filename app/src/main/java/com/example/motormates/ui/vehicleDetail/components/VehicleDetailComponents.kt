@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -149,13 +150,26 @@ fun RatingRow(calificacion: Float, numeroResenas: Int) {
 fun SpecStatCard(valor: String, etiqueta: String) {
     Column(
         modifier = Modifier
-            .width(84.dp)
+            .width(96.dp)
             .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
             .padding(vertical = 12.dp, horizontal = 8.dp)
     ) {
-        Text(text = valor, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Text(
+            text = valor,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
         Spacer(modifier = Modifier.height(2.dp))
-        Text(text = etiqueta, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
+        Text(
+            text = etiqueta,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 11.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
