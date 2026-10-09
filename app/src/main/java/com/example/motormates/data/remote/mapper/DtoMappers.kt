@@ -22,7 +22,11 @@ fun VehicleDto.toDomain(): Vehicle = Vehicle(
     model = model,
     year = year,
     category = category,
-    imageUrl = imageUrl
+    imageUrl = imageUrl,
+    potencia = potencia,
+    aceleracion = aceleracion,
+    velocidadMaxima = velocidadMaxima,
+    traccion = traccion
 )
 
 fun UserDto.toDomain(): BackendUser = BackendUser(

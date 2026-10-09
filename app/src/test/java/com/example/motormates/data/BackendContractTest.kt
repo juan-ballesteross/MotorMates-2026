@@ -81,8 +81,12 @@ class BackendContractTest {
         assertEquals("911 GT3", porsche.model)
         assertEquals(2024, porsche.year)
         assertEquals("Deportivo", porsche.category)
-        // Los vehículos sembrados no traen imagen: la UI debe tolerar el null.
-        assertEquals(null, porsche.imageUrl)
+        assertNotNull("La semilla del backend trae imagen", porsche.imageUrl)
+        // Las especificaciones llegan ya formateadas con su unidad desde la BD.
+        assertEquals("502 hp", porsche.potencia)
+        assertEquals("3.4 s", porsche.aceleracion)
+        assertEquals("318 km/h", porsche.velocidadMaxima)
+        assertEquals("RWD", porsche.traccion)
     }
 
     @Test

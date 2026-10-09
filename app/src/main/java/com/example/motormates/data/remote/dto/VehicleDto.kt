@@ -14,6 +14,13 @@ data class VehicleDto(
     @SerializedName("year") val year: Int,
     @SerializedName("category") val category: String,
     @SerializedName("imageUrl") val imageUrl: String?,
+    // Las especificaciones técnicas son opcionales en la BD (allowNull), así
+    // que van nulables: si la columna está vacía, Gson deja null y el fallback
+    // lo resuelve el mapper a UI.
+    @SerializedName("potencia") val potencia: String?,
+    @SerializedName("aceleracion") val aceleracion: String?,
+    @SerializedName("velocidadMaxima") val velocidadMaxima: String?,
+    @SerializedName("traccion") val traccion: String?,
     @SerializedName("createdAt") val createdAt: String?,
     @SerializedName("updatedAt") val updatedAt: String?
 )

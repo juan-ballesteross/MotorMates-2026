@@ -20,8 +20,8 @@ fun Vehicle.toFeedVehicleUi(): FeedVehicleUi = FeedVehicleUi(
 /**
  * La calificación y el número de reseñas no vienen del endpoint de
  * vehículos: se calculan con las reseñas que ya se consultaron.
- * Las especificaciones técnicas (potencia, 0-100, etc.) no existen en el
- * backend, así que se muestran como "—" en vez de inventarlas.
+ * Las especificaciones técnicas sí las manda el backend, ya formateadas con
+ * su unidad, así que solo se les pone "—" cuando la columna viene vacía.
  */
 fun Vehicle.toCarDetailUi(reviews: List<Review>): CarDetailUi = CarDetailUi(
     marca = brand.uppercase(),
@@ -31,10 +31,10 @@ fun Vehicle.toCarDetailUi(reviews: List<Review>): CarDetailUi = CarDetailUi(
     imageUrl = imageUrl,
     calificacion = if (reviews.isEmpty()) 0f else reviews.map { it.rating }.average().toFloat(),
     numeroResenas = reviews.size,
-    potencia = "—",
-    aceleracion = "—",
-    velocidadMaxima = "—",
-    traccion = "—"
+    potencia = potencia ?: "—",
+    aceleracion = aceleracion ?: "—",
+    velocidadMaxima = velocidadMaxima ?: "—",
+    traccion = traccion ?: "—"
 )
 
 fun Vehicle.toReviewCarSummary(): ReviewCarSummary = ReviewCarSummary(
