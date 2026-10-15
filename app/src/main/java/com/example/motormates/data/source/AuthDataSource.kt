@@ -13,4 +13,6 @@ interface AuthDataSource {
     suspend fun signOut()
 
     fun getCurrentUser(): AuthUser?
+
+    suspend fun deleteCurrentUser()
 }

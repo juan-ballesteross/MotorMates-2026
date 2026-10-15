@@ -1,12 +1,15 @@
 package com.example.motormates.data.repository
 
+import com.example.motormates.data.dto.UserDto
 import com.example.motormates.data.model.AuthUser
 import com.example.motormates.data.source.AuthDataSource
+import com.example.motormates.data.source.UserDataSource
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.firestore.FirebaseFirestoreException
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -23,16 +26,12 @@ interface AuthRepository {
 }
 
 class AuthRepositoryImpl @Inject constructor(
-    private val authDataSource: AuthDataSource
+    private val authDataSource: AuthDataSource,
+    private val userDataSource: UserDataSource
 ) : AuthRepository {
 
     override val authState: Flow<AuthUser?> = authDataSource.authState
 
-    /**
-     * Catches específicos primero, genérico al final — mismo orden que
-     * usó el profesor. Cada catch arma su propio mensaje en español en
-     * vez de dejar pasar el texto crudo de Firebase.
-     */
     override suspend fun signIn(email: String, password: String): Result<AuthUser> {
         return try {
             val user = authDataSource.signIn(email.trim(), password)
@@ -50,7 +49,13 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun signUp(fullName: String, email: String, password: String): Result<AuthUser> {
         return try {
-            val user = authDataSource.signUp(fullName.trim(), email.trim(), password)
+            val cleanName = fullName.trim()
+            val cleanEmail = email.trim()
+
+            // Paso 1: crear la cuenta en Auth. Paso 2: guardar su perfil en Firestore.
+            val user = authDataSource.signUp(cleanName, cleanEmail, password)
+            saveUserProfile(user, cleanName, cleanEmail)
+
             Result.success(user)
         } catch (e: FirebaseAuthUserCollisionException) {
             Result.failure(Exception("Ya existe una cuenta registrada con ese correo"))
@@ -60,15 +65,44 @@ class AuthRepositoryImpl @Inject constructor(
             Result.failure(Exception("El correo no es válido"))
         } catch (e: FirebaseNetworkException) {
             Result.failure(Exception("Sin conexión a internet, verifica tu red"))
+        } catch (e: FirebaseFirestoreException) {
+            val message = when (e.code) {
+                FirebaseFirestoreException.Code.UNAVAILABLE ->
+                    "Sin conexión a internet, verifica tu red"
+                else -> "No se pudo guardar tu perfil, intenta de nuevo"
+            }
+            Result.failure(Exception(message))
         } catch (e: Exception) {
             Result.failure(Exception("Error al registrar la cuenta"))
         }
     }
 
-    // signOut se deja con runCatching: es una operación simple donde no
-    // necesitamos distinguir tipos de error con mensajes específicos.
     override suspend fun signOut(): Result<Unit> =
         runCatching { authDataSource.signOut() }
 
     override fun getCurrentUser(): AuthUser? = authDataSource.getCurrentUser()
+
+    /**
+     * Si guardar el perfil falla, la cuenta de Auth ya existe sin perfil.
+     * La borramos para que el usuario pueda reintentar el registro con el
+     * mismo correo, y relanzamos el error para que el catch de signUp
+     * lo traduzca al mensaje que corresponda.
+     */
+    private suspend fun saveUserProfile(user: AuthUser, fullName: String, email: String) {
+        try {
+            userDataSource.createUser(
+                UserDto(
+                    id = user.id,
+                    fullName = fullName,
+                    email = email,
+                    // Valor inicial: lo que va antes de la @ del correo. Se podrá editar.
+                    username = email.substringBefore("@"),
+                    createdAt = System.currentTimeMillis()
+                )
+            )
+        } catch (e: Exception) {
+            runCatching { authDataSource.deleteCurrentUser() }
+            throw e
+        }
+    }
 }

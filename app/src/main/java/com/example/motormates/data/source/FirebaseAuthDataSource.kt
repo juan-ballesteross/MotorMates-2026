@@ -43,6 +43,11 @@ class FirebaseAuthDataSource @Inject constructor(
     }
 
     override fun getCurrentUser(): AuthUser? = firebaseAuth.currentUser?.toAuthUser()
+
+    override suspend fun deleteCurrentUser() {
+        firebaseAuth.currentUser?.delete()?.await()
+    }
+
 }
 
 private fun FirebaseUser.toAuthUser(displayNameOverride: String? = null): AuthUser =
@@ -52,3 +57,4 @@ private fun FirebaseUser.toAuthUser(displayNameOverride: String? = null): AuthUs
         displayName = displayNameOverride ?: displayName,
         photoUrl = photoUrl?.toString()
     )
+
