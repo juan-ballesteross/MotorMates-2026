@@ -1,5 +1,6 @@
 package com.example.motormates.data.model
 
+import com.example.motormates.data.dto.UserDto
 import com.example.motormates.data.util.toRelativeTimeEs
 
 /**
@@ -79,4 +80,25 @@ fun BackendUser.toUserProfile(reviewsCount: Int): UserProfile = UserProfile(
     reviewsCount = reviewsCount,
     followersDisplay = "0",
     followingDisplay = "0"
+)
+
+/**
+ * Perfil del usuario autenticado con Firebase, leído desde Firestore.
+ * A diferencia de BackendUser, aquí sí hay location/bio/username propios.
+ */
+fun UserDto.toUserProfile(reviewsCount: Int): UserProfile = UserProfile(
+    name = fullName,
+    handle = "@" + username.ifBlank { email.substringBefore("@") },
+    location = location,
+    bio = bio,
+    reviewsCount = reviewsCount,
+    followersDisplay = "0",
+    followingDisplay = "0"
+)
+
+fun UserDto.toUserSearchResult(): UserSearchResult = UserSearchResult(
+    uid = id,
+    name = fullName,
+    handle = "@" + username.ifBlank { email.substringBefore("@") },
+    avatarUrl = avatarUrl
 )

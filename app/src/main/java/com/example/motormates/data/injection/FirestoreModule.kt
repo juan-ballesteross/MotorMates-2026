@@ -13,5 +13,8 @@ object FirestoreModule {
 
     @Provides
     @Singleton
-    fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+    fun provideFirestore(): FirebaseFirestore =
+        // La base de datos de este proyecto se llama "motormatesdb" y no
+        // "(default)", porque así se creó en la consola de Firebase.
+        FirebaseFirestore.getInstance("motormatesdb")
 }

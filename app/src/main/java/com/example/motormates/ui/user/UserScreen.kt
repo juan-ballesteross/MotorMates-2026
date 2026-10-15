@@ -65,6 +65,7 @@ fun UserScreen(
     UserScreenContent(
         profile = uiState.profile,
         profileImageUrl = uiState.profileImageUrl,
+        coverImageUrl = uiState.coverImageUrl,
         reviews = uiState.reviews,
         isLoading = uiState.isLoading,
         errorMessage = uiState.errorMessage,

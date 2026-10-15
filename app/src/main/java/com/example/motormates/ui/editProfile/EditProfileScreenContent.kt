@@ -20,6 +20,7 @@ import com.example.motormates.ui.editProfile.components.EditProfileAddVehicleBut
 import com.example.motormates.ui.editProfile.components.EditProfileBioField
 import com.example.motormates.ui.editProfile.components.EditProfileGarageItem
 import com.example.motormates.ui.editProfile.components.EditProfileLogoutButton
+import com.example.motormates.ui.editProfile.components.EditProfileCoverSection
 import com.example.motormates.ui.editProfile.components.EditProfilePhotoSection
 import com.example.motormates.ui.editProfile.components.EditProfileTopBar
 import com.example.motormates.ui.register.components.RegisterTextField
@@ -39,7 +40,13 @@ fun EditProfileScreenContent(
     profileImageUrl: String?,
     isImageUploading: Boolean,
     imageUploadError: String?,
+    coverImageUrl: String?,
+    isCoverUploading: Boolean,
+    coverUploadError: String?,
+    isSaving: Boolean,
+    saveError: String?,
     onChangePhotoClick: () -> Unit,
+    onChangeCoverClick: () -> Unit,
     onCloseClick: () -> Unit,
     onSaveClick: () -> Unit,
     onAddVehicleClick: () -> Unit,
@@ -58,6 +65,22 @@ fun EditProfileScreenContent(
             EditProfileTopBar(onCloseClick = onCloseClick, onSaveClick = onSaveClick)
         }
         item {
+            EditProfileCoverSection(
+                coverImageUrl = coverImageUrl,
+                isUploading = isCoverUploading,
+                onChangeCoverClick = onChangeCoverClick
+            )
+        }
+        coverUploadError?.let { error ->
+            item {
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp
+                )
+            }
+        }
+        item {
             EditProfilePhotoSection(
                 profileImageUrl = profileImageUrl,
                 isUploading = isImageUploading,
@@ -65,6 +88,15 @@ fun EditProfileScreenContent(
             )
         }
         imageUploadError?.let { error ->
+            item {
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp
+                )
+            }
+        }
+        saveError?.let { error ->
             item {
                 Text(
                     text = error,

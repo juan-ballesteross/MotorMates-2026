@@ -10,9 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.motormates.data.model.CarListing
+import com.example.motormates.data.model.UserSearchResult
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.search.components.SearchTopBar
@@ -27,7 +28,8 @@ import com.example.motormates.ui.theme.MotorMatesTheme
 @Composable
 fun SearchScreen(
     onCarClick: (CarListing) -> Unit = {},
-    viewModel: SearchViewModel = viewModel(),
+    onUserClick: (UserSearchResult) -> Unit = {},
+    viewModel: SearchViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -48,7 +50,9 @@ fun SearchScreen(
             selectedCategory = uiState.selectedCategory,
             onSelectCategory = viewModel::updateSelectedCategory,
             filteredCars = uiState.filteredCars,
-            onCarClick = onCarClick
+            onCarClick = onCarClick,
+            userResults = uiState.userResults,
+            onUserClick = onUserClick
         )
     }
 }

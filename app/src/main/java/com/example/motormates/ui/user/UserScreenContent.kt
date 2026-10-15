@@ -41,6 +41,7 @@ import com.example.motormates.ui.user.components.ProfileTabsRow
 fun UserScreenContent(
     profile: UserProfile,
     profileImageUrl: String?,
+    coverImageUrl: String?,
     reviews: List<UserReviewUi>,
     isLoading: Boolean,
     errorMessage: String?,
@@ -65,6 +66,7 @@ fun UserScreenContent(
         item(span = { GridItemSpan(maxLineSpan) }) {
             ProfileHeader(
                 profileImageUrl = profileImageUrl,
+                coverImageUrl = coverImageUrl,
                 onEditProfileClick = onEditProfileClick
             )
         }

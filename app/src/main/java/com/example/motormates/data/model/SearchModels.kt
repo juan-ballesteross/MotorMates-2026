@@ -15,3 +15,11 @@ data class CarListing(
     val category: SearchCategoryKey,
     val imageResId: Int
 )
+
+/** Resultado de buscar usuarios reales (Firestore) en el buscador. */
+data class UserSearchResult(
+    val uid: String,
+    val name: String,
+    val handle: String,
+    val avatarUrl: String? = null
+)

@@ -37,12 +37,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.motormates.R
 
 @Composable
 fun PublicProfileHeader(
     coverResId: Int,
+    coverUrl: String? = null,
     avatarResId: Int,
+    avatarUrl: String? = null,
     onBackClick: () -> Unit,
     onFollowClick: () -> Unit,
     onMessageClick: () -> Unit,
@@ -50,15 +53,27 @@ fun PublicProfileHeader(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(coverResId),
-                contentDescription = stringResource(R.string.user_cover_cd),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp)
-                    .clip(RoundedCornerShape(20.dp))
-            )
+            if (coverUrl != null) {
+                AsyncImage(
+                    model = coverUrl,
+                    contentDescription = stringResource(R.string.user_cover_cd),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                )
+            } else {
+                Image(
+                    painter = painterResource(coverResId),
+                    contentDescription = stringResource(R.string.user_cover_cd),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                )
+            }
             IconButton(
                 onClick = onBackClick,
                 modifier = Modifier
@@ -86,14 +101,25 @@ fun PublicProfileHeader(
                     .clip(RoundedCornerShape(16.dp))
                     .border(3.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(16.dp))
             ) {
-                Image(
-                    painter = painterResource(avatarResId),
-                    contentDescription = stringResource(R.string.user_avatar_cd),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(13.dp))
-                )
+                if (avatarUrl != null) {
+                    AsyncImage(
+                        model = avatarUrl,
+                        contentDescription = stringResource(R.string.user_avatar_cd),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(13.dp))
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(avatarResId),
+                        contentDescription = stringResource(R.string.user_avatar_cd),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(13.dp))
+                    )
+                }
             }
             Spacer(modifier = Modifier.weight(1f))
             Button(

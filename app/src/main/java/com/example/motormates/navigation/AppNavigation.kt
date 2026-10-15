@@ -94,6 +94,9 @@ fun AppNavigation(
             SearchScreen(
                 onCarClick = { car ->
                     navController.navigate(ScreenRoute.VehicleDetail.createRoute(car.id))
+                },
+                onUserClick = { user ->
+                    navController.navigate(ScreenRoute.PublicProfileFirebase.createRoute(user.uid))
                 }
             )
         }
@@ -109,6 +112,7 @@ fun AppNavigation(
         }
         composable(ScreenRoute.Profile.route) { entry ->
             val reviewsChanged by entry.reviewsChangedState()
+            val profileChanged by entry.profileChangedState()
 
             UserScreen(
                 onEditProfileClick = { navController.navigate(ScreenRoute.EditProfile.route) },
@@ -118,8 +122,11 @@ fun AppNavigation(
                 onEditReviewClick = { vehicleId, reviewId ->
                     navController.navigate(ScreenRoute.NewReview.createRoute(vehicleId, reviewId))
                 },
-                reloadSignal = reviewsChanged,
-                onReloadHandled = { entry.clearReviewsChanged() }
+                reloadSignal = reviewsChanged || profileChanged,
+                onReloadHandled = {
+                    entry.clearReviewsChanged()
+                    entry.clearProfileChanged()
+                }
             )
         }
         composable(ScreenRoute.Alerts.route) {
@@ -128,7 +135,12 @@ fun AppNavigation(
         composable(ScreenRoute.EditProfile.route) {
             EditProfileScreen(
                 onCloseClick = { navController.popBackStack() },
-                onSaveClick = { navController.popBackStack() },
+                onSaveClick = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(RESULT_PROFILE_CHANGED, true)
+                    navController.popBackStack()
+                },
                 onLoggedOut = {
                     navController.navigate(ScreenRoute.Login.route) {
                         popUpTo(0) { inclusive = true }
@@ -240,6 +252,21 @@ fun AppNavigation(
                 }
             )
         }
+        composable(
+            route = ScreenRoute.PublicProfileFirebase.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.PublicProfileFirebase.ARG_UID) { type = NavType.StringType }
+            )
+        ) { entry ->
+            val uid = entry.arguments?.getString(ScreenRoute.PublicProfileFirebase.ARG_UID)
+            PublicProfileScreen(
+                firebaseUid = uid,
+                onBackClick = { navController.popBackStack() },
+                onVehicleClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
+                }
+            )
+        }
     }
 }
 
@@ -254,4 +281,12 @@ private fun NavBackStackEntry.reviewsChangedState(): State<Boolean> =
 
 private fun NavBackStackEntry.clearReviewsChanged() {
     savedStateHandle[RESULT_REVIEWS_CHANGED] = false
+}
+
+@Composable
+private fun NavBackStackEntry.profileChangedState(): State<Boolean> =
+    savedStateHandle.getStateFlow(RESULT_PROFILE_CHANGED, false).collectAsStateWithLifecycle()
+
+private fun NavBackStackEntry.clearProfileChanged() {
+    savedStateHandle[RESULT_PROFILE_CHANGED] = false
 }

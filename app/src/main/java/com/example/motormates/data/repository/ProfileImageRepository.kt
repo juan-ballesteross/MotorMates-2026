@@ -14,14 +14,23 @@ interface ProfileImageRepository {
 }
 
 class ProfileImageRepositoryImpl @Inject constructor(
-    private val profileImageDataSource: ProfileImageDataSource
+    private val profileImageDataSource: ProfileImageDataSource,
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ) : ProfileImageRepository {
 
     override val profileImageUrl: StateFlow<String?> = profileImageDataSource.profileImageUrl
 
     override suspend fun uploadProfileImage(uri: Uri): Result<String> {
         return try {
-            Result.success(profileImageDataSource.uploadProfileImage(uri))
+            val downloadUrl = profileImageDataSource.uploadProfileImage(uri)
+            // Se guarda también en Firestore (campo best-effort: si falla,
+            // la foto ya quedó subida y puesta en tu propio perfil, así que
+            // no se revierte nada, solo no se ve todavía en perfiles ajenos).
+            authRepository.getCurrentUser()?.id?.let { uid ->
+                userRepository.updateCurrentUserAvatar(uid, downloadUrl)
+            }
+            Result.success(downloadUrl)
         } catch (e: IllegalStateException) {
             Result.failure(Exception(e.message ?: "Debes iniciar sesion para cambiar tu foto"))
         } catch (e: FirebaseNetworkException) {

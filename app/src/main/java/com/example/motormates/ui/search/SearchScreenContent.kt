@@ -12,9 +12,11 @@ import androidx.compose.ui.unit.dp
 import com.example.motormates.data.model.CarListing
 import com.example.motormates.data.model.SearchCategory
 import com.example.motormates.data.model.SearchCategoryKey
+import com.example.motormates.data.model.UserSearchResult
 import com.example.motormates.ui.search.components.CarResultsGrid
 import com.example.motormates.ui.search.components.CategoryChipsRow
 import com.example.motormates.ui.search.components.EmptySearchState
+import com.example.motormates.ui.search.components.UserResultsSection
 
 @Composable
 fun SearchScreenContent(
@@ -23,6 +25,8 @@ fun SearchScreenContent(
     onSelectCategory: (SearchCategoryKey) -> Unit,
     filteredCars: List<CarListing>,
     onCarClick: (CarListing) -> Unit = {},
+    userResults: List<UserSearchResult> = emptyList(),
+    onUserClick: (UserSearchResult) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -31,6 +35,10 @@ fun SearchScreenContent(
             .background(MaterialTheme.colorScheme.background)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
+        if (userResults.isNotEmpty()) {
+            UserResultsSection(users = userResults, onUserClick = onUserClick)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
         CategoryChipsRow(
             categories = categories,
             selected = selectedCategory,

@@ -9,5 +9,8 @@ data class PublicProfileUiState(
     val reviews: List<UserReviewUi> = emptyList(),
     val selectedTab: ProfileTab = ProfileTab.REVIEWS,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    // Solo se llena para usuarios reales de Firebase (ver loadProfileByUid).
+    val avatarUrl: String? = null,
+    val coverUrl: String? = null
 )

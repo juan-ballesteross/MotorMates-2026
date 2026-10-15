@@ -58,6 +58,42 @@ class PublicProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Perfil de un usuario real, registrado con Firebase (encontrado desde
+     * el buscador). Sus reseñas quedan vacías: todavía viven en el backend
+     * viejo con id numérico, sin relación con el uid de Firebase Auth.
+     */
+    fun loadProfileByUid(uid: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            val userResult = userRepository.getCurrentUserProfile(uid)
+
+            _uiState.update { current ->
+                userResult.fold(
+                    onSuccess = { user ->
+                        current.copy(
+                            isLoading = false,
+                            errorMessage = null,
+                            profile = user.toUserProfile(reviewsCount = 0),
+                            reviews = emptyList(),
+                            selectedTab = ProfileTab.REVIEWS,
+                            avatarUrl = user.avatarUrl,
+                            coverUrl = user.coverUrl
+                        )
+                    },
+                    onFailure = { error ->
+                        current.copy(
+                            isLoading = false,
+                            profile = null,
+                            errorMessage = error.message ?: "No se pudo cargar el perfil"
+                        )
+                    }
+                )
+            }
+        }
+    }
+
     fun updateSelectedTab(tab: ProfileTab) {
         _uiState.update { it.copy(selectedTab = tab) }
     }

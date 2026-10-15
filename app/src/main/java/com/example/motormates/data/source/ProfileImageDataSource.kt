@@ -41,7 +41,8 @@ class FirebaseProfileImageDataSource @Inject constructor(
         val imageRef = firebaseStorage.reference.child("profile_images/${user.uid}/avatar")
 
         imageRef.putFile(uri).await()
-        val downloadUrl = imageRef.downloadUrl.await().toString()
+        val rawDownloadUrl = imageRef.downloadUrl.await().toString()
+        val downloadUrl = "$rawDownloadUrl&cb=${System.currentTimeMillis()}"
         val changes = UserProfileChangeRequest.Builder()
             .setPhotoUri(Uri.parse(downloadUrl))
             .build()

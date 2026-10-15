@@ -11,5 +11,6 @@ data class UserDto(
     val location: String = "",
     val bio: String = "",
     val avatarUrl: String? = null, // URL (String), no un recurso local
+    val coverUrl: String? = null,
     val createdAt: Long = 0L
 )

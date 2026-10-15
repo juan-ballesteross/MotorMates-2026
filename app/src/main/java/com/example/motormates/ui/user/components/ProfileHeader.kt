@@ -1,6 +1,5 @@
 package com.example.motormates.ui.user.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,13 +37,17 @@ import coil.compose.AsyncImage
 @Composable
 fun ProfileHeader(
     profileImageUrl: String?,
+    coverImageUrl: String?,
     onEditProfileClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Image(
-            painter = painterResource(R.drawable.profile_cover),
+        AsyncImage(
+            model = coverImageUrl,
             contentDescription = stringResource(R.string.user_cover_cd),
+            placeholder = painterResource(R.drawable.profile_cover),
+            error = painterResource(R.drawable.profile_cover),
+            fallback = painterResource(R.drawable.profile_cover),
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()

@@ -85,6 +85,68 @@ fun EditProfileTopBar(
     }
 }
 
+@Composable
+fun EditProfileCoverSection(
+    coverImageUrl: String?,
+    isUploading: Boolean,
+    onChangeCoverClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable(enabled = !isUploading, onClick = onChangeCoverClick)
+    ) {
+        if (coverImageUrl == null) {
+            Image(
+                painter = painterResource(R.drawable.profile_cover),
+                contentDescription = stringResource(R.string.user_cover_cd),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            AsyncImage(
+                model = coverImageUrl,
+                contentDescription = stringResource(R.string.user_cover_cd),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(10.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.85f))
+                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(10.dp))
+                .clickable(enabled = !isUploading, onClick = onChangeCoverClick)
+                .padding(horizontal = 14.dp, vertical = 10.dp)
+        ) {
+            Text(
+                text = stringResource(
+                    if (isUploading) R.string.edit_profile_uploading_cover
+                    else R.string.edit_profile_change_cover_button
+                ),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        if (isUploading) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(28.dp),
+                strokeWidth = 2.dp
+            )
+        }
+    }
+}
+
 /**
  * Placeholder de foto de portada: sin picker real todavía (no existe
  * ninguno en la app), igual criterio que ReviewAddPhotoButton/PostGalleryPreview.

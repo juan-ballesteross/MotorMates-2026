@@ -33,7 +33,9 @@ import com.example.motormates.ui.user.components.ProfileTabsRow
 @Composable
 fun PublicProfileScreenContent(
     coverResId: Int,
+    coverUrl: String? = null,
     avatarResId: Int,
+    avatarUrl: String? = null,
     profile: UserProfile,
     reviews: List<UserReviewUi>,
     isLoading: Boolean,
@@ -58,7 +60,9 @@ fun PublicProfileScreenContent(
         item(span = { GridItemSpan(maxLineSpan) }) {
             PublicProfileHeader(
                 coverResId = coverResId,
+                coverUrl = coverUrl,
                 avatarResId = avatarResId,
+                avatarUrl = avatarUrl,
                 onBackClick = onBackClick,
                 onFollowClick = onFollowClick,
                 onMessageClick = onMessageClick

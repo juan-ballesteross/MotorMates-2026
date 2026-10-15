@@ -28,6 +28,11 @@ fun EditProfileScreen(
     ) { uri ->
         uri?.let(viewModel::uploadProfileImage)
     }
+    val coverPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let(viewModel::uploadCoverImage)
+    }
 
     EditProfileScreenContent(
         username = uiState.username,
@@ -38,13 +43,23 @@ fun EditProfileScreen(
         profileImageUrl = uiState.profileImageUrl,
         isImageUploading = uiState.isImageUploading,
         imageUploadError = uiState.imageUploadError,
+        coverImageUrl = uiState.coverImageUrl,
+        isCoverUploading = uiState.isCoverUploading,
+        coverUploadError = uiState.coverUploadError,
+        isSaving = uiState.isSaving,
+        saveError = uiState.saveError,
         onChangePhotoClick = {
             photoPickerLauncher.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
             )
         },
+        onChangeCoverClick = {
+            coverPickerLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        },
         onCloseClick = onCloseClick,
-        onSaveClick = onSaveClick,
+        onSaveClick = { viewModel.saveProfile(onSaved = onSaveClick) },
         onAddVehicleClick = onAddVehicleClick,
         onEditVehicleClick = onEditVehicleClick,
         onLogoutClick = { viewModel.logOut(onLoggedOut) },
@@ -65,7 +80,13 @@ private fun EditProfileScreenPreview() {
             profileImageUrl = null,
             isImageUploading = false,
             imageUploadError = null,
+            coverImageUrl = null,
+            isCoverUploading = false,
+            coverUploadError = null,
+            isSaving = false,
+            saveError = null,
             onChangePhotoClick = {},
+            onChangeCoverClick = {},
             onCloseClick = {},
             onSaveClick = {},
             onAddVehicleClick = {},

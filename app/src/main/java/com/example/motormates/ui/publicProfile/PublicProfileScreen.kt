@@ -20,7 +20,8 @@ import com.example.motormates.data.model.localAvatarResFor
 
 @Composable
 fun PublicProfileScreen(
-    userId: Int,
+    userId: Int? = null,
+    firebaseUid: String? = null,
     onBackClick: () -> Unit = {},
     onVehicleClick: (Int) -> Unit = {},
     viewModel: PublicProfileViewModel = hiltViewModel(),
@@ -28,8 +29,12 @@ fun PublicProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(userId) {
-        viewModel.loadProfile(userId)
+    LaunchedEffect(userId, firebaseUid) {
+        if (userId != null) {
+            viewModel.loadProfile(userId)
+        } else if (firebaseUid != null) {
+            viewModel.loadProfileByUid(firebaseUid)
+        }
     }
 
     val profile = uiState.profile
@@ -57,9 +62,13 @@ fun PublicProfileScreen(
         else -> PublicProfileScreenContent(
             // La portada sí es puro adorno (el backend no la guarda), pero
             // el avatar usa el mismo mapeo fijo por userId que las Historias
-            // y las reseñas, para no mostrar siempre la misma foto.
+            // y las reseñas, para no mostrar siempre la misma foto. Los
+            // usuarios reales de Firebase muestran su propia foto (avatarUrl)
+            // cuando la tienen.
             coverResId = R.drawable.profile_cover,
-            avatarResId = localAvatarResFor(userId) ?: R.drawable.user_3,
+            coverUrl = uiState.coverUrl,
+            avatarResId = userId?.let { localAvatarResFor(it) } ?: R.drawable.user_3,
+            avatarUrl = uiState.avatarUrl,
             profile = profile,
             reviews = uiState.reviews,
             isLoading = uiState.isLoading,

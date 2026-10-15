@@ -20,6 +20,7 @@ data class UserUiState(
     val cars: List<GarageCar> = emptyList(),
     val selectedTab: ProfileTab = ProfileTab.REVIEWS,
     val profileImageUrl: String? = null,
+    val coverImageUrl: String? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val pendingDeleteReviewId: Int? = null

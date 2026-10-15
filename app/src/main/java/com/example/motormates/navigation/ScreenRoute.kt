@@ -50,4 +50,13 @@ sealed class ScreenRoute(val route: String) {
         const val ARG_USER_ID = "userId"
         fun createRoute(userId: Int) = "publicProfile/$userId"
     }
+
+    /**
+     * Perfil de otro usuario real, registrado con Firebase (uid de Auth,
+     * no el id numérico del backend viejo). Encontrado desde el buscador.
+     */
+    object PublicProfileFirebase : ScreenRoute("publicProfileFirebase/{uid}") {
+        const val ARG_UID = "uid"
+        fun createRoute(uid: String) = "publicProfileFirebase/$uid"
+    }
 }

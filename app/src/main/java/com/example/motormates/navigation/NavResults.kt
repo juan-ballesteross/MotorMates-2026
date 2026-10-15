@@ -8,3 +8,9 @@ package com.example.motormates.navigation
  * compartido entre pantallas.
  */
 const val RESULT_REVIEWS_CHANGED = "reviewsChanged"
+
+/**
+ * Misma idea que RESULT_REVIEWS_CHANGED, pero para cuando se edita el
+ * perfil propio: le avisa a "Mi perfil" que debe recargar los datos.
+ */
+const val RESULT_PROFILE_CHANGED = "profileChanged"
