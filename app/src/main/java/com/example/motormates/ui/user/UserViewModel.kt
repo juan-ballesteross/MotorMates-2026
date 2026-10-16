@@ -3,7 +3,6 @@ package com.example.motormates.ui.user
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.mock.UserMocks
-import com.example.motormates.data.model.CURRENT_USER_ID
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.toUserProfile
 import com.example.motormates.data.model.toUserReviewUi
@@ -44,18 +43,14 @@ class UserViewModel @Inject constructor(
 
     /**
      * El perfil (nombre, handle, ubicación, bio) sale de Firestore, del
-     * usuario real que inició sesión con Firebase Auth. Las reseñas todavía
-     * no se migraron a Firestore, así que por ahora siguen viniendo del
-     * usuario quemado (CURRENT_USER_ID) del backend viejo.
+     * usuario real que inició sesión con Firebase Auth, y sus reseñas son
+     * las de la colección "reviews" cuyo userId es su uid.
      */
     fun load() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             val authUser = authRepository.getCurrentUser()
-            val reviews = reviewRepository.getReviewsByUser(CURRENT_USER_ID)
-                .getOrElse { emptyList() }
-
             if (authUser == null) {
                 _uiState.update {
                     it.copy(
@@ -67,6 +62,8 @@ class UserViewModel @Inject constructor(
             }
 
             val userResult = userRepository.getCurrentUserProfile(authUser.id)
+            val reviews = reviewRepository.getReviewsByUser(authUser.id)
+                .getOrElse { emptyList() }
 
             _uiState.update { current ->
                 userResult.fold(
@@ -94,7 +91,7 @@ class UserViewModel @Inject constructor(
         _uiState.update { it.copy(selectedTab = tab) }
     }
 
-    fun askDeleteReview(reviewId: Int) {
+    fun askDeleteReview(reviewId: String) {
         _uiState.update { it.copy(pendingDeleteReviewId = reviewId) }
     }
 

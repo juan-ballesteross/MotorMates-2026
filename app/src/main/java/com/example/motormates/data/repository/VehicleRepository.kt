@@ -2,20 +2,20 @@ package com.example.motormates.data.repository
 
 import com.example.motormates.data.model.Vehicle
 import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
-import com.example.motormates.data.remote.mapper.toDomain
+import com.google.firebase.firestore.FirebaseFirestoreException
 import java.io.IOException
 import javax.inject.Inject
 import retrofit2.HttpException
 
 interface VehicleRepository {
     suspend fun getVehicles(): Result<List<Vehicle>>
-    suspend fun getVehicleById(id: Int): Result<Vehicle>
+    suspend fun getVehicleById(id: String): Result<Vehicle>
 }
 
 /**
  * Devuelve modelos de dominio, nunca DTOs: la capa de arriba no debe saber
- * cómo viene armado el JSON. Se inyecta la interfaz de la fuente de datos,
- * no la implementación de Retrofit.
+ * cómo viene armado el dato. Se inyecta la interfaz de la fuente de datos,
+ * no la implementación (hoy Firestore, antes Retrofit).
  */
 class VehicleRepositoryImpl @Inject constructor(
     private val remoteDataSource: VehicleRemoteDataSource
@@ -23,8 +23,9 @@ class VehicleRepositoryImpl @Inject constructor(
 
     /**
      * Catches específicos primero y genérico al final, igual que en
-     * AuthRepositoryImpl. Se usa try/catch con HttpException en vez de
-     * Response<T> para no amarrar la app al tipo de respuesta de Retrofit.
+     * AuthRepositoryImpl. Se atrapan tanto los errores de Retrofit
+     * (IOException/HttpException) como los de Firestore, para que cambiar
+     * de fuente de datos no cambie los mensajes que ve la UI.
      */
     override suspend fun getVehicles(): Result<List<Vehicle>> {
         return try {
@@ -40,12 +41,21 @@ class VehicleRepositoryImpl @Inject constructor(
                     )
                 )
             )
+        } catch (e: FirebaseFirestoreException) {
+            Result.failure(
+                Exception(
+                    e.toSpanishMessage(
+                        notFound = "No se encontraron vehículos",
+                        fallback = "No se pudieron cargar los vehículos"
+                    )
+                )
+            )
         } catch (e: Exception) {
             Result.failure(Exception("No se pudieron cargar los vehículos"))
         }
     }
 
-    override suspend fun getVehicleById(id: Int): Result<Vehicle> {
+    override suspend fun getVehicleById(id: String): Result<Vehicle> {
         return try {
             Result.success(remoteDataSource.getVehicleById(id).toDomain())
         } catch (e: IOException) {
@@ -54,13 +64,28 @@ class VehicleRepositoryImpl @Inject constructor(
             Result.failure(
                 Exception(
                     e.toSpanishMessage(
-                        notFound = "Este vehículo no existe o fue eliminado",
+                        notFound = VEHICLE_NOT_FOUND,
                         fallback = "No se pudo cargar el vehículo"
                     )
                 )
             )
+        } catch (e: FirebaseFirestoreException) {
+            Result.failure(
+                Exception(
+                    e.toSpanishMessage(
+                        notFound = VEHICLE_NOT_FOUND,
+                        fallback = "No se pudo cargar el vehículo"
+                    )
+                )
+            )
+        } catch (e: NoSuchElementException) {
+            Result.failure(Exception(VEHICLE_NOT_FOUND))
         } catch (e: Exception) {
             Result.failure(Exception("No se pudo cargar el vehículo"))
         }
+    }
+
+    private companion object {
+        const val VEHICLE_NOT_FOUND = "Este vehículo no existe o fue eliminado"
     }
 }

@@ -1,7 +1,7 @@
 package com.example.motormates.data.model
 
 data class StoryUser(
-    val userId: Int,
+    val userId: String,
     val name: String,
     val avatarResId: Int,
     val imageRes: Int? = null,
@@ -27,7 +27,7 @@ data class ReviewPost(
  * viene armado el dato en la capa de datos.
  */
 data class FeedVehicleUi(
-    val id: Int,
+    val id: String,
     val brand: String,
     val model: String,
     val year: Int,

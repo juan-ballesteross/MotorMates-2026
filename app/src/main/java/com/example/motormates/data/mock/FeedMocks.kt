@@ -3,12 +3,13 @@ package com.example.motormates.data.mock
 import com.example.motormates.R
 import com.example.motormates.data.model.ReviewPost
 import com.example.motormates.data.model.StoryUser
+import com.example.motormates.data.seed.SeedData
 
 object FeedMocks {
     val sampleStories = listOf(
-        StoryUser(userId = 1, name = "Rodrigo", avatarResId = R.drawable.user_3, imageRes = R.drawable.rodrigo_feed, caption = "Antes de una carrerita"),
-        StoryUser(userId = 2, name = "Sofía", avatarResId = R.drawable.user1, imageRes = R.drawable.sofia_feed, caption = "Posuda"),
-        StoryUser(userId = 3, name = "Iván", avatarResId = R.drawable.user2)
+        StoryUser(userId = SeedData.SEED_USER_RODRIGO, name = "Rodrigo", avatarResId = R.drawable.user_3, imageRes = R.drawable.rodrigo_feed, caption = "Antes de una carrerita"),
+        StoryUser(userId = SeedData.SEED_USER_SOFIA, name = "Sofía", avatarResId = R.drawable.user1, imageRes = R.drawable.sofia_feed, caption = "Posuda"),
+        StoryUser(userId = SeedData.SEED_USER_IVAN, name = "Iván", avatarResId = R.drawable.user2)
     )
 
     val samplePost = ReviewPost(

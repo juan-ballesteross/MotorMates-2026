@@ -49,9 +49,9 @@ fun UserScreenContent(
     selectedTab: ProfileTab,
     onSelectTab: (ProfileTab) -> Unit,
     onEditProfileClick: () -> Unit,
-    onReviewClick: (Int) -> Unit = {},
-    onEditReviewClick: (Int) -> Unit = {},
-    onDeleteReviewClick: (Int) -> Unit = {},
+    onReviewClick: (String) -> Unit = {},
+    onEditReviewClick: (String) -> Unit = {},
+    onDeleteReviewClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(

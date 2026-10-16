@@ -14,5 +14,5 @@ data class VehicleDetailState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isBookmarked: Boolean = false,
-    val pendingDeleteReviewId: Int? = null
+    val pendingDeleteReviewId: String? = null
 )

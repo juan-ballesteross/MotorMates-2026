@@ -8,7 +8,7 @@ package com.example.motormates.data.model
  * unidad incluida ("502 hp", "3.4 s"), así que el dominio no las formatea.
  */
 data class Vehicle(
-    val id: Int,
+    val id: String,
     val brand: String,
     val model: String,
     val year: Int,

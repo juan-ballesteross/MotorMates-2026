@@ -1,14 +1,16 @@
 package com.example.motormates.data.remote.datasource
 
-import com.example.motormates.data.remote.dto.VehicleDto
+import com.example.motormates.data.dto.VehicleDtoGeneric
 
 /**
  * Contrato de la fuente remota de vehículos. Existe como interfaz para
- * poder cambiar Retrofit por otra tecnología sin tocar el repositorio.
+ * poder cambiar Retrofit por Firestore sin tocar el repositorio: basta con
+ * cambiar el @Binds en NetworkModule.
  */
 interface VehicleRemoteDataSource {
 
-    suspend fun getVehicles(): List<VehicleDto>
+    suspend fun getVehicles(): List<VehicleDtoGeneric>
 
-    suspend fun getVehicleById(id: Int): VehicleDto
+    /** Lanza NoSuchElementException (o HttpException 404) si no existe. */
+    suspend fun getVehicleById(id: String): VehicleDtoGeneric
 }

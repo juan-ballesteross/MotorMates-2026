@@ -42,7 +42,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
 import com.example.motormates.data.model.ReviewUi
-import com.example.motormates.data.model.localAvatarResFor
+import com.example.motormates.data.seed.localAvatarResFor
 
 /**
  * Foto del vehículo con los botones de "volver" y "guardar" flotando encima.
@@ -180,15 +180,15 @@ fun SpecStatCard(valor: String, etiqueta: String) {
 /**
  * Una reseña en la lista. El nombre y el avatar abren el perfil del autor.
  * Los botones de editar y eliminar solo aparecen si la reseña es mía
- * (isMine lo resuelve el mapper comparando contra CURRENT_USER_ID), porque
+ * (isMine lo resuelve el mapper comparando contra el uid de la sesión), porque
  * el backend no verifica el dueño en PUT ni en DELETE.
  */
 @Composable
 fun ReviewItem(
     review: ReviewUi,
-    onAuthorClick: (Int) -> Unit = {},
-    onEditClick: (Int) -> Unit = {},
-    onDeleteClick: (Int) -> Unit = {}
+    onAuthorClick: (String) -> Unit = {},
+    onEditClick: (String) -> Unit = {},
+    onDeleteClick: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier

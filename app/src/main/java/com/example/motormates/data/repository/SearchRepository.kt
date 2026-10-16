@@ -5,13 +5,13 @@ import com.example.motormates.data.model.CarListing
 
 interface SearchRepository {
     fun getCars(): List<CarListing>
-    fun findCarById(id: Int): CarListing?
+    fun findCarById(id: String): CarListing?
 }
 
 class LocalSearchRepository : SearchRepository {
     override fun getCars(): List<CarListing> = SearchMocks.sampleSearchCars
 
-    override fun findCarById(id: Int): CarListing? = SearchMocks.findById(id)
+    override fun findCarById(id: String): CarListing? = SearchMocks.findById(id)
 }
 
 object SearchRepositoryProvider {

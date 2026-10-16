@@ -16,25 +16,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.motormates.R
-import com.example.motormates.navigation.ScreenRoute
 import com.example.motormates.ui.review.components.NewReviewTopBar
 
 /**
- * Sirve para crear y para editar: reviewId == NO_REVIEW_ID significa crear.
+ * Sirve para crear y para editar: reviewId == null significa crear.
  * El auto reseñado ya no llega por parámetro — lo resuelve el ViewModel a
  * partir del id, en vez de que el grafo de navegación lo busque.
  */
 @Composable
 fun NewReviewScreen(
-    vehicleId: Int,
-    reviewId: Int = ScreenRoute.NewReview.NO_REVIEW_ID,
+    vehicleId: String,
+    reviewId: String? = null,
     onCloseClick: () -> Unit = {},
     onSaved: () -> Unit = {},
     viewModel: NewReviewViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val isEditing = reviewId != ScreenRoute.NewReview.NO_REVIEW_ID
+    val isEditing = reviewId != null
 
     LaunchedEffect(vehicleId, reviewId) {
         viewModel.start(vehicleId, reviewId)

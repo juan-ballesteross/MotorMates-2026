@@ -13,10 +13,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun CommentsScreen(
-    vehicleId: Int,
+    vehicleId: String,
     onBackClick: () -> Unit = {},
-    onAuthorClick: (Int) -> Unit = {},
-    onEditReviewClick: (Int) -> Unit = {},
+    onAuthorClick: (String) -> Unit = {},
+    onEditReviewClick: (String) -> Unit = {},
     reloadSignal: Boolean = false,
     onReloadHandled: () -> Unit = {},
     viewModel: CommentsViewModel = hiltViewModel(),

@@ -3,6 +3,7 @@ package com.example.motormates.ui.comments
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.model.toReviewUi
+import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.ReviewRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -18,24 +19,26 @@ import kotlinx.coroutines.launch
  */
 @HiltViewModel
 class CommentsViewModel @Inject constructor(
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CommentsUiState())
     val uiState: StateFlow<CommentsUiState> = _uiState
 
-    fun load(vehicleId: Int) {
+    fun load(vehicleId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             val result = reviewRepository.getReviewsByVehicle(vehicleId)
+            val currentUserId = authRepository.getCurrentUser()?.id
             _uiState.update { current ->
                 result.fold(
                     onSuccess = { reviews ->
                         current.copy(
                             isLoading = false,
                             errorMessage = null,
-                            reviews = reviews.map { it.toReviewUi() }
+                            reviews = reviews.map { it.toReviewUi(currentUserId) }
                         )
                     },
                     onFailure = { error ->
@@ -49,7 +52,7 @@ class CommentsViewModel @Inject constructor(
         }
     }
 
-    fun askDeleteReview(reviewId: Int) {
+    fun askDeleteReview(reviewId: String) {
         _uiState.update { it.copy(pendingDeleteReviewId = reviewId) }
     }
 
@@ -57,7 +60,7 @@ class CommentsViewModel @Inject constructor(
         _uiState.update { it.copy(pendingDeleteReviewId = null) }
     }
 
-    fun confirmDeleteReview(vehicleId: Int) {
+    fun confirmDeleteReview(vehicleId: String) {
         val reviewId = _uiState.value.pendingDeleteReviewId ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(pendingDeleteReviewId = null) }

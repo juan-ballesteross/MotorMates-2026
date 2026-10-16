@@ -1,5 +1,6 @@
 package com.example.motormates.data.repository
 
+import com.google.firebase.firestore.FirebaseFirestoreException
 import retrofit2.HttpException
 
 /**
@@ -19,3 +20,17 @@ internal fun HttpException.toSpanishMessage(
 
 internal const val NO_CONNECTION_MESSAGE =
     "Sin conexión con el servidor, verifica que esté encendido"
+
+/**
+ * Equivalente de toSpanishMessage para los errores de Firestore, que no
+ * traen código HTTP sino un Code propio.
+ */
+internal fun FirebaseFirestoreException.toSpanishMessage(
+    notFound: String,
+    fallback: String
+): String = when (code) {
+    FirebaseFirestoreException.Code.UNAVAILABLE -> "Sin conexión a internet, verifica tu red"
+    FirebaseFirestoreException.Code.NOT_FOUND -> notFound
+    FirebaseFirestoreException.Code.PERMISSION_DENIED -> "No tienes permiso para hacer esto"
+    else -> fallback
+}

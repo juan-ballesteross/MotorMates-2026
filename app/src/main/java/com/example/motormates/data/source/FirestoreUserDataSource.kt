@@ -5,7 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
 import kotlinx.coroutines.tasks.await
 
-private const val USERS_COLLECTION = "users"
+internal const val USERS_COLLECTION = "users"
 
 class FirestoreUserDataSource @Inject constructor(
     private val firestore: FirebaseFirestore

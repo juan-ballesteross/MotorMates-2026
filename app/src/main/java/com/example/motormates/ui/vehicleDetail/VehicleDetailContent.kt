@@ -64,9 +64,9 @@ fun VehicleDetailContent(
     onBookmarkClick: () -> Unit,
     onWriteReviewClick: () -> Unit,
     onSeeAllReviewsClick: () -> Unit,
-    onAuthorClick: (Int) -> Unit,
-    onEditReviewClick: (Int) -> Unit,
-    onDeleteReviewClick: (Int) -> Unit,
+    onAuthorClick: (String) -> Unit,
+    onEditReviewClick: (String) -> Unit,
+    onDeleteReviewClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val inlineReviewsLimit = inlineReviewsLimit()

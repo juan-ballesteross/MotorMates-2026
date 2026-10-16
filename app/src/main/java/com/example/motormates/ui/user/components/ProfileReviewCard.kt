@@ -37,10 +37,10 @@ import com.example.motormates.data.model.UserReviewUi
 fun ProfileReviewCard(
     review: UserReviewUi,
     modifier: Modifier = Modifier,
-    onClick: (Int) -> Unit = {},
+    onClick: (String) -> Unit = {},
     isEditable: Boolean = false,
-    onEditClick: (Int) -> Unit = {},
-    onDeleteClick: (Int) -> Unit = {}
+    onEditClick: (String) -> Unit = {},
+    onDeleteClick: (String) -> Unit = {}
 ) {
     Column(
         modifier = modifier

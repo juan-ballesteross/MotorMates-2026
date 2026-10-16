@@ -1,7 +1,9 @@
 package com.example.motormates.data.repository
 
+import com.example.motormates.data.dto.UserDto
 import com.example.motormates.data.model.AuthUser
 import com.example.motormates.data.source.AuthDataSource
+import com.example.motormates.data.source.UserDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -19,7 +21,8 @@ class AuthRepositoryImplTest {
             displayName = "Jose"
         )
         val repository = AuthRepositoryImpl(
-            FakeAuthDataSource(signInResult = Result.success(expectedUser))
+            FakeAuthDataSource(signInResult = Result.success(expectedUser)),
+            FakeUserDataSource()
         )
 
         val result = repository.signIn(" jose@example.com ", "secret")
@@ -30,7 +33,8 @@ class AuthRepositoryImplTest {
     @Test
     fun signInFailureIsPropagated() = runTest {
         val repository = AuthRepositoryImpl(
-            FakeAuthDataSource(signInResult = Result.failure(IllegalArgumentException("invalid credentials")))
+            FakeAuthDataSource(signInResult = Result.failure(IllegalArgumentException("invalid credentials"))),
+            FakeUserDataSource()
         )
 
         val result = repository.signIn("jose@example.com", "wrong")
@@ -46,7 +50,8 @@ class AuthRepositoryImplTest {
             displayName = "Jose"
         )
         val repository = AuthRepositoryImpl(
-            FakeAuthDataSource(currentUser = currentUser)
+            FakeAuthDataSource(currentUser = currentUser),
+            FakeUserDataSource()
         )
 
         val result = repository.signOut()
@@ -63,13 +68,13 @@ class AuthRepositoryImplTest {
             displayName = "Jose"
         )
         val dataSource = FakeAuthDataSource(currentUser = currentUser)
-        val repository = AuthRepositoryImpl(dataSource)
+        val repository = AuthRepositoryImpl(dataSource, FakeUserDataSource())
 
         assertEquals(dataSource.authState, repository.authState)
     }
 }
 
-private class FakeAuthDataSource(
+internal class FakeAuthDataSource(
     currentUser: AuthUser? = null,
     private val signInResult: Result<AuthUser> = Result.success(
         AuthUser(id = "user-1", email = "jose@example.com", displayName = "Jose")
@@ -100,4 +105,36 @@ private class FakeAuthDataSource(
     }
 
     override fun getCurrentUser(): AuthUser? = session.value
+
+    override suspend fun deleteCurrentUser() {
+        session.value = null
+    }
+}
+
+/** UserDataSource en memoria, compartido por las pruebas de repositorios. */
+internal class FakeUserDataSource(
+    users: List<UserDto> = emptyList()
+) : UserDataSource {
+
+    private val usersById = users.associateBy { it.id }.toMutableMap()
+
+    override suspend fun createUser(user: UserDto) {
+        usersById[user.id] = user
+    }
+
+    override suspend fun getUser(uid: String): UserDto? = usersById[uid]
+
+    override suspend fun updateUser(uid: String, fullName: String, bio: String) {
+        usersById[uid]?.let { usersById[uid] = it.copy(fullName = fullName, bio = bio) }
+    }
+
+    override suspend fun updateAvatarUrl(uid: String, avatarUrl: String) {
+        usersById[uid]?.let { usersById[uid] = it.copy(avatarUrl = avatarUrl) }
+    }
+
+    override suspend fun updateCoverUrl(uid: String, coverUrl: String) {
+        usersById[uid]?.let { usersById[uid] = it.copy(coverUrl = coverUrl) }
+    }
+
+    override suspend fun getAllUsers(): List<UserDto> = usersById.values.toList()
 }

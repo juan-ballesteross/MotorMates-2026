@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.model.toCarDetailUi
 import com.example.motormates.data.model.toReviewUi
+import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.VehicleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +17,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class VehicleDetailViewModel @Inject constructor(
     private val vehicleRepository: VehicleRepository,
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(VehicleDetailState())
@@ -27,7 +29,7 @@ class VehicleDetailViewModel @Inject constructor(
      * promedio y el conteo que muestra la cabecera se calculan a partir de
      * las reseñas, así que no tiene sentido pintar uno sin el otro.
      */
-    fun load(vehicleId: Int) {
+    fun load(vehicleId: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -44,19 +46,20 @@ class VehicleDetailViewModel @Inject constructor(
             }
 
             val reviews = reviewRepository.getReviewsByVehicle(vehicleId).getOrElse { emptyList() }
+            val currentUserId = authRepository.getCurrentUser()?.id
 
             _state.update {
                 it.copy(
                     isLoading = false,
                     errorMessage = null,
                     vehicle = vehicle.toCarDetailUi(reviews),
-                    reviews = reviews.map { review -> review.toReviewUi() }
+                    reviews = reviews.map { review -> review.toReviewUi(currentUserId) }
                 )
             }
         }
     }
 
-    fun askDeleteReview(reviewId: Int) {
+    fun askDeleteReview(reviewId: String) {
         _state.update { it.copy(pendingDeleteReviewId = reviewId) }
     }
 
@@ -64,7 +67,7 @@ class VehicleDetailViewModel @Inject constructor(
         _state.update { it.copy(pendingDeleteReviewId = null) }
     }
 
-    fun confirmDeleteReview(vehicleId: Int) {
+    fun confirmDeleteReview(vehicleId: String) {
         val reviewId = _state.value.pendingDeleteReviewId ?: return
         viewModelScope.launch {
             _state.update { it.copy(pendingDeleteReviewId = null) }

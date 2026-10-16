@@ -20,12 +20,12 @@ data class CarDetailUi(
 
 /**
  * Una reseña lista para pintar. isMine lo resuelve el mapper comparando
- * contra CURRENT_USER_ID, para que ninguna pantalla tenga que deducirlo.
- * avatarUrl va nulable porque el backend no guarda fotos de usuario.
+ * contra el uid del usuario autenticado, para que ninguna pantalla tenga
+ * que deducirlo. avatarUrl va nulable porque el autor puede no tener foto.
  */
 data class ReviewUi(
-    val id: Int,
-    val userId: Int,
+    val id: String,
+    val userId: String,
     val nombreUsuario: String,
     val avatarUrl: String? = null,
     val tiempoTexto: String,

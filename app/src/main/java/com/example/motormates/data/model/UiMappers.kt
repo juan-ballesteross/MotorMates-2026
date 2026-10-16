@@ -45,11 +45,15 @@ fun Vehicle.toReviewCarSummary(): ReviewCarSummary = ReviewCarSummary(
     imageUrl = imageUrl
 )
 
-fun Review.toReviewUi(currentUserId: Int = CURRENT_USER_ID): ReviewUi = ReviewUi(
+/**
+ * currentUserId es el uid de Firebase Auth de quien usa la app (null si no
+ * hay sesión): con él se decide si la reseña es mía y se puede editar.
+ */
+fun Review.toReviewUi(currentUserId: String?): ReviewUi = ReviewUi(
     id = id,
     userId = userId,
-    nombreUsuario = author?.fullName ?: "Usuario #$userId",
-    avatarUrl = null,
+    nombreUsuario = author?.fullName?.ifBlank { null } ?: "Usuario",
+    avatarUrl = author?.avatarUrl,
     tiempoTexto = createdAt.toRelativeTimeEs(),
     calificacion = rating.coerceIn(0, 5),
     comentario = comment.orEmpty(),
@@ -59,7 +63,7 @@ fun Review.toReviewUi(currentUserId: Int = CURRENT_USER_ID): ReviewUi = ReviewUi
 fun Review.toUserReviewUi(): UserReviewUi = UserReviewUi(
     id = id,
     vehicleId = vehicleId,
-    vehicleName = vehicle?.let { "${it.brand} ${it.model}" } ?: "Vehículo #$vehicleId",
+    vehicleName = vehicle?.let { "${it.brand} ${it.model}" } ?: "Vehículo",
     rating = rating.coerceIn(0, 5),
     comment = comment.orEmpty(),
     timeAgo = createdAt.toRelativeTimeEs()

@@ -16,23 +16,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.motormates.R
-import com.example.motormates.data.model.localAvatarResFor
+import com.example.motormates.data.seed.localAvatarResFor
 
 @Composable
 fun PublicProfileScreen(
-    userId: Int? = null,
     firebaseUid: String? = null,
     onBackClick: () -> Unit = {},
-    onVehicleClick: (Int) -> Unit = {},
+    onVehicleClick: (String) -> Unit = {},
     viewModel: PublicProfileViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(userId, firebaseUid) {
-        if (userId != null) {
-            viewModel.loadProfile(userId)
-        } else if (firebaseUid != null) {
+    LaunchedEffect(firebaseUid) {
+        if (firebaseUid != null) {
             viewModel.loadProfileByUid(firebaseUid)
         }
     }
@@ -60,14 +57,12 @@ fun PublicProfileScreen(
         }
 
         else -> PublicProfileScreenContent(
-            // La portada sí es puro adorno (el backend no la guarda), pero
-            // el avatar usa el mismo mapeo fijo por userId que las Historias
-            // y las reseñas, para no mostrar siempre la misma foto. Los
-            // usuarios reales de Firebase muestran su propia foto (avatarUrl)
-            // cuando la tienen.
+            // Si el usuario no ha subido foto (avatarUrl/coverUrl), se usa una
+            // local: los usuarios semilla tienen una fija, igual que en las
+            // Historias y las reseñas, para no mostrar siempre la misma.
             coverResId = R.drawable.profile_cover,
             coverUrl = uiState.coverUrl,
-            avatarResId = userId?.let { localAvatarResFor(it) } ?: R.drawable.user_3,
+            avatarResId = firebaseUid?.let { localAvatarResFor(it) } ?: R.drawable.user_3,
             avatarUrl = uiState.avatarUrl,
             profile = profile,
             reviews = uiState.reviews,

@@ -15,9 +15,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Perfil de otro usuario. El id es el real de la tabla users del backend:
- * se llega acá tocando el autor de una reseña, porque el backend no expone
- * un endpoint para listar usuarios.
+ * Perfil de otro usuario registrado en Firestore (colección "users"). Se
+ * llega desde el buscador o tocando el autor de una reseña.
  */
 @HiltViewModel
 class PublicProfileViewModel @Inject constructor(
@@ -28,12 +27,12 @@ class PublicProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PublicProfileUiState())
     val uiState: StateFlow<PublicProfileUiState> = _uiState
 
-    fun loadProfile(userId: Int) {
+    fun loadProfileByUid(uid: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            val userResult = userRepository.getUserById(userId)
-            val reviews = reviewRepository.getReviewsByUser(userId).getOrElse { emptyList() }
+            val userResult = userRepository.getCurrentUserProfile(uid)
+            val reviews = reviewRepository.getReviewsByUser(uid).getOrElse { emptyList() }
 
             _uiState.update { current ->
                 userResult.fold(
@@ -43,40 +42,6 @@ class PublicProfileViewModel @Inject constructor(
                             errorMessage = null,
                             profile = user.toUserProfile(reviewsCount = reviews.size),
                             reviews = reviews.map { it.toUserReviewUi() },
-                            selectedTab = ProfileTab.REVIEWS
-                        )
-                    },
-                    onFailure = { error ->
-                        current.copy(
-                            isLoading = false,
-                            profile = null,
-                            errorMessage = error.message ?: "No se pudo cargar el perfil"
-                        )
-                    }
-                )
-            }
-        }
-    }
-
-    /**
-     * Perfil de un usuario real, registrado con Firebase (encontrado desde
-     * el buscador). Sus reseñas quedan vacías: todavía viven en el backend
-     * viejo con id numérico, sin relación con el uid de Firebase Auth.
-     */
-    fun loadProfileByUid(uid: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            val userResult = userRepository.getCurrentUserProfile(uid)
-
-            _uiState.update { current ->
-                userResult.fold(
-                    onSuccess = { user ->
-                        current.copy(
-                            isLoading = false,
-                            errorMessage = null,
-                            profile = user.toUserProfile(reviewsCount = 0),
-                            reviews = emptyList(),
                             selectedTab = ProfileTab.REVIEWS,
                             avatarUrl = user.avatarUrl,
                             coverUrl = user.coverUrl

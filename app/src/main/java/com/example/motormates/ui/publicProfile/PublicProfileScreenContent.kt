@@ -45,7 +45,7 @@ fun PublicProfileScreenContent(
     onBackClick: () -> Unit,
     onFollowClick: () -> Unit,
     onMessageClick: () -> Unit,
-    onReviewClick: (Int) -> Unit = {},
+    onReviewClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(

@@ -2,12 +2,10 @@ package com.example.motormates.ui.review
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.motormates.data.model.CURRENT_USER_ID
 import com.example.motormates.data.model.ReviewAspect
 import com.example.motormates.data.model.toReviewCarSummary
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.VehicleRepository
-import com.example.motormates.navigation.ScreenRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,11 +25,10 @@ class NewReviewViewModel @Inject constructor(
     /**
      * Resuelve el vehículo que se está reseñando (antes lo hacía el grafo de
      * navegación a partir de los mocks) y, en modo edición, precarga el
-     * formulario. El backend no tiene GET /reviews/{id}, así que la reseña
-     * se busca dentro de las del vehículo — la misma consulta que ya hace
-     * la pantalla de detalle.
+     * formulario. La reseña se busca dentro de las del vehículo — la misma
+     * consulta que ya hace la pantalla de detalle. reviewId null = crear.
      */
-    fun start(vehicleId: Int, reviewId: Int) {
+    fun start(vehicleId: String, reviewId: String?) {
         if (_uiState.value.car != null) return // ya cargado: no repetir en recomposiciones
 
         viewModelScope.launch {
@@ -48,7 +45,7 @@ class NewReviewViewModel @Inject constructor(
                 return@launch
             }
 
-            val isEditing = reviewId != ScreenRoute.NewReview.NO_REVIEW_ID
+            val isEditing = reviewId != null
             val existing = if (isEditing) {
                 reviewRepository.getReviewsByVehicle(vehicleId)
                     .getOrNull()
@@ -104,7 +101,7 @@ class NewReviewViewModel @Inject constructor(
      * acepta rating 0, pero las estrellas solo expresan 1..5 y una reseña
      * de 0 estrellas por descuido no tiene sentido.
      */
-    fun save(vehicleId: Int) {
+    fun save(vehicleId: String) {
         val current = _uiState.value
         if (current.isSaving) return
         if (current.rating !in 1..5) {
@@ -123,7 +120,7 @@ class NewReviewViewModel @Inject constructor(
                 // así que no habría forma de borrarlo.
                 reviewRepository.updateReview(reviewId, current.rating, trimmed)
             } ?: reviewRepository.createReview(
-                userId = CURRENT_USER_ID,
+                // El autor lo pone el repositorio: es el usuario autenticado.
                 vehicleId = vehicleId,
                 rating = current.rating,
                 // Al crear sí conviene null: deja la columna nula en vez de

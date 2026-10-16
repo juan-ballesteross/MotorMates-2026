@@ -1,5 +1,8 @@
 package com.example.motormates.data.remote.dto
 
+import com.example.motormates.data.dto.VehicleDtoGeneric
+import com.example.motormates.data.model.Vehicle
+import com.example.motormates.data.remote.mapper.mapToDomain
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -23,4 +26,6 @@ data class VehicleDto(
     @SerializedName("traccion") val traccion: String?,
     @SerializedName("createdAt") val createdAt: String?,
     @SerializedName("updatedAt") val updatedAt: String?
-)
+) : VehicleDtoGeneric {
+    override fun toDomain(): Vehicle = mapToDomain()
+}

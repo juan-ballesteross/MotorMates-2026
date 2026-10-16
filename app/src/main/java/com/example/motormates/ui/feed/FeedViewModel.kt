@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.mock.FeedMocks
 import com.example.motormates.data.model.toFeedVehicleUi
 import com.example.motormates.data.repository.VehicleRepository
+import com.example.motormates.data.seed.FirestoreSeeder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
-    private val vehicleRepository: VehicleRepository
+    private val vehicleRepository: VehicleRepository,
+    private val firestoreSeeder: FirestoreSeeder
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FeedUiState())
@@ -23,7 +25,13 @@ class FeedViewModel @Inject constructor(
     init {
         // Las historias siguen siendo datos locales, el backend no las modela.
         _uiState.update { it.copy(stories = FeedMocks.sampleStories) }
-        loadVehicles()
+        viewModelScope.launch {
+            // Primera vez en una BD vacía: se queman los datos de prueba
+            // antes de pedir los vehículos. Si falla (p. ej. reglas de
+            // Firestore), igual se intenta cargar lo que haya.
+            runCatching { firestoreSeeder.seedIfEmpty() }
+            loadVehicles()
+        }
     }
 
     fun loadVehicles() {

@@ -32,7 +32,7 @@ fun FeedScreenContent(
     isLoading: Boolean,
     errorMessage: String?,
     modifier: Modifier = Modifier,
-    onVehicleClick: (Int) -> Unit = {},
+    onVehicleClick: (String) -> Unit = {},
     onStoryClick: (Int) -> Unit = {},
     onRetryClick: () -> Unit = {}
 ) {

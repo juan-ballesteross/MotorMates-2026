@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
@@ -12,7 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.motormates.data.mock.FeedMocks
-import com.example.motormates.data.model.CURRENT_USER_ID
 import com.example.motormates.ui.alerts.AlertsScreen
 import com.example.motormates.ui.comments.CommentsScreen
 import com.example.motormates.ui.editProfile.EditProfileScreen
@@ -31,15 +31,16 @@ import com.example.motormates.ui.vehicleDetail.VehicleDetailScreen
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sessionViewModel: SessionViewModel = hiltViewModel()
 ) {
     // Tocar el autor de una reseña: si soy yo, va a mi propio perfil en vez
     // del perfil público, mismo criterio que ya usaba la pantalla de historias.
-    fun openAuthor(userId: Int) {
-        if (userId == CURRENT_USER_ID) {
+    fun openAuthor(userId: String) {
+        if (userId == sessionViewModel.currentUserId()) {
             navController.navigate(ScreenRoute.Profile.route)
         } else {
-            navController.navigate(ScreenRoute.PublicProfile.createRoute(userId))
+            navController.navigate(ScreenRoute.PublicProfileFirebase.createRoute(userId))
         }
     }
 
@@ -151,10 +152,10 @@ fun AppNavigation(
         composable(
             route = ScreenRoute.VehicleDetail.route,
             arguments = listOf(
-                navArgument(ScreenRoute.VehicleDetail.ARG_VEHICLE_ID) { type = NavType.IntType }
+                navArgument(ScreenRoute.VehicleDetail.ARG_VEHICLE_ID) { type = NavType.StringType }
             )
         ) { entry ->
-            val vehicleId = entry.arguments?.getInt(ScreenRoute.VehicleDetail.ARG_VEHICLE_ID) ?: -1
+            val vehicleId = entry.arguments?.getString(ScreenRoute.VehicleDetail.ARG_VEHICLE_ID).orEmpty()
             val reviewsChanged by entry.reviewsChangedState()
 
             VehicleDetailScreen(
@@ -177,10 +178,10 @@ fun AppNavigation(
         composable(
             route = ScreenRoute.Comments.route,
             arguments = listOf(
-                navArgument(ScreenRoute.Comments.ARG_VEHICLE_ID) { type = NavType.IntType }
+                navArgument(ScreenRoute.Comments.ARG_VEHICLE_ID) { type = NavType.StringType }
             )
         ) { entry ->
-            val vehicleId = entry.arguments?.getInt(ScreenRoute.Comments.ARG_VEHICLE_ID) ?: -1
+            val vehicleId = entry.arguments?.getString(ScreenRoute.Comments.ARG_VEHICLE_ID).orEmpty()
             val reviewsChanged by entry.reviewsChangedState()
 
             CommentsScreen(
@@ -197,16 +198,16 @@ fun AppNavigation(
         composable(
             route = ScreenRoute.NewReview.route,
             arguments = listOf(
-                navArgument(ScreenRoute.NewReview.ARG_VEHICLE_ID) { type = NavType.IntType },
+                navArgument(ScreenRoute.NewReview.ARG_VEHICLE_ID) { type = NavType.StringType },
                 navArgument(ScreenRoute.NewReview.ARG_REVIEW_ID) {
-                    type = NavType.IntType
-                    defaultValue = ScreenRoute.NewReview.NO_REVIEW_ID
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
                 }
             )
         ) { entry ->
-            val vehicleId = entry.arguments?.getInt(ScreenRoute.NewReview.ARG_VEHICLE_ID) ?: -1
-            val reviewId = entry.arguments?.getInt(ScreenRoute.NewReview.ARG_REVIEW_ID)
-                ?: ScreenRoute.NewReview.NO_REVIEW_ID
+            val vehicleId = entry.arguments?.getString(ScreenRoute.NewReview.ARG_VEHICLE_ID).orEmpty()
+            val reviewId = entry.arguments?.getString(ScreenRoute.NewReview.ARG_REVIEW_ID)
 
             NewReviewScreen(
                 vehicleId = vehicleId,
@@ -234,21 +235,6 @@ fun AppNavigation(
                 onCloseClick = { navController.popBackStack() },
                 onUserClick = { index ->
                     FeedMocks.sampleStories.getOrNull(index)?.let { openAuthor(it.userId) }
-                }
-            )
-        }
-        composable(
-            route = ScreenRoute.PublicProfile.route,
-            arguments = listOf(
-                navArgument(ScreenRoute.PublicProfile.ARG_USER_ID) { type = NavType.IntType }
-            )
-        ) { entry ->
-            val userId = entry.arguments?.getInt(ScreenRoute.PublicProfile.ARG_USER_ID) ?: -1
-            PublicProfileScreen(
-                userId = userId,
-                onBackClick = { navController.popBackStack() },
-                onVehicleClick = { vehicleId ->
-                    navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
                 }
             )
         }

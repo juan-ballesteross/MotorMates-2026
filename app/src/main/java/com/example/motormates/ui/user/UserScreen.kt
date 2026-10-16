@@ -24,8 +24,8 @@ import com.example.motormates.ui.theme.MotorMatesTheme
 @Composable
 fun UserScreen(
     onEditProfileClick: () -> Unit = {},
-    onVehicleClick: (Int) -> Unit = {},
-    onEditReviewClick: (Int, Int) -> Unit = { _, _ -> },
+    onVehicleClick: (String) -> Unit = {},
+    onEditReviewClick: (String, String) -> Unit = { _, _ -> },
     reloadSignal: Boolean = false,
     onReloadHandled: () -> Unit = {},
     viewModel: UserViewModel = hiltViewModel(),

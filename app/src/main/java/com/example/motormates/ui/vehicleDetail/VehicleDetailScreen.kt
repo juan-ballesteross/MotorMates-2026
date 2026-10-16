@@ -18,12 +18,12 @@ import com.example.motormates.ui.vehicleDetail.components.VehicleDetailError
 
 @Composable
 fun VehicleDetailScreen(
-    vehicleId: Int,
+    vehicleId: String,
     onBackClick: () -> Unit = {},
     onWriteReviewClick: () -> Unit = {},
     onSeeAllReviewsClick: () -> Unit = {},
-    onAuthorClick: (Int) -> Unit = {},
-    onEditReviewClick: (Int) -> Unit = {},
+    onAuthorClick: (String) -> Unit = {},
+    onEditReviewClick: (String) -> Unit = {},
     reloadSignal: Boolean = false,
     onReloadHandled: () -> Unit = {},
     viewModel: VehicleDetailViewModel = hiltViewModel(),

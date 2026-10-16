@@ -1,5 +1,8 @@
 package com.example.motormates.data.remote.dto
 
+import com.example.motormates.data.dto.ReviewDtoGeneric
+import com.example.motormates.data.model.Review
+import com.example.motormates.data.remote.mapper.mapToDomain
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -18,7 +21,9 @@ data class ReviewDto(
     @SerializedName("updatedAt") val updatedAt: String?,
     @SerializedName("user") val user: ReviewUserDto? = null,
     @SerializedName("vehicle") val vehicle: ReviewVehicleDto? = null
-)
+) : ReviewDtoGeneric {
+    override fun toDomain(): Review = mapToDomain()
+}
 
 /**
  * Proyecciones parciales: el backend las limita con attributes, así que

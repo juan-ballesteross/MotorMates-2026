@@ -14,7 +14,7 @@ import com.example.motormates.data.model.ReviewCarSummary
  */
 data class NewReviewUiState(
     val car: ReviewCarSummary? = null,
-    val reviewId: Int? = null,
+    val reviewId: String? = null,
     val rating: Int = 0,
     val experience: String = "",
     val selectedAspects: Set<ReviewAspect> = emptySet(),

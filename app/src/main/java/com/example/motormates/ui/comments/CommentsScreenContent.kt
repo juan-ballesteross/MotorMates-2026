@@ -27,9 +27,9 @@ fun CommentsScreenContent(
     isLoading: Boolean,
     errorMessage: String?,
     onBackClick: () -> Unit,
-    onAuthorClick: (Int) -> Unit,
-    onEditReviewClick: (Int) -> Unit,
-    onDeleteReviewClick: (Int) -> Unit,
+    onAuthorClick: (String) -> Unit,
+    onEditReviewClick: (String) -> Unit,
+    onDeleteReviewClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
