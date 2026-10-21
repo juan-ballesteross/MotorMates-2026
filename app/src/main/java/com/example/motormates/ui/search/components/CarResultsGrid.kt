@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import com.example.motormates.R
 import com.example.motormates.data.model.CarListing
+import com.example.motormates.ui.theme.Radius
 
 @Composable
 fun CarResultsGrid(
@@ -66,7 +67,7 @@ private fun CarResultCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
     ) {

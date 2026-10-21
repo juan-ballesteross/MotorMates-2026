@@ -60,10 +60,15 @@ fun Review.toReviewUi(currentUserId: String?): ReviewUi = ReviewUi(
     isMine = userId == currentUserId
 )
 
-fun Review.toUserReviewUi(): UserReviewUi = UserReviewUi(
+/**
+ * vehicleImageUrl no viaja dentro de la reseña (las ya guardadas en
+ * Firestore no la tienen): el ViewModel la resuelve con los vehículos.
+ */
+fun Review.toUserReviewUi(vehicleImageUrl: String? = null): UserReviewUi = UserReviewUi(
     id = id,
     vehicleId = vehicleId,
     vehicleName = vehicle?.let { "${it.brand} ${it.model}" } ?: "Vehículo",
+    vehicleImageUrl = vehicleImageUrl,
     rating = rating.coerceIn(0, 5),
     comment = comment.orEmpty(),
     timeAgo = createdAt.toRelativeTimeEs()

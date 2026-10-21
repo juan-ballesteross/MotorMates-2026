@@ -7,6 +7,7 @@ import com.example.motormates.data.model.toUserProfile
 import com.example.motormates.data.model.toUserReviewUi
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.UserRepository
+import com.example.motormates.data.repository.VehicleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class PublicProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    private val vehicleRepository: VehicleRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PublicProfileUiState())
@@ -33,6 +35,11 @@ class PublicProfileViewModel @Inject constructor(
 
             val userResult = userRepository.getCurrentUserProfile(uid)
             val reviews = reviewRepository.getReviewsByUser(uid).getOrElse { emptyList() }
+            // Foto de cada vehículo reseñado. Si falla, las reseñas se
+            // muestran igual, sin miniatura.
+            val vehicleImages = vehicleRepository.getVehicles()
+                .getOrElse { emptyList() }
+                .associate { it.id to it.imageUrl }
 
             _uiState.update { current ->
                 userResult.fold(
@@ -41,7 +48,7 @@ class PublicProfileViewModel @Inject constructor(
                             isLoading = false,
                             errorMessage = null,
                             profile = user.toUserProfile(reviewsCount = reviews.size),
-                            reviews = reviews.map { it.toUserReviewUi() },
+                            reviews = reviews.map { it.toUserReviewUi(vehicleImages[it.vehicleId]) },
                             selectedTab = ProfileTab.REVIEWS,
                             avatarUrl = user.avatarUrl,
                             coverUrl = user.coverUrl

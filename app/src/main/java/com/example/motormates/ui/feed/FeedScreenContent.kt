@@ -18,12 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.example.motormates.data.model.FeedVehicleUi
 import com.example.motormates.data.model.StoryUser
 import com.example.motormates.ui.feed.components.StoriesRow
 import com.example.motormates.ui.feed.components.VehicleFeedCard
 import com.example.motormates.ui.theme.MotorMatesBackground
+import com.example.motormates.ui.theme.Spacing
 
 @Composable
 fun FeedScreenContent(
@@ -40,8 +40,8 @@ fun FeedScreenContent(
         modifier = modifier
             .fillMaxSize()
             .background(MotorMatesBackground),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 20.dp)
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        contentPadding = PaddingValues(top = Spacing.xxs, bottom = Spacing.gutter)
     ) {
         item { StoriesRow(stories, onStoryClick = onStoryClick) }
 
@@ -52,7 +52,7 @@ fun FeedScreenContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(32.dp),
+                        .padding(Spacing.xl),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -63,7 +63,7 @@ fun FeedScreenContent(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 32.dp),
+                        .padding(horizontal = Spacing.gutter, vertical = Spacing.xl),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -73,7 +73,7 @@ fun FeedScreenContent(
                     )
                     Button(
                         onClick = onRetryClick,
-                        modifier = Modifier.padding(top = 16.dp)
+                        modifier = Modifier.padding(top = Spacing.md)
                     ) {
                         Text(text = "Reintentar")
                     }
@@ -84,7 +84,7 @@ fun FeedScreenContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(32.dp),
+                        .padding(Spacing.xl),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

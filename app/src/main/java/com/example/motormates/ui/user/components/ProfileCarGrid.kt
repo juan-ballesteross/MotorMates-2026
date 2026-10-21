@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.data.model.GarageCar
+import com.example.motormates.ui.theme.Radius
 
 /**
  * Tarjeta de auto del garaje/reseñas, usada como celda del grid de dos
@@ -28,7 +29,7 @@ fun ProfileCarCard(car: GarageCar, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
     ) {
         Image(

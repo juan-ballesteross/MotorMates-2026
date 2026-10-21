@@ -20,6 +20,7 @@ data class UserReviewUi(
     val id: String,
     val vehicleId: String,
     val vehicleName: String,
+    val vehicleImageUrl: String? = null,
     val rating: Int,
     val comment: String,
     val timeAgo: String

@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.data.model.GarageCar
 import coil.compose.AsyncImage
+import com.example.motormates.ui.theme.Radius
+import com.example.motormates.ui.theme.Spacing
 
 private const val BIO_MAX_LENGTH = 150
 
@@ -55,7 +57,7 @@ fun EditProfileTopBar(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 14.dp)
+            .padding(horizontal = Spacing.gutter, vertical = Spacing.sm)
     ) {
         Icon(
             imageVector = Icons.Filled.Close,
@@ -96,7 +98,7 @@ fun EditProfileCoverSection(
         modifier = modifier
             .fillMaxWidth()
             .height(120.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable(enabled = !isUploading, onClick = onChangeCoverClick)
     ) {
@@ -119,9 +121,9 @@ fun EditProfileCoverSection(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(10.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(Radius.sm))
                 .background(MaterialTheme.colorScheme.background.copy(alpha = 0.85f))
-                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(10.dp))
+                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(Radius.sm))
                 .clickable(enabled = !isUploading, onClick = onChangeCoverClick)
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
@@ -203,8 +205,8 @@ fun EditProfilePhotoSection(
         Spacer(modifier = Modifier.width(14.dp))
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(Radius.sm))
+                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(Radius.sm))
                 .clickable(enabled = !isUploading, onClick = onChangePhotoClick)
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
@@ -246,7 +248,7 @@ fun EditProfileBioField(
                 )
             },
             minLines = 3,
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(Radius.md),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -279,7 +281,7 @@ fun EditProfileGarageItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -288,7 +290,7 @@ fun EditProfileGarageItem(
             modifier = Modifier
                 .width(72.dp)
                 .height(52.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(Radius.sm))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
@@ -342,8 +344,8 @@ fun EditProfileAddVehicleButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(Radius.md))
+            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(Radius.md))
             .clickable(onClick = onClick)
             .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
@@ -365,8 +367,8 @@ fun EditProfileLogoutButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .border(1.dp, MaterialTheme.colorScheme.error, RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(Radius.md))
+            .border(1.dp, MaterialTheme.colorScheme.error, RoundedCornerShape(Radius.md))
             .clickable(onClick = onClick)
             .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center

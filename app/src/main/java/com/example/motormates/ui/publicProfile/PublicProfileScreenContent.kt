@@ -29,6 +29,7 @@ import com.example.motormates.ui.user.components.ProfileInfoSection
 import com.example.motormates.ui.user.components.ProfileReviewCard
 import com.example.motormates.ui.user.components.ProfileStatsRow
 import com.example.motormates.ui.user.components.ProfileTabsRow
+import com.example.motormates.ui.theme.Spacing
 
 @Composable
 fun PublicProfileScreenContent(
@@ -53,9 +54,9 @@ fun PublicProfileScreenContent(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        contentPadding = PaddingValues(horizontal = Spacing.gutter, vertical = Spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             PublicProfileHeader(
@@ -90,7 +91,7 @@ fun PublicProfileScreenContent(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(32.dp),
+                            .padding(Spacing.xl),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
@@ -101,7 +102,7 @@ fun PublicProfileScreenContent(
                     Text(
                         text = errorMessage,
                         color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(vertical = 24.dp)
+                        modifier = Modifier.padding(vertical = Spacing.lg)
                     )
                 }
 

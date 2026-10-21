@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.motormates.data.model.FeedVehicleUi
+import com.example.motormates.ui.theme.Radius
+import com.example.motormates.ui.theme.Spacing
 
 @Composable
 fun VehicleFeedCard(
@@ -34,8 +36,8 @@ fun VehicleFeedCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .padding(horizontal = Spacing.gutter)
+            .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
     ) {
@@ -66,7 +68,7 @@ fun VehicleFeedCard(
             }
         }
 
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
             Text(
                 text = "${vehicle.brand} ${vehicle.model}",
                 color = MaterialTheme.colorScheme.onSurface,

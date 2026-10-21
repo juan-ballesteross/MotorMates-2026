@@ -4,13 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import coil.compose.AsyncImage
+import com.example.motormates.ui.theme.Radius
 
 /**
  * Portada + avatar superpuesto + botón "Editar perfil", replicando el
@@ -41,7 +40,10 @@ fun ProfileHeader(
     onEditProfileClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    // Box y no Column + offset: offset solo mueve el dibujo, el espacio
+    // original se sigue midiendo y dejaba un hueco bajo el avatar. Así el
+    // avatar se superpone a la portada y la altura total es la real.
+    Box(modifier = modifier.fillMaxWidth()) {
         AsyncImage(
             model = coverImageUrl,
             contentDescription = stringResource(R.string.user_cover_cd),
@@ -51,20 +53,20 @@ fun ProfileHeader(
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(140.dp)
-                .clip(RoundedCornerShape(20.dp))
+                .height(COVER_HEIGHT)
+                .clip(RoundedCornerShape(Radius.xl))
         )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = (-38).dp),
+                .padding(top = COVER_HEIGHT - AVATAR_OVERLAP),
             verticalAlignment = Alignment.Bottom
         ) {
             Box(
                 modifier = Modifier
                     .size(84.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .border(3.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(Radius.lg))
+                    .border(3.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(Radius.lg))
             ) {
                 AsyncImage(
                     model = profileImageUrl,
@@ -81,8 +83,8 @@ fun ProfileHeader(
             Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(Radius.sm))
+                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(Radius.sm))
                     .clickable(onClick = onEditProfileClick)
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
@@ -96,3 +98,7 @@ fun ProfileHeader(
         }
     }
 }
+
+/** Compartidas con PublicProfileHeader para que ambos perfiles midan igual. */
+internal val COVER_HEIGHT = 140.dp
+internal val AVATAR_OVERLAP = 38.dp

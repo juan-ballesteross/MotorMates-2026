@@ -10,6 +10,7 @@ import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.ProfileImageRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.UserRepository
+import com.example.motormates.data.repository.VehicleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,7 @@ class UserViewModel @Inject constructor(
     private val profileImageRepository: ProfileImageRepository,
     private val userRepository: UserRepository,
     private val reviewRepository: ReviewRepository,
+    private val vehicleRepository: VehicleRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
@@ -64,6 +66,11 @@ class UserViewModel @Inject constructor(
             val userResult = userRepository.getCurrentUserProfile(authUser.id)
             val reviews = reviewRepository.getReviewsByUser(authUser.id)
                 .getOrElse { emptyList() }
+            // Foto de cada vehículo reseñado. Si falla, las reseñas se
+            // muestran igual, sin miniatura.
+            val vehicleImages = vehicleRepository.getVehicles()
+                .getOrElse { emptyList() }
+                .associate { it.id to it.imageUrl }
 
             _uiState.update { current ->
                 userResult.fold(
@@ -72,7 +79,7 @@ class UserViewModel @Inject constructor(
                             isLoading = false,
                             errorMessage = null,
                             profile = user.toUserProfile(reviewsCount = reviews.size),
-                            reviews = reviews.map { it.toUserReviewUi() },
+                            reviews = reviews.map { it.toUserReviewUi(vehicleImages[it.vehicleId]) },
                             coverImageUrl = user.coverUrl
                         )
                     },

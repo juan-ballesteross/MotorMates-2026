@@ -2,6 +2,7 @@ package com.example.motormates.ui.editProfile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.data.model.GarageCar
@@ -24,6 +24,7 @@ import com.example.motormates.ui.editProfile.components.EditProfileCoverSection
 import com.example.motormates.ui.editProfile.components.EditProfilePhotoSection
 import com.example.motormates.ui.editProfile.components.EditProfileTopBar
 import com.example.motormates.ui.register.components.RegisterTextField
+import com.example.motormates.ui.theme.Spacing
 
 /**
  * Contenido scrollable de "Editar perfil". Stateless: recibe todo el estado
@@ -54,16 +55,67 @@ fun EditProfileScreenContent(
     onLogoutClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
+    // La barra queda fija arriba y solo el formulario hace scroll.
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        item {
-            EditProfileTopBar(onCloseClick = onCloseClick, onSaveClick = onSaveClick)
-        }
+        EditProfileTopBar(onCloseClick = onCloseClick, onSaveClick = onSaveClick)
+        EditProfileForm(
+            username = username,
+            onUsernameChange = onUsernameChange,
+            bio = bio,
+            onBioChange = onBioChange,
+            cars = cars,
+            profileImageUrl = profileImageUrl,
+            isImageUploading = isImageUploading,
+            imageUploadError = imageUploadError,
+            coverImageUrl = coverImageUrl,
+            isCoverUploading = isCoverUploading,
+            coverUploadError = coverUploadError,
+            saveError = saveError,
+            onChangePhotoClick = onChangePhotoClick,
+            onChangeCoverClick = onChangeCoverClick,
+            onAddVehicleClick = onAddVehicleClick,
+            onEditVehicleClick = onEditVehicleClick,
+            onLogoutClick = onLogoutClick,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun EditProfileForm(
+    username: String,
+    onUsernameChange: (String) -> Unit,
+    bio: String,
+    onBioChange: (String) -> Unit,
+    cars: List<GarageCar>,
+    profileImageUrl: String?,
+    isImageUploading: Boolean,
+    imageUploadError: String?,
+    coverImageUrl: String?,
+    isCoverUploading: Boolean,
+    coverUploadError: String?,
+    saveError: String?,
+    onChangePhotoClick: () -> Unit,
+    onChangeCoverClick: () -> Unit,
+    onAddVehicleClick: () -> Unit,
+    onEditVehicleClick: (GarageCar) -> Unit,
+    onLogoutClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = Spacing.gutter,
+            end = Spacing.gutter,
+            top = Spacing.xs,
+            bottom = Spacing.lg
+        ),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md)
+    ) {
         item {
             EditProfileCoverSection(
                 coverImageUrl = coverImageUrl,

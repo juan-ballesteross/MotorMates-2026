@@ -1,5 +1,6 @@
 package com.example.motormates
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -52,9 +53,16 @@ fun MotorMatesApp(modifier: Modifier = Modifier) {
             }
         }
     ) { innerPadding ->
+        // innerPadding ya incluye la barra de estado y la de navegación
+        // (edge-to-edge). Se marcan como consumidas para que los
+        // statusBarsPadding() de los top bars y los Scaffold anidados de
+        // algunas pantallas no las vuelvan a sumar (eso duplicaba el
+        // espacio de arriba).
         AppNavigation(
             navController = navController,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
         )
     }
 }

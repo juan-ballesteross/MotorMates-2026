@@ -43,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
 import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.data.seed.localAvatarResFor
+import com.example.motormates.ui.theme.Radius
 
 /**
  * Foto del vehículo con los botones de "volver" y "guardar" flotando encima.
@@ -154,7 +155,7 @@ fun SpecStatCard(valor: String, etiqueta: String) {
     Column(
         modifier = Modifier
             .width(96.dp)
-            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(Radius.md))
             .padding(vertical = 12.dp, horizontal = 8.dp)
     ) {
         Text(

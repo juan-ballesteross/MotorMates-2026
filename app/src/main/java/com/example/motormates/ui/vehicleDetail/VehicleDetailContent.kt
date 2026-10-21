@@ -33,6 +33,7 @@ import com.example.motormates.ui.vehicleDetail.components.RatingRow
 import com.example.motormates.ui.vehicleDetail.components.ReviewItem
 import com.example.motormates.ui.vehicleDetail.components.SpecStatCard
 import com.example.motormates.ui.vehicleDetail.components.VehicleImageHeader
+import com.example.motormates.ui.theme.Radius
 
 /**
  * Cuántas reseñas se muestran aquí antes de mandar a la lista completa.
@@ -141,7 +142,7 @@ fun VehicleDetailContent(
                 Button(
                     onClick = onWriteReviewClick,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(Radius.md),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)

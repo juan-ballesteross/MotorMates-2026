@@ -3,15 +3,12 @@ package com.example.motormates.ui.publicProfile.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.motormates.R
+import com.example.motormates.ui.theme.Radius
+import com.example.motormates.ui.user.components.AVATAR_OVERLAP
+import com.example.motormates.ui.user.components.COVER_HEIGHT
 
 @Composable
 fun PublicProfileHeader(
@@ -51,7 +51,9 @@ fun PublicProfileHeader(
     onMessageClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    // Mismo esquema que ProfileHeader: Box en vez de offset para no dejar
+    // un hueco bajo el avatar.
+    Box(modifier = modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth()) {
             if (coverUrl != null) {
                 AsyncImage(
@@ -60,8 +62,8 @@ fun PublicProfileHeader(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(140.dp)
-                        .clip(RoundedCornerShape(20.dp))
+                        .height(COVER_HEIGHT)
+                        .clip(RoundedCornerShape(Radius.xl))
                 )
             } else {
                 Image(
@@ -70,8 +72,8 @@ fun PublicProfileHeader(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(140.dp)
-                        .clip(RoundedCornerShape(20.dp))
+                        .height(COVER_HEIGHT)
+                        .clip(RoundedCornerShape(Radius.xl))
                 )
             }
             IconButton(
@@ -92,14 +94,14 @@ fun PublicProfileHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = (-38).dp),
+                .padding(top = COVER_HEIGHT - AVATAR_OVERLAP),
             verticalAlignment = Alignment.Bottom
         ) {
             Box(
                 modifier = Modifier
                     .size(84.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .border(3.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(Radius.lg))
+                    .border(3.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(Radius.lg))
             ) {
                 if (avatarUrl != null) {
                     AsyncImage(
@@ -125,7 +127,7 @@ fun PublicProfileHeader(
             Button(
                 onClick = onFollowClick,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(Radius.sm)
             ) {
                 Text(
                     text = stringResource(R.string.public_profile_follow_button),
@@ -136,7 +138,7 @@ fun PublicProfileHeader(
             Spacer(modifier = Modifier.width(10.dp))
             OutlinedButton(
                 onClick = onMessageClick,
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(Radius.sm)
             ) {
                 Text(
                     text = stringResource(R.string.public_profile_message_button),
