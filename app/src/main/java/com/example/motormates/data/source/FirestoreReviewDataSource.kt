@@ -10,7 +10,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
 import kotlinx.coroutines.tasks.await
 
-internal const val REVIEWS_COLLECTION = "reviews"
 
 class FirestoreReviewDataSource @Inject constructor(
     private val firestore: FirebaseFirestore
