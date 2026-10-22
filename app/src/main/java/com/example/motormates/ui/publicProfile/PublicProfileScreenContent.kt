@@ -44,9 +44,12 @@ fun PublicProfileScreenContent(
     selectedTab: ProfileTab,
     onSelectTab: (ProfileTab) -> Unit,
     onBackClick: () -> Unit,
+    isFollowing: Boolean = false,
     onFollowClick: () -> Unit,
     onMessageClick: () -> Unit,
     onReviewClick: (String) -> Unit = {},
+    onFollowersClick: () -> Unit = {},
+    onFollowingClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -64,6 +67,7 @@ fun PublicProfileScreenContent(
                 coverUrl = coverUrl,
                 avatarResId = avatarResId,
                 avatarUrl = avatarUrl,
+                isFollowing = isFollowing,
                 onBackClick = onBackClick,
                 onFollowClick = onFollowClick,
                 onMessageClick = onMessageClick
@@ -73,7 +77,11 @@ fun PublicProfileScreenContent(
             ProfileInfoSection(profile = profile)
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
-            ProfileStatsRow(profile = profile)
+            ProfileStatsRow(
+                profile = profile,
+                onFollowersClick = onFollowersClick,
+                onFollowingClick = onFollowingClick
+            )
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
             ProfileTabsRow(selected = selectedTab, onSelect = onSelectTab)

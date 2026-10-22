@@ -12,5 +12,7 @@ data class UserDto(
     val bio: String = "",
     val avatarUrl: String? = null, // URL (String), no un recurso local
     val coverUrl: String? = null,
+    val followersCount: Int = 0,
+    val followingCount: Int = 0,
     val createdAt: Long = 0L
 )

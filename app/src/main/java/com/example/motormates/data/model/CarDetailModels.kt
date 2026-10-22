@@ -31,5 +31,7 @@ data class ReviewUi(
     val tiempoTexto: String,
     val calificacion: Int,
     val comentario: String,
-    val isMine: Boolean = false
+    val isMine: Boolean = false,
+    val likesCount: Int = 0,
+    val isLikedByMe: Boolean = false
 )

@@ -26,6 +26,8 @@ fun UserScreen(
     onEditProfileClick: () -> Unit = {},
     onVehicleClick: (String) -> Unit = {},
     onEditReviewClick: (String, String) -> Unit = { _, _ -> },
+    onFollowersClick: () -> Unit = {},
+    onFollowingClick: () -> Unit = {},
     reloadSignal: Boolean = false,
     onReloadHandled: () -> Unit = {},
     viewModel: UserViewModel = hiltViewModel(),
@@ -80,6 +82,8 @@ fun UserScreen(
             }
         },
         onDeleteReviewClick = viewModel::askDeleteReview,
+        onFollowersClick = onFollowersClick,
+        onFollowingClick = onFollowingClick,
         modifier = modifier
     )
 }

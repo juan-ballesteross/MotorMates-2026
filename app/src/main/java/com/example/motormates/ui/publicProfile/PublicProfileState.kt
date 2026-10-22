@@ -12,5 +12,6 @@ data class PublicProfileUiState(
     val errorMessage: String? = null,
     // Solo se llena para usuarios reales de Firebase (ver loadProfileByUid).
     val avatarUrl: String? = null,
-    val coverUrl: String? = null
+    val coverUrl: String? = null,
+    val isFollowedByMe: Boolean = false
 )

@@ -1,6 +1,7 @@
 package com.example.motormates.ui.user.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,7 +27,12 @@ import com.example.motormates.ui.theme.Spacing
  * como el resto de bloques de la app.
  */
 @Composable
-fun ProfileStatsRow(profile: UserProfile, modifier: Modifier = Modifier) {
+fun ProfileStatsRow(
+    profile: UserProfile,
+    onFollowersClick: () -> Unit = {},
+    onFollowingClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -42,12 +48,16 @@ fun ProfileStatsRow(profile: UserProfile, modifier: Modifier = Modifier) {
         StatItem(
             value = profile.followersDisplay,
             label = stringResource(R.string.user_stat_followers),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .clickable(onClick = onFollowersClick)
         )
         StatItem(
             value = profile.followingDisplay,
             label = stringResource(R.string.user_stat_following),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .clickable(onClick = onFollowingClick)
         )
     }
 }

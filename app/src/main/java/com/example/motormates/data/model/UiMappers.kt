@@ -2,6 +2,8 @@ package com.example.motormates.data.model
 
 import com.example.motormates.data.dto.UserDto
 import com.example.motormates.data.util.toRelativeTimeEs
+import java.time.Duration
+import java.time.Instant
 
 /**
  * Mapeo dominio -> UI. Está separado de DtoMappers para que quede claro
@@ -49,7 +51,7 @@ fun Vehicle.toReviewCarSummary(): ReviewCarSummary = ReviewCarSummary(
  * currentUserId es el uid de Firebase Auth de quien usa la app (null si no
  * hay sesión): con él se decide si la reseña es mía y se puede editar.
  */
-fun Review.toReviewUi(currentUserId: String?): ReviewUi = ReviewUi(
+fun Review.toReviewUi(currentUserId: String?, likedReviewIds: Set<String> = emptySet()): ReviewUi = ReviewUi(
     id = id,
     userId = userId,
     nombreUsuario = author?.fullName?.ifBlank { null } ?: "Usuario",
@@ -57,7 +59,9 @@ fun Review.toReviewUi(currentUserId: String?): ReviewUi = ReviewUi(
     tiempoTexto = createdAt.toRelativeTimeEs(),
     calificacion = rating.coerceIn(0, 5),
     comentario = comment.orEmpty(),
-    isMine = userId == currentUserId
+    isMine = userId == currentUserId,
+    likesCount = likesCount,
+    isLikedByMe = id in likedReviewIds
 )
 
 /**
@@ -101,8 +105,8 @@ fun UserDto.toUserProfile(reviewsCount: Int): UserProfile = UserProfile(
     location = location,
     bio = bio,
     reviewsCount = reviewsCount,
-    followersDisplay = "0",
-    followingDisplay = "0"
+    followersDisplay = "$followersCount",
+    followingDisplay = "$followingCount"
 )
 
 fun UserDto.toUserSearchResult(): UserSearchResult = UserSearchResult(
@@ -111,3 +115,45 @@ fun UserDto.toUserSearchResult(): UserSearchResult = UserSearchResult(
     handle = "@" + username.ifBlank { email.substringBefore("@") },
     avatarUrl = avatarUrl
 )
+
+/**
+ * section agrupa por antigüedad (igual criterio que antes se veía quemado
+ * en los datos de ejemplo): HOY si fue en las últimas 24 h, ESTA SEMANA si
+ * fue en los últimos 7 días, ANTES para el resto.
+ */
+fun Notification.toNotificationUi(): NotificationUi {
+    val vehicleName = if (!vehicleBrand.isNullOrBlank()) "$vehicleBrand $vehicleModel" else null
+
+    val message = when (type) {
+        NotificationType.LIKE ->
+            if (vehicleName != null) "le dio like a tu reseña del $vehicleName" else "le dio like a tu reseña"
+        NotificationType.REVIEW ->
+            if (vehicleName != null) "también dejó una reseña en el $vehicleName" else "también dejó una reseña en un carro que reseñaste"
+        NotificationType.FOLLOW -> "empezó a seguirte"
+        NotificationType.COMMENT, NotificationType.RATING -> ""
+    }
+
+    val section = createdAt?.let { iso ->
+        try {
+            val hours = Duration.between(Instant.parse(iso), Instant.now()).toHours()
+            when {
+                hours < 24 -> "HOY"
+                hours < 24 * 7 -> "ESTA SEMANA"
+                else -> "ANTES"
+            }
+        } catch (e: Exception) {
+            "ANTES"
+        }
+    } ?: "ANTES"
+
+    return NotificationUi(
+        id = id,
+        type = type,
+        actorName = actorName,
+        actorAvatarUrl = actorAvatarUrl,
+        message = message,
+        timeAgo = createdAt.toRelativeTimeEs(),
+        section = section,
+        thumbnailUrl = vehicleImageUrl
+    )
+}

@@ -4,6 +4,8 @@ import com.example.motormates.data.dto.LikeDto
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 
 
@@ -38,4 +40,47 @@ class FirestoreLikeDataSource @Inject constructor(
             null
         }.await()
     }
+
+    /**
+     * Mismo criterio que likeReview: todo en una transacción para que el
+     * borrado del like y la resta del contador queden consistentes.
+     */
+    override suspend fun unlikeReview(reviewId: String, userId: String) {
+        val reviewRef = firestore.collection(REVIEWS_COLLECTION).document(reviewId)
+        val likeRef = reviewRef.collection(LIKES_COLLECTION).document(userId)
+
+        firestore.runTransaction { transaction ->
+            val likeSnapshot = transaction.get(likeRef)
+
+            if (likeSnapshot.exists()) {
+                transaction.delete(likeRef)
+                transaction.update(reviewRef, "likesCount", FieldValue.increment(-1))
+            }
+
+            null
+        }.await()
+    }
+
+    /**
+     * Una lectura por reseña (no un collectionGroup) para no depender de
+     * índices adicionales: las listas de reseñas que se muestran son cortas.
+     */
+    override suspend fun getLikedReviewIds(userId: String, reviewIds: List<String>): Set<String> =
+        coroutineScope {
+            reviewIds
+                .map { reviewId ->
+                    async {
+                        val exists = firestore.collection(REVIEWS_COLLECTION)
+                            .document(reviewId)
+                            .collection(LIKES_COLLECTION)
+                            .document(userId)
+                            .get()
+                            .await()
+                            .exists()
+                        if (exists) reviewId else null
+                    }
+                }
+                .mapNotNull { it.await() }
+                .toSet()
+        }
 }

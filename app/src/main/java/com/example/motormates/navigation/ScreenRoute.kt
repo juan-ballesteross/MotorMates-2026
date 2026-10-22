@@ -51,4 +51,16 @@ sealed class ScreenRoute(val route: String) {
         const val ARG_UID = "uid"
         fun createRoute(uid: String) = "publicProfileFirebase/$uid"
     }
+
+    /**
+     * Lista de seguidores o seguidos de un usuario (propio o de otra
+     * cuenta). mode solo puede ser MODE_FOLLOWERS o MODE_FOLLOWING.
+     */
+    object FollowList : ScreenRoute("followList/{uid}/{mode}") {
+        const val ARG_UID = "uid"
+        const val ARG_MODE = "mode"
+        const val MODE_FOLLOWERS = "followers"
+        const val MODE_FOLLOWING = "following"
+        fun createRoute(uid: String, mode: String) = "followList/$uid/$mode"
+    }
 }

@@ -2,9 +2,13 @@ package com.example.motormates.ui.publicProfile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.motormates.data.model.NotificationType
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.toUserProfile
 import com.example.motormates.data.model.toUserReviewUi
+import com.example.motormates.data.repository.AuthRepository
+import com.example.motormates.data.repository.FollowRepository
+import com.example.motormates.data.repository.NotificationRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.UserRepository
 import com.example.motormates.data.repository.VehicleRepository
@@ -23,13 +27,19 @@ import kotlinx.coroutines.launch
 class PublicProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val reviewRepository: ReviewRepository,
-    private val vehicleRepository: VehicleRepository
+    private val vehicleRepository: VehicleRepository,
+    private val followRepository: FollowRepository,
+    private val authRepository: AuthRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PublicProfileUiState())
     val uiState: StateFlow<PublicProfileUiState> = _uiState
 
+    private var profileUid: String? = null
+
     fun loadProfileByUid(uid: String) {
+        profileUid = uid
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -40,6 +50,10 @@ class PublicProfileViewModel @Inject constructor(
             val vehicleImages = vehicleRepository.getVehicles()
                 .getOrElse { emptyList() }
                 .associate { it.id to it.imageUrl }
+            val currentUserId = authRepository.getCurrentUser()?.id
+            val isFollowing = currentUserId?.let { myId ->
+                followRepository.isFollowing(myId, uid).getOrElse { false }
+            } ?: false
 
             _uiState.update { current ->
                 userResult.fold(
@@ -51,7 +65,8 @@ class PublicProfileViewModel @Inject constructor(
                             reviews = reviews.map { it.toUserReviewUi(vehicleImages[it.vehicleId]) },
                             selectedTab = ProfileTab.REVIEWS,
                             avatarUrl = user.avatarUrl,
-                            coverUrl = user.coverUrl
+                            coverUrl = user.coverUrl,
+                            isFollowedByMe = isFollowing
                         )
                     },
                     onFailure = { error ->
@@ -61,6 +76,53 @@ class PublicProfileViewModel @Inject constructor(
                             errorMessage = error.message ?: "No se pudo cargar el perfil"
                         )
                     }
+                )
+            }
+        }
+    }
+
+    /**
+     * Optimista: cambia el botón y el contador de seguidores de una vez y
+     * llama a Firestore después; si falla, revierte.
+     */
+    fun toggleFollow() {
+        val targetUid = profileUid ?: return
+        val myId = authRepository.getCurrentUser()?.id ?: return
+        val wasFollowing = _uiState.value.isFollowedByMe
+        val profile = _uiState.value.profile ?: return
+        val previousFollowersCount = profile.followersDisplay.toIntOrNull() ?: 0
+
+        _uiState.update {
+            it.copy(
+                isFollowedByMe = !wasFollowing,
+                profile = profile.copy(
+                    followersDisplay = "${(previousFollowersCount + if (wasFollowing) -1 else 1).coerceAtLeast(0)}"
+                )
+            )
+        }
+
+        viewModelScope.launch {
+            val result = if (wasFollowing) {
+                followRepository.unfollowUser(myId, targetUid)
+            } else {
+                followRepository.followUser(myId, targetUid)
+            }
+
+            result.onFailure {
+                _uiState.update {
+                    it.copy(
+                        isFollowedByMe = wasFollowing,
+                        profile = profile.copy(followersDisplay = "$previousFollowersCount")
+                    )
+                }
+            }
+
+            // Solo al seguir (no al dejar de seguir), y solo si sí se guardó.
+            if (!wasFollowing && result.isSuccess) {
+                notificationRepository.notify(
+                    recipientUid = targetUid,
+                    type = NotificationType.FOLLOW,
+                    actorId = myId
                 )
             }
         }

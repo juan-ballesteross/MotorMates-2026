@@ -91,6 +91,7 @@ fun VehicleDetailScreen(
             onAuthorClick = onAuthorClick,
             onEditReviewClick = onEditReviewClick,
             onDeleteReviewClick = viewModel::askDeleteReview,
+            onLikeClick = viewModel::toggleLike,
             modifier = modifier
         )
     }

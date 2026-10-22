@@ -7,3 +7,6 @@ package com.example.motormates.data.source
 internal const val USERS_COLLECTION = "users"
 internal const val REVIEWS_COLLECTION = "reviews"
 internal const val LIKES_COLLECTION = "likes"
+internal const val FOLLOWERS_COLLECTION = "followers"
+internal const val FOLLOWING_COLLECTION = "following"
+internal const val NOTIFICATIONS_COLLECTION = "notifications"

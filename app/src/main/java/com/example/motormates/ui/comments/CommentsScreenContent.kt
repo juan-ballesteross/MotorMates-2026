@@ -30,6 +30,7 @@ fun CommentsScreenContent(
     onAuthorClick: (String) -> Unit,
     onEditReviewClick: (String) -> Unit,
     onDeleteReviewClick: (String) -> Unit,
+    onLikeClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -82,7 +83,8 @@ fun CommentsScreenContent(
                         review = review,
                         onAuthorClick = onAuthorClick,
                         onEditClick = onEditReviewClick,
-                        onDeleteClick = onDeleteReviewClick
+                        onDeleteClick = onDeleteReviewClick,
+                        onLikeClick = onLikeClick
                     )
                 }
             }

@@ -81,6 +81,7 @@
 
     <!-- Public profile (perfil de otro usuario) -->
     <string name="public_profile_follow_button">Seguir</string>
+    <string name="public_profile_following_button">Siguiendo</string>
     <string name="public_profile_message_button">Enviar mensaje</string>
     <string name="public_profile_back_cd">Volver</string>
 

@@ -21,6 +21,7 @@ data class ReviewFirestoreDto(
     val vehicleId: String = "",
     val createdAt: Long = 0L,
     val updatedAt: Long = 0L,
+    val likesCount: Int = 0,
     val user: ReviewUserSnapshot? = null,
     val vehicle: ReviewVehicleSnapshot? = null
 ) : ReviewDtoGeneric {
@@ -34,6 +35,7 @@ data class ReviewFirestoreDto(
         // El dominio maneja createdAt como ISO-8601 (lo que ya entiende
         // toRelativeTimeEs); en Firestore se guarda como epoch en millis.
         createdAt = if (createdAt > 0) Instant.ofEpochMilli(createdAt).toString() else null,
+        likesCount = likesCount,
         author = user?.let { ReviewAuthor(id = userId, fullName = it.fullName, avatarUrl = it.avatarUrl) },
         vehicle = vehicle?.let { ReviewVehicleRef(id = vehicleId, brand = it.brand, model = it.model) }
     )

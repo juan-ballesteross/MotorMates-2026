@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.motormates.data.model.NotificationType
 import com.example.motormates.data.model.NotificationUi
 
@@ -65,7 +66,7 @@ fun NotificationItem(
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NotificationIcon(type = notification.type)
+        NotificationIcon(type = notification.type, avatarUrl = notification.actorAvatarUrl)
 
         Spacer(modifier = Modifier.width(12.dp))
 
@@ -90,19 +91,46 @@ fun NotificationItem(
             )
         }
 
-        if (notification.thumbnailResId != null) {
+        if (notification.thumbnailUrl != null) {
+            Spacer(modifier = Modifier.width(8.dp))
+            AsyncImage(
+                model = notification.thumbnailUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+        } else if (notification.thumbnailResId != null) {
             Spacer(modifier = Modifier.width(8.dp))
             NotificationThumbnail(resId = notification.thumbnailResId)
         }
     }
 }
 
+/**
+ * Si el actor tiene foto, se muestra ella (como en cualquier feed de
+ * notificaciones); si no, se cae al ícono de siempre según el tipo.
+ */
 @Composable
-private fun NotificationIcon(type: NotificationType) {
+private fun NotificationIcon(type: NotificationType, avatarUrl: String? = null) {
+    if (avatarUrl != null) {
+        AsyncImage(
+            model = avatarUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+        )
+        return
+    }
+
     val (icon, tint) = when (type) {
         NotificationType.LIKE -> Icons.Filled.Favorite to MaterialTheme.colorScheme.primary
         NotificationType.RATING -> Icons.Filled.Star to MaterialTheme.colorScheme.primary
-        NotificationType.COMMENT -> Icons.AutoMirrored.Filled.Comment to MaterialTheme.colorScheme.onSurfaceVariant
+        NotificationType.COMMENT, NotificationType.REVIEW ->
+            Icons.AutoMirrored.Filled.Comment to MaterialTheme.colorScheme.onSurfaceVariant
         NotificationType.FOLLOW -> Icons.Filled.Person to MaterialTheme.colorScheme.onSurfaceVariant
     }
 

@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -189,7 +191,8 @@ fun ReviewItem(
     review: ReviewUi,
     onAuthorClick: (String) -> Unit = {},
     onEditClick: (String) -> Unit = {},
-    onDeleteClick: (String) -> Unit = {}
+    onDeleteClick: (String) -> Unit = {},
+    onLikeClick: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -279,6 +282,25 @@ fun ReviewItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 lineHeight = 18.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable { onLikeClick(review.id) }
+        ) {
+            Text(
+                text = "${review.likesCount}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 13.sp
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                imageVector = if (review.isLikedByMe) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                contentDescription = if (review.isLikedByMe) "Quitar like" else "Dar like",
+                tint = if (review.isLikedByMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
             )
         }
     }

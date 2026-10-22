@@ -13,6 +13,7 @@ data class Review(
     val userId: String,
     val vehicleId: String,
     val createdAt: String?,
+    val likesCount: Int = 0,
     val author: ReviewAuthor?,
     val vehicle: ReviewVehicleRef?
 )

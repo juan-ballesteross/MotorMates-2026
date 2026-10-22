@@ -46,6 +46,7 @@ fun PublicProfileHeader(
     coverUrl: String? = null,
     avatarResId: Int,
     avatarUrl: String? = null,
+    isFollowing: Boolean = false,
     onBackClick: () -> Unit,
     onFollowClick: () -> Unit,
     onMessageClick: () -> Unit,
@@ -124,16 +125,29 @@ fun PublicProfileHeader(
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
-            Button(
-                onClick = onFollowClick,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                shape = RoundedCornerShape(Radius.sm)
-            ) {
-                Text(
-                    text = stringResource(R.string.public_profile_follow_button),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+            if (isFollowing) {
+                OutlinedButton(
+                    onClick = onFollowClick,
+                    shape = RoundedCornerShape(Radius.sm)
+                ) {
+                    Text(
+                        text = stringResource(R.string.public_profile_following_button),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            } else {
+                Button(
+                    onClick = onFollowClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    shape = RoundedCornerShape(Radius.sm)
+                ) {
+                    Text(
+                        text = stringResource(R.string.public_profile_follow_button),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(10.dp))
             OutlinedButton(

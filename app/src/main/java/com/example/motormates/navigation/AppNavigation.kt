@@ -17,6 +17,7 @@ import com.example.motormates.ui.alerts.AlertsScreen
 import com.example.motormates.ui.comments.CommentsScreen
 import com.example.motormates.ui.editProfile.EditProfileScreen
 import com.example.motormates.ui.feed.FeedScreen
+import com.example.motormates.ui.followlist.FollowListScreen
 import com.example.motormates.ui.login.LoginScreen
 import com.example.motormates.ui.post.PostScreen
 import com.example.motormates.ui.publicProfile.PublicProfileScreen
@@ -122,6 +123,20 @@ fun AppNavigation(
                 },
                 onEditReviewClick = { vehicleId, reviewId ->
                     navController.navigate(ScreenRoute.NewReview.createRoute(vehicleId, reviewId))
+                },
+                onFollowersClick = {
+                    sessionViewModel.currentUserId()?.let { uid ->
+                        navController.navigate(
+                            ScreenRoute.FollowList.createRoute(uid, ScreenRoute.FollowList.MODE_FOLLOWERS)
+                        )
+                    }
+                },
+                onFollowingClick = {
+                    sessionViewModel.currentUserId()?.let { uid ->
+                        navController.navigate(
+                            ScreenRoute.FollowList.createRoute(uid, ScreenRoute.FollowList.MODE_FOLLOWING)
+                        )
+                    }
                 },
                 reloadSignal = reviewsChanged || profileChanged,
                 onReloadHandled = {
@@ -250,7 +265,34 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() },
                 onVehicleClick = { vehicleId ->
                     navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
+                },
+                onFollowersClick = { targetUid ->
+                    navController.navigate(
+                        ScreenRoute.FollowList.createRoute(targetUid, ScreenRoute.FollowList.MODE_FOLLOWERS)
+                    )
+                },
+                onFollowingClick = { targetUid ->
+                    navController.navigate(
+                        ScreenRoute.FollowList.createRoute(targetUid, ScreenRoute.FollowList.MODE_FOLLOWING)
+                    )
                 }
+            )
+        }
+        composable(
+            route = ScreenRoute.FollowList.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.FollowList.ARG_UID) { type = NavType.StringType },
+                navArgument(ScreenRoute.FollowList.ARG_MODE) { type = NavType.StringType }
+            )
+        ) { entry ->
+            val uid = entry.arguments?.getString(ScreenRoute.FollowList.ARG_UID).orEmpty()
+            val mode = entry.arguments?.getString(ScreenRoute.FollowList.ARG_MODE)
+
+            FollowListScreen(
+                uid = uid,
+                isFollowers = mode == ScreenRoute.FollowList.MODE_FOLLOWERS,
+                onBackClick = { navController.popBackStack() },
+                onUserClick = { user -> openAuthor(user.uid) }
             )
         }
     }

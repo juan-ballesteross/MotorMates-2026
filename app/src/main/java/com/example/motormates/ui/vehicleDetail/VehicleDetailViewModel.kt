@@ -2,9 +2,13 @@ package com.example.motormates.ui.vehicleDetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.motormates.data.model.NotificationType
+import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.data.model.toCarDetailUi
 import com.example.motormates.data.model.toReviewUi
 import com.example.motormates.data.repository.AuthRepository
+import com.example.motormates.data.repository.LikeRepository
+import com.example.motormates.data.repository.NotificationRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.VehicleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,11 +22,17 @@ import kotlinx.coroutines.launch
 class VehicleDetailViewModel @Inject constructor(
     private val vehicleRepository: VehicleRepository,
     private val reviewRepository: ReviewRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val likeRepository: LikeRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(VehicleDetailState())
     val state: StateFlow<VehicleDetailState> = _state
+
+    // Se guarda para poder avisarle al autor de la reseña qué carro era, sin
+    // tener que pasarlo de nuevo como parámetro en cada toggleLike.
+    private var currentVehicleId: String? = null
 
     /**
      * Carga vehículo y reseñas en la misma corrutina: la calificación
@@ -30,6 +40,7 @@ class VehicleDetailViewModel @Inject constructor(
      * las reseñas, así que no tiene sentido pintar uno sin el otro.
      */
     fun load(vehicleId: String) {
+        currentVehicleId = vehicleId
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -47,15 +58,71 @@ class VehicleDetailViewModel @Inject constructor(
 
             val reviews = reviewRepository.getReviewsByVehicle(vehicleId).getOrElse { emptyList() }
             val currentUserId = authRepository.getCurrentUser()?.id
+            val likedReviewIds = currentUserId?.let { uid ->
+                likeRepository.getLikedReviewIds(uid, reviews.map { it.id }).getOrElse { emptySet() }
+            } ?: emptySet()
 
             _state.update {
                 it.copy(
                     isLoading = false,
                     errorMessage = null,
                     vehicle = vehicle.toCarDetailUi(reviews),
-                    reviews = reviews.map { review -> review.toReviewUi(currentUserId) }
+                    reviews = reviews.map { review -> review.toReviewUi(currentUserId, likedReviewIds) }
                 )
             }
+        }
+    }
+
+    /**
+     * Optimista: cambia el corazón y el contador de una vez y llama a
+     * Firestore después; si falla, revierte ese mismo review a como estaba.
+     */
+    fun toggleLike(reviewId: String) {
+        val userId = authRepository.getCurrentUser()?.id ?: return
+        val review = _state.value.reviews.find { it.id == reviewId } ?: return
+        val wasLiked = review.isLikedByMe
+
+        updateReview(reviewId) {
+            it.copy(
+                isLikedByMe = !wasLiked,
+                likesCount = (it.likesCount + if (wasLiked) -1 else 1).coerceAtLeast(0)
+            )
+        }
+
+        viewModelScope.launch {
+            val result = if (wasLiked) {
+                likeRepository.unlikeReview(reviewId, userId)
+            } else {
+                likeRepository.likeReview(reviewId, userId)
+            }
+
+            result.onFailure {
+                updateReview(reviewId) {
+                    it.copy(
+                        isLikedByMe = wasLiked,
+                        likesCount = (it.likesCount + if (wasLiked) 1 else -1).coerceAtLeast(0)
+                    )
+                }
+            }
+
+            // Solo al dar like (no al quitarlo), y solo si sí se guardó.
+            if (!wasLiked && result.isSuccess) {
+                notificationRepository.notify(
+                    recipientUid = review.userId,
+                    type = NotificationType.LIKE,
+                    actorId = userId,
+                    vehicleId = currentVehicleId,
+                    reviewId = reviewId
+                )
+            }
+        }
+    }
+
+    private fun updateReview(reviewId: String, transform: (ReviewUi) -> ReviewUi) {
+        _state.update { current ->
+            current.copy(
+                reviews = current.reviews.map { if (it.id == reviewId) transform(it) else it }
+            )
         }
     }
 

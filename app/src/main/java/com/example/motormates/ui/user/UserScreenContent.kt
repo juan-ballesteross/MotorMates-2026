@@ -53,6 +53,8 @@ fun UserScreenContent(
     onReviewClick: (String) -> Unit = {},
     onEditReviewClick: (String) -> Unit = {},
     onDeleteReviewClick: (String) -> Unit = {},
+    onFollowersClick: () -> Unit = {},
+    onFollowingClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -75,7 +77,11 @@ fun UserScreenContent(
             ProfileInfoSection(profile = profile)
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
-            ProfileStatsRow(profile = profile)
+            ProfileStatsRow(
+                profile = profile,
+                onFollowersClick = onFollowersClick,
+                onFollowingClick = onFollowingClick
+            )
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
             ProfileTabsRow(selected = selectedTab, onSelect = onSelectTab)
