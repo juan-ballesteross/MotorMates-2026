@@ -8,31 +8,36 @@ import com.example.motormates.data.remote.service.ReviewApiService
 import javax.inject.Inject
 
 /**
- * Implementación contra el backend propio (Postgres). Sus ids son
- * numéricos, así que los ids String del dominio se convierten aquí.
+ * Implementación contra el backend propio (Postgres). Los ids viajan como
+ * String igual que en el dominio: el userId es el uid de Firebase y el
+ * backend convierte los ids numéricos de reviews y vehículos por su cuenta.
  */
 class ReviewRetrofitDataSource @Inject constructor(
     private val service: ReviewApiService
 ) : ReviewRemoteDataSource {
 
     override suspend fun getReviewsByVehicle(vehicleId: String): List<ReviewDtoGeneric> =
-        service.getReviewsByVehicle(vehicleId.toInt())
+        service.getReviewsByVehicle(vehicleId)
 
     override suspend fun getReviewsByUser(userId: String): List<ReviewDtoGeneric> =
-        service.getReviewsByUser(userId.toInt())
+        service.getReviewsByUser(userId)
 
+    /**
+     * El backend no guarda la captura del autor ni del vehículo (los trae
+     * con un JOIN al leer), así que authorName/vehicleBrand no se envían.
+     */
     override suspend fun createReview(review: NewReview): ReviewDtoGeneric =
         service.createReview(
             CreateReviewRequest(
-                userId = review.userId.toInt(),
-                vehicleId = review.vehicleId.toInt(),
+                userId = review.userId,
+                vehicleId = review.vehicleId,
                 rating = review.rating,
                 comment = review.comment
             )
         )
 
     override suspend fun updateReview(id: String, rating: Int?, comment: String?): ReviewDtoGeneric =
-        service.updateReview(id.toInt(), UpdateReviewRequest(rating = rating, comment = comment))
+        service.updateReview(id, UpdateReviewRequest(rating = rating, comment = comment))
 
-    override suspend fun deleteReview(id: String) = service.deleteReview(id.toInt())
+    override suspend fun deleteReview(id: String) = service.deleteReview(id)
 }

@@ -10,5 +10,5 @@ interface VehicleApiService {
     suspend fun getVehicles(): List<VehicleDto>
 
     @GET("vehicles/{id}")
-    suspend fun getVehicleById(@Path("id") id: Int): VehicleDto
+    suspend fun getVehicleById(@Path("id") id: String): VehicleDto
 }

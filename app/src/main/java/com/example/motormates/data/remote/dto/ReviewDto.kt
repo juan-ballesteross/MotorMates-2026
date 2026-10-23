@@ -6,19 +6,20 @@ import com.example.motormates.data.remote.mapper.mapToDomain
 import com.google.gson.annotations.SerializedName
 
 /**
- * Review tal como la devuelve el backend. Los dos objetos anidados son
- * excluyentes y por eso van nulables: GET /vehicles/{id}/reviews incluye
- * solo "user", GET /users/{id}/reviews incluye solo "vehicle", y el POST
- * y el PUT no incluyen ninguno.
+ * Review tal como la devuelve el backend. Todas las respuestas traen el
+ * autor (con su foto), el vehículo y el likesCount, que el backend cuenta
+ * en la misma consulta. userId es el uid de Firebase (texto); el id de la
+ * review y el del vehículo siguen siendo numéricos en Postgres.
  */
 data class ReviewDto(
     @SerializedName("id") val id: Int,
     @SerializedName("rating") val rating: Int,
     @SerializedName("comment") val comment: String?,
-    @SerializedName("userId") val userId: Int,
+    @SerializedName("userId") val userId: String,
     @SerializedName("vehicleId") val vehicleId: Int,
     @SerializedName("createdAt") val createdAt: String?,
     @SerializedName("updatedAt") val updatedAt: String?,
+    @SerializedName("likesCount") val likesCount: Int = 0,
     @SerializedName("user") val user: ReviewUserDto? = null,
     @SerializedName("vehicle") val vehicle: ReviewVehicleDto? = null
 ) : ReviewDtoGeneric {
@@ -31,8 +32,9 @@ data class ReviewDto(
  * de los campos en null.
  */
 data class ReviewUserDto(
-    @SerializedName("id") val id: Int,
-    @SerializedName("fullName") val fullName: String
+    @SerializedName("id") val id: String,
+    @SerializedName("fullName") val fullName: String,
+    @SerializedName("avatarUrl") val avatarUrl: String? = null
 )
 
 data class ReviewVehicleDto(

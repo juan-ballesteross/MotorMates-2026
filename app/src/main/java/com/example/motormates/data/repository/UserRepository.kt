@@ -1,37 +1,41 @@
 package com.example.motormates.data.repository
 
-import com.example.motormates.data.dto.UserDto
-import com.example.motormates.data.model.BackendUser
-import com.example.motormates.data.remote.datasource.UserRemoteDataSource
-import com.example.motormates.data.remote.mapper.toDomain
+import com.example.motormates.data.model.User
 import com.example.motormates.data.source.UserDataSource
 import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import retrofit2.HttpException
 
 interface UserRepository {
-    suspend fun getUserById(id: Int): Result<BackendUser>
-
-    /** Perfil de Firestore del usuario autenticado (uid de Firebase Auth). */
-    suspend fun getCurrentUserProfile(uid: String): Result<UserDto>
+    /** Perfil del usuario autenticado (uid de Firebase Auth). */
+    suspend fun getCurrentUserProfile(uid: String): Result<User>
 
     /** El mismo perfil en tiempo real: contadores, avatar y portada al día. */
-    fun observeUserProfile(uid: String): Flow<Result<UserDto>>
+    fun observeUserProfile(uid: String): Flow<Result<User>>
 
     /**
-     * success(true/false) solo cuando se pudo comprobar contra Firestore;
-     * failure si no se pudo (sin red). Quien decida cerrar la sesión necesita
-     * esa diferencia para no sacar a nadie por un problema de conexión.
+     * success(true/false) solo cuando se pudo comprobar contra la fuente de
+     * datos; failure si no se pudo (sin red). Quien decida cerrar la sesión
+     * necesita esa diferencia para no sacar a nadie por un problema de conexión.
      */
     suspend fun hasProfile(uid: String): Result<Boolean>
 
-    suspend fun updateCurrentUserProfile(uid: String, fullName: String, bio: String): Result<Unit>
+    /**
+     * Valida y guarda los datos editables del perfil. El username se guarda
+     * normalizado (sin espacios y en minúsculas) y debe ser único.
+     */
+    suspend fun updateCurrentUserProfile(
+        uid: String,
+        fullName: String,
+        username: String,
+        location: String,
+        bio: String
+    ): Result<Unit>
 
-    /** Todos los perfiles de Firestore, para el buscador de usuarios. */
-    suspend fun getAllRegisteredUsers(): Result<List<UserDto>>
+    /** Todos los perfiles, para el buscador de usuarios. */
+    suspend fun getAllRegisteredUsers(): Result<List<User>>
 
     suspend fun updateCurrentUserAvatar(uid: String, avatarUrl: String): Result<Unit>
 
@@ -39,34 +43,14 @@ interface UserRepository {
 }
 
 class UserRepositoryImpl @Inject constructor(
-    private val remoteDataSource: UserRemoteDataSource,
     private val userDataSource: UserDataSource
 ) : UserRepository {
 
-    override suspend fun getUserById(id: Int): Result<BackendUser> {
-        return try {
-            Result.success(remoteDataSource.getUserById(id).toDomain())
-        } catch (e: IOException) {
-            Result.failure(Exception(NO_CONNECTION_MESSAGE))
-        } catch (e: HttpException) {
-            Result.failure(
-                Exception(
-                    e.toSpanishMessage(
-                        notFound = "Este usuario no existe",
-                        fallback = "No se pudo cargar el perfil"
-                    )
-                )
-            )
-        } catch (e: Exception) {
-            Result.failure(Exception("No se pudo cargar el perfil"))
-        }
-    }
-
-    override suspend fun getCurrentUserProfile(uid: String): Result<UserDto> {
+    override suspend fun getCurrentUserProfile(uid: String): Result<User> {
         return try {
             val user = userDataSource.getUser(uid)
             if (user != null) {
-                Result.success(user)
+                Result.success(user.toDomain())
             } else {
                 Result.failure(Exception(PROFILE_NOT_FOUND))
             }
@@ -83,10 +67,10 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun observeUserProfile(uid: String): Flow<Result<UserDto>> =
+    override fun observeUserProfile(uid: String): Flow<Result<User>> =
         userDataSource.observeUser(uid)
             .map { user ->
-                if (user != null) Result.success(user)
+                if (user != null) Result.success(user.toDomain())
                 else Result.failure(Exception(PROFILE_NOT_FOUND))
             }
             .catch { emit(Result.failure(Exception(PROFILE_LOAD_ERROR))) }
@@ -94,19 +78,38 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun updateCurrentUserProfile(
         uid: String,
         fullName: String,
+        username: String,
+        location: String,
         bio: String
     ): Result<Unit> {
+        val cleanName = fullName.trim()
+        val cleanUsername = username.trim().removePrefix("@").lowercase()
+
+        if (cleanName.isEmpty()) {
+            return Result.failure(Exception("El nombre no puede estar vacío"))
+        }
+        if (!USERNAME_REGEX.matches(cleanUsername)) {
+            return Result.failure(
+                Exception("El usuario solo puede tener letras, números, punto y guion bajo (3–20)")
+            )
+        }
+
         return try {
-            userDataSource.updateUser(uid, fullName, bio)
+            if (userDataSource.isUsernameTaken(cleanUsername, exceptUid = uid)) {
+                return Result.failure(Exception("Ese nombre de usuario ya está en uso"))
+            }
+            userDataSource.updateUser(uid, cleanName, cleanUsername, location.trim(), bio.trim())
             Result.success(Unit)
+        } catch (e: IOException) {
+            Result.failure(Exception(NO_CONNECTION_MESSAGE))
         } catch (e: Exception) {
             Result.failure(Exception("No se pudo guardar tu perfil"))
         }
     }
 
-    override suspend fun getAllRegisteredUsers(): Result<List<UserDto>> {
+    override suspend fun getAllRegisteredUsers(): Result<List<User>> {
         return try {
-            Result.success(userDataSource.getAllUsers())
+            Result.success(userDataSource.getAllUsers().map { it.toDomain() })
         } catch (e: Exception) {
             Result.failure(Exception("No se pudo cargar la lista de usuarios"))
         }
@@ -133,5 +136,6 @@ class UserRepositoryImpl @Inject constructor(
     private companion object {
         const val PROFILE_NOT_FOUND = "No se encontró tu perfil"
         const val PROFILE_LOAD_ERROR = "No se pudo cargar tu perfil"
+        val USERNAME_REGEX = Regex("^[a-z0-9._]{3,20}$")
     }
 }

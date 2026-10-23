@@ -2,6 +2,7 @@ package com.example.motormates.data.repository
 
 import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.model.NewReview
+import com.example.motormates.data.model.NotificationType
 import com.example.motormates.data.model.Review
 import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
 import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
@@ -44,7 +45,8 @@ class ReviewRepositoryImpl @Inject constructor(
     private val realtimeDataSource: ReviewRealtimeDataSource,
     private val vehicleDataSource: VehicleRemoteDataSource,
     private val userDataSource: UserDataSource,
-    private val authDataSource: AuthDataSource
+    private val authDataSource: AuthDataSource,
+    private val notificationRepository: NotificationRepository
 ) : ReviewRepository {
 
     override suspend fun getReviewsByVehicle(vehicleId: String): Result<List<Review>> =
@@ -83,7 +85,7 @@ class ReviewRepositoryImpl @Inject constructor(
             return Result.failure(Exception(INVALID_RATING))
         }
 
-        return safeCall(
+        val result = safeCall(
             notFound = "El usuario o el vehículo ya no existe",
             fallback = "No se pudo publicar la reseña"
         ) {
@@ -104,6 +106,32 @@ class ReviewRepositoryImpl @Inject constructor(
                     vehicleModel = vehicle.model
                 )
             ).toDomain()
+        }
+
+        result.getOrNull()?.let { newReview -> notifyOtherReviewers(newReview) }
+        return result
+    }
+
+    /**
+     * Solo al crear (no al editar): se avisa a quienes ya habían reseñado
+     * este mismo carro, para que sepan que alguien más lo reseñó. Es
+     * best-effort: si falla la consulta, la reseña igual quedó publicada.
+     */
+    private suspend fun notifyOtherReviewers(newReview: Review) {
+        val otherReviewerIds = runCatching { remoteDataSource.getReviewsByVehicle(newReview.vehicleId) }
+            .getOrElse { emptyList() }
+            .map { it.toDomain().userId }
+            .filter { it != newReview.userId }
+            .distinct()
+
+        otherReviewerIds.forEach { recipientId ->
+            notificationRepository.notify(
+                recipientUid = recipientId,
+                type = NotificationType.REVIEW,
+                actorId = newReview.userId,
+                vehicleId = newReview.vehicleId,
+                reviewId = newReview.id
+            )
         }
     }
 

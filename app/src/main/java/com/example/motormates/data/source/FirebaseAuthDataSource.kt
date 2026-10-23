@@ -48,6 +48,13 @@ class FirebaseAuthDataSource @Inject constructor(
         firebaseAuth.currentUser?.delete()?.await()
     }
 
+    override suspend fun updateDisplayName(name: String) {
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName(name)
+            .build()
+        firebaseAuth.currentUser?.updateProfile(profileUpdates)?.await()
+    }
+
 }
 
 private fun FirebaseUser.toAuthUser(displayNameOverride: String? = null): AuthUser =

@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Desde Android 17 (API 37) hace falta para hablar con el backend propio en la red local (10.0.2.2 / 192.168.x) -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
     <application
         android:name=".MotorMatesApplication"

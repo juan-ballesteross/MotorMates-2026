@@ -95,8 +95,12 @@
     <string name="edit_profile_cover_hint">JPG o PNG, se ve detrás de tu foto de perfil</string>
     <string name="edit_profile_change_cover_button">Cambiar portada</string>
     <string name="edit_profile_uploading_cover">Subiendo...</string>
-    <string name="edit_profile_username_label">Nombre de usuario</string>
-    <string name="edit_profile_username_placeholder">Tu nombre de usuario</string>
+    <string name="edit_profile_fullname_label">Nombre completo</string>
+    <string name="edit_profile_fullname_placeholder">Tu nombre</string>
+    <string name="edit_profile_username_label">Usuario</string>
+    <string name="edit_profile_username_placeholder">tu_usuario (letras, números, . y _)</string>
+    <string name="edit_profile_location_label">Ubicación</string>
+    <string name="edit_profile_location_placeholder">Ciudad, país</string>
     <string name="edit_profile_bio_label">Biografía</string>
     <string name="edit_profile_bio_placeholder">Cuéntanos sobre ti y tu pasión por los autos...</string>
     <string name="edit_profile_bio_counter">%1$d / %2$d</string>

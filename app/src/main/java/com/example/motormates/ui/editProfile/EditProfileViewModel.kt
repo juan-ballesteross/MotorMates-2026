@@ -44,14 +44,28 @@ class EditProfileViewModel @Inject constructor(
             val authUser = authRepository.getCurrentUser() ?: return@launch
             userRepository.getCurrentUserProfile(authUser.id).onSuccess { user ->
                 _uiState.update {
-                    it.copy(username = user.fullName, bio = user.bio, coverImageUrl = user.coverUrl)
+                    it.copy(
+                        fullName = user.fullName,
+                        username = user.username,
+                        location = user.location,
+                        bio = user.bio,
+                        coverImageUrl = user.coverUrl
+                    )
                 }
             }
         }
     }
 
+    fun updateFullName(input: String) {
+        _uiState.update { it.copy(fullName = input) }
+    }
+
     fun updateUsername(input: String) {
         _uiState.update { it.copy(username = input) }
+    }
+
+    fun updateLocation(input: String) {
+        _uiState.update { it.copy(location = input) }
     }
 
     fun updateBio(input: String) {
@@ -68,14 +82,19 @@ class EditProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, saveError = null) }
 
+            val form = _uiState.value
             val result = userRepository.updateCurrentUserProfile(
                 uid = authUser.id,
-                fullName = _uiState.value.username,
-                bio = _uiState.value.bio
+                fullName = form.fullName,
+                username = form.username,
+                location = form.location,
+                bio = form.bio
             )
 
             result.fold(
                 onSuccess = {
+                    // Best-effort, como la foto: que falle no deshace lo guardado.
+                    authRepository.updateDisplayName(form.fullName)
                     _uiState.update { it.copy(isSaving = false) }
                     onSaved()
                 },

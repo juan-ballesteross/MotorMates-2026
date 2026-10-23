@@ -2,18 +2,20 @@ package com.example.motormates.ui.comments
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.motormates.data.model.NotificationType
 import com.example.motormates.data.model.toReviewUi
 import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.LikeRepository
-import com.example.motormates.data.repository.NotificationRepository
 import com.example.motormates.data.repository.ReviewRepository
+import com.example.motormates.ui.common.LikedReviewsState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -26,8 +28,7 @@ import kotlinx.coroutines.launch
 class CommentsViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val authRepository: AuthRepository,
-    private val likeRepository: LikeRepository,
-    private val notificationRepository: NotificationRepository
+    private val likeRepository: LikeRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CommentsUiState())
@@ -37,18 +38,15 @@ class CommentsViewModel @Inject constructor(
     // de la reseña a qué carro le dieron like.
     private var currentVehicleId: String? = null
 
-    // Mismo criterio que en VehicleDetailViewModel: el "ya di like" no viene
-    // en el snapshot de la reseña, se consulta una vez y lo mueve toggleLike.
-    private val likedReviewIds = MutableStateFlow<Set<String>>(emptySet())
-    private var likedIdsLoaded = false
+    // Mismo criterio que en VehicleDetailViewModel: el "ya di like" se
+    // escucha aparte, en tiempo real, y se combina con las reseñas.
+    private val likedReviews = LikedReviewsState(likeRepository)
 
     private var reviewsJob: Job? = null
 
     /** Las reseñas quedan escuchándose: llegan y se actualizan solas. */
     fun load(vehicleId: String) {
         currentVehicleId = vehicleId
-        likedIdsLoaded = false
-        likedReviewIds.value = emptySet()
         reviewsJob?.cancel()
 
         val currentUserId = authRepository.getCurrentUser()?.id
@@ -56,18 +54,17 @@ class CommentsViewModel @Inject constructor(
         reviewsJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            combine(
-                reviewRepository.observeReviewsByVehicle(vehicleId),
-                likedReviewIds
-            ) { result, liked -> result to liked }
+            val reviewsFlow = reviewRepository.observeReviewsByVehicle(vehicleId)
+                .shareIn(this, SharingStarted.Eagerly, replay = 1)
+            val likedFlow = likedReviews.observe(
+                currentUserId,
+                reviewsFlow.map { result -> result.getOrNull().orEmpty().map { it.id } }
+            )
+
+            combine(reviewsFlow, likedFlow) { result, liked -> result to liked }
                 .collect { (result, liked) ->
                     result.fold(
                         onSuccess = { reviews ->
-                            if (currentUserId != null && !likedIdsLoaded) {
-                                likedIdsLoaded = true
-                                loadLikedIds(currentUserId, reviews.map { it.id })
-                            }
-
                             _uiState.update {
                                 it.copy(
                                     isLoading = false,
@@ -91,44 +88,23 @@ class CommentsViewModel @Inject constructor(
         }
     }
 
-    private fun loadLikedIds(userId: String, reviewIds: List<String>) {
-        viewModelScope.launch {
-            likedReviewIds.value = likeRepository.getLikedReviewIds(userId, reviewIds)
-                .getOrElse { emptySet() }
-        }
-    }
-
-    /** Optimista solo con el corazón: el contador llega del snapshot. */
+    /** Optimista solo con el corazón: el contador llega con la reseña. */
     fun toggleLike(reviewId: String) {
         val userId = authRepository.getCurrentUser()?.id ?: return
         val review = _uiState.value.reviews.find { it.id == reviewId } ?: return
         val wasLiked = review.isLikedByMe
 
-        setLiked(reviewId, !wasLiked)
+        likedReviews.setPending(reviewId, !wasLiked)
 
         viewModelScope.launch {
             val result = if (wasLiked) {
                 likeRepository.unlikeReview(reviewId, userId)
             } else {
-                likeRepository.likeReview(reviewId, userId)
+                likeRepository.likeReview(reviewId, userId, review.userId, currentVehicleId)
             }
 
-            result.onFailure { setLiked(reviewId, wasLiked) }
-
-            if (!wasLiked && result.isSuccess) {
-                notificationRepository.notify(
-                    recipientUid = review.userId,
-                    type = NotificationType.LIKE,
-                    actorId = userId,
-                    vehicleId = currentVehicleId,
-                    reviewId = reviewId
-                )
-            }
+            result.onFailure { likedReviews.discardPending(reviewId) }
         }
-    }
-
-    private fun setLiked(reviewId: String, liked: Boolean) {
-        likedReviewIds.update { if (liked) it + reviewId else it - reviewId }
     }
 
     fun askDeleteReview(reviewId: String) {

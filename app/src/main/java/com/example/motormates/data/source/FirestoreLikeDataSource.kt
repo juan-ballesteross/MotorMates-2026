@@ -4,8 +4,12 @@ import com.example.motormates.data.dto.LikeDto
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
 
@@ -62,25 +66,34 @@ class FirestoreLikeDataSource @Inject constructor(
     }
 
     /**
-     * Una lectura por reseña (no un collectionGroup) para no depender de
-     * índices adicionales: las listas de reseñas que se muestran son cortas.
+     * Un listener por reseña sobre reviews/{id}/likes/{uid} (no un
+     * collectionGroup, que exige crear un índice en la consola): las listas
+     * que se muestran son cortas. combine junta todos en un Set y vuelve a
+     * emitir apenas cualquiera cambia, incluso si el like se dio o se quitó
+     * desde otro dispositivo.
      */
-    override suspend fun getLikedReviewIds(userId: String, reviewIds: List<String>): Set<String> =
-        coroutineScope {
-            reviewIds
-                .map { reviewId ->
-                    async {
-                        val exists = firestore.collection(REVIEWS_COLLECTION)
-                            .document(reviewId)
-                            .collection(LIKES_COLLECTION)
-                            .document(userId)
-                            .get()
-                            .await()
-                            .exists()
-                        if (exists) reviewId else null
-                    }
-                }
-                .mapNotNull { it.await() }
-                .toSet()
+    override fun observeLikedReviewIds(userId: String, reviewIds: List<String>): Flow<Set<String>> {
+        if (reviewIds.isEmpty()) return flowOf(emptySet())
+
+        val perReview = reviewIds.map { reviewId ->
+            observeLikeExists(reviewId, userId).map { liked -> if (liked) reviewId else null }
         }
+        return combine(perReview) { results -> results.filterNotNull().toSet() }
+    }
+
+    /** Mismo molde que observeQuery en ReviewRealtimeDataSource. */
+    private fun observeLikeExists(reviewId: String, userId: String): Flow<Boolean> = callbackFlow {
+        val registration = firestore.collection(REVIEWS_COLLECTION)
+            .document(reviewId)
+            .collection(LIKES_COLLECTION)
+            .document(userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                trySend(snapshot?.exists() == true)
+            }
+        awaitClose { registration.remove() }
+    }
 }

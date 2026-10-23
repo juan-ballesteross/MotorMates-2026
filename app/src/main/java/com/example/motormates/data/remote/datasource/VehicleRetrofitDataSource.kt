@@ -10,6 +10,5 @@ class VehicleRetrofitDataSource @Inject constructor(
 
     override suspend fun getVehicles(): List<VehicleDtoGeneric> = service.getVehicles()
 
-    override suspend fun getVehicleById(id: String): VehicleDtoGeneric =
-        service.getVehicleById(id.toInt())
+    override suspend fun getVehicleById(id: String): VehicleDtoGeneric = service.getVehicleById(id)
 }

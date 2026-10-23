@@ -2,13 +2,11 @@ package com.example.motormates.ui.publicProfile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.motormates.data.model.NotificationType
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.toUserProfile
 import com.example.motormates.data.model.toUserReviewUi
 import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.FollowRepository
-import com.example.motormates.data.repository.NotificationRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.UserRepository
 import com.example.motormates.data.repository.VehicleRepository
@@ -31,8 +29,7 @@ class PublicProfileViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val vehicleRepository: VehicleRepository,
     private val followRepository: FollowRepository,
-    private val authRepository: AuthRepository,
-    private val notificationRepository: NotificationRepository
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PublicProfileUiState())
@@ -136,15 +133,6 @@ class PublicProfileViewModel @Inject constructor(
 
             result.onFailure {
                 _uiState.update { it.copy(isFollowedByMe = wasFollowing) }
-            }
-
-            // Solo al seguir (no al dejar de seguir), y solo si sí se guardó.
-            if (!wasFollowing && result.isSuccess) {
-                notificationRepository.notify(
-                    recipientUid = targetUid,
-                    type = NotificationType.FOLLOW,
-                    actorId = myId
-                )
             }
         }
     }
