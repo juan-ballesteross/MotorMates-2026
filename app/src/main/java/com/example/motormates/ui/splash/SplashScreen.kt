@@ -35,7 +35,7 @@ fun SplashScreen(
 ) {
     LaunchedEffect(Unit) {
         delay(SPLASH_DURATION_MS)
-        onSplashFinished(viewModel.isUserLoggedIn())
+        onSplashFinished(viewModel.hasUsableSession())
     }
 
     Box(

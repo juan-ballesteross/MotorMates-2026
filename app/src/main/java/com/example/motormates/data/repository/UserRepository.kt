@@ -7,6 +7,9 @@ import com.example.motormates.data.remote.mapper.toDomain
 import com.example.motormates.data.source.UserDataSource
 import java.io.IOException
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import retrofit2.HttpException
 
 interface UserRepository {
@@ -14,6 +17,16 @@ interface UserRepository {
 
     /** Perfil de Firestore del usuario autenticado (uid de Firebase Auth). */
     suspend fun getCurrentUserProfile(uid: String): Result<UserDto>
+
+    /** El mismo perfil en tiempo real: contadores, avatar y portada al día. */
+    fun observeUserProfile(uid: String): Flow<Result<UserDto>>
+
+    /**
+     * success(true/false) solo cuando se pudo comprobar contra Firestore;
+     * failure si no se pudo (sin red). Quien decida cerrar la sesión necesita
+     * esa diferencia para no sacar a nadie por un problema de conexión.
+     */
+    suspend fun hasProfile(uid: String): Result<Boolean>
 
     suspend fun updateCurrentUserProfile(uid: String, fullName: String, bio: String): Result<Unit>
 
@@ -55,12 +68,28 @@ class UserRepositoryImpl @Inject constructor(
             if (user != null) {
                 Result.success(user)
             } else {
-                Result.failure(Exception("No se encontró tu perfil"))
+                Result.failure(Exception(PROFILE_NOT_FOUND))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("No se pudo cargar tu perfil"))
+            Result.failure(Exception(PROFILE_LOAD_ERROR))
         }
     }
+
+    override suspend fun hasProfile(uid: String): Result<Boolean> {
+        return try {
+            Result.success(userDataSource.getUser(uid) != null)
+        } catch (e: Exception) {
+            Result.failure(Exception(PROFILE_LOAD_ERROR))
+        }
+    }
+
+    override fun observeUserProfile(uid: String): Flow<Result<UserDto>> =
+        userDataSource.observeUser(uid)
+            .map { user ->
+                if (user != null) Result.success(user)
+                else Result.failure(Exception(PROFILE_NOT_FOUND))
+            }
+            .catch { emit(Result.failure(Exception(PROFILE_LOAD_ERROR))) }
 
     override suspend fun updateCurrentUserProfile(
         uid: String,
@@ -99,5 +128,10 @@ class UserRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(Exception("No se pudo guardar la foto de portada"))
         }
+    }
+
+    private companion object {
+        const val PROFILE_NOT_FOUND = "No se encontró tu perfil"
+        const val PROFILE_LOAD_ERROR = "No se pudo cargar tu perfil"
     }
 }

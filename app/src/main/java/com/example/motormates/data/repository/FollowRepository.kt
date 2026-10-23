@@ -4,13 +4,17 @@ import com.example.motormates.data.dto.UserDto
 import com.example.motormates.data.source.FollowDataSource
 import com.google.firebase.firestore.FirebaseFirestoreException
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 
 interface FollowRepository {
     suspend fun followUser(followerUid: String, targetUid: String): Result<Unit>
     suspend fun unfollowUser(followerUid: String, targetUid: String): Result<Unit>
     suspend fun isFollowing(followerUid: String, targetUid: String): Result<Boolean>
-    suspend fun getFollowers(uid: String): Result<List<UserDto>>
-    suspend fun getFollowing(uid: String): Result<List<UserDto>>
+    fun observeFollowingIds(uid: String): Flow<List<String>>
+    fun observeFollowers(uid: String): Flow<Result<List<UserDto>>>
+    fun observeFollowing(uid: String): Flow<Result<List<UserDto>>>
 }
 
 class FollowRepositoryImpl @Inject constructor(
@@ -48,21 +52,19 @@ class FollowRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getFollowers(uid: String): Result<List<UserDto>> {
-        return try {
-            Result.success(followDataSource.getFollowers(uid))
-        } catch (e: Exception) {
-            Result.failure(Exception("No se pudo cargar la lista de seguidores"))
-        }
-    }
+    /** Mismo criterio que isFollowing: si falla, el feed se ve vacío pero no roto. */
+    override fun observeFollowingIds(uid: String): Flow<List<String>> =
+        followDataSource.observeFollowingIds(uid).catch { emit(emptyList()) }
 
-    override suspend fun getFollowing(uid: String): Result<List<UserDto>> {
-        return try {
-            Result.success(followDataSource.getFollowing(uid))
-        } catch (e: Exception) {
-            Result.failure(Exception("No se pudo cargar la lista de seguidos"))
-        }
-    }
+    override fun observeFollowers(uid: String): Flow<Result<List<UserDto>>> =
+        followDataSource.observeFollowers(uid)
+            .map { Result.success(it) }
+            .catch { emit(Result.failure(Exception("No se pudo cargar la lista de seguidores"))) }
+
+    override fun observeFollowing(uid: String): Flow<Result<List<UserDto>>> =
+        followDataSource.observeFollowing(uid)
+            .map { Result.success(it) }
+            .catch { emit(Result.failure(Exception("No se pudo cargar la lista de seguidos"))) }
 
     private fun FirebaseFirestoreException.toFollowMessage(): String = when (code) {
         FirebaseFirestoreException.Code.UNAVAILABLE ->

@@ -34,3 +34,27 @@ data class FeedVehicleUi(
     val category: String,
     val imageUrl: String?
 )
+
+/** Las dos vistas del Home: el catálogo de carros o lo que publica la gente que sigo. */
+enum class FeedTab { EXPLORAR, SIGUIENDO }
+
+/**
+ * Una reseña lista para pintar en el feed de "Siguiendo". Es aparte de
+ * ReviewUi porque acá importan las dos cosas a la vez: quién la escribió
+ * (en el detalle del carro el autor es lo único que varía) y de qué carro
+ * habla (en el perfil el autor ya se sabe).
+ */
+data class FeedReviewUi(
+    val id: String,
+    val userId: String,
+    val vehicleId: String,
+    val nombreUsuario: String,
+    val avatarUrl: String? = null,
+    val vehicleName: String,
+    val vehicleImageUrl: String? = null,
+    val tiempoTexto: String,
+    val calificacion: Int,
+    val comentario: String,
+    val likesCount: Int = 0,
+    val isLikedByMe: Boolean = false
+)

@@ -65,6 +65,29 @@ fun Review.toReviewUi(currentUserId: String?, likedReviewIds: Set<String> = empt
 )
 
 /**
+ * La reseña como se ve en el feed de "Siguiendo": lleva autor y vehículo.
+ * vehicleImageUrl no viaja dentro de la reseña, la resuelve el ViewModel con
+ * los vehículos, igual que en toUserReviewUi.
+ */
+fun Review.toFeedReviewUi(
+    vehicleImageUrl: String? = null,
+    likedReviewIds: Set<String> = emptySet()
+): FeedReviewUi = FeedReviewUi(
+    id = id,
+    userId = userId,
+    vehicleId = vehicleId,
+    nombreUsuario = author?.fullName?.ifBlank { null } ?: "Usuario",
+    avatarUrl = author?.avatarUrl,
+    vehicleName = vehicle?.let { "${it.brand} ${it.model}" } ?: "Vehículo",
+    vehicleImageUrl = vehicleImageUrl,
+    tiempoTexto = createdAt.toRelativeTimeEs(),
+    calificacion = rating.coerceIn(0, 5),
+    comentario = comment.orEmpty(),
+    likesCount = likesCount,
+    isLikedByMe = id in likedReviewIds
+)
+
+/**
  * vehicleImageUrl no viaja dentro de la reseña (las ya guardadas en
  * Firestore no la tienen): el ViewModel la resuelve con los vehículos.
  */

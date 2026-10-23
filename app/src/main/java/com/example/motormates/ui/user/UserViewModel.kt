@@ -13,8 +13,10 @@ import com.example.motormates.data.repository.UserRepository
 import com.example.motormates.data.repository.VehicleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -30,6 +32,12 @@ class UserViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UserUiState())
     val uiState: StateFlow<UserUiState> = _uiState
 
+    // Foto de cada vehículo reseñado. Es un flow para que entre al combine:
+    // así no hay que releer los vehículos en cada emisión del perfil.
+    private val vehicleImagesByVehicleId = MutableStateFlow<Map<String, String?>>(emptyMap())
+
+    private var profileJob: Job? = null
+
     init {
         // El garaje se queda con datos locales: el backend no lo modela.
         _uiState.update { it.copy(cars = UserMocks.sampleUserCars) }
@@ -44,53 +52,78 @@ class UserViewModel @Inject constructor(
     }
 
     /**
-     * El perfil (nombre, handle, ubicación, bio) sale de Firestore, del
-     * usuario real que inició sesión con Firebase Auth, y sus reseñas son
-     * las de la colección "reviews" cuyo userId es su uid.
+     * El perfil y sus reseñas quedan escuchándose en Firestore: así el
+     * contador de seguidores sube cuando alguien me sigue, sin recargar.
      */
     fun load() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            val authUser = authRepository.getCurrentUser()
-            if (authUser == null) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = "No se encontró tu sesión, vuelve a iniciar sesión"
-                    )
-                }
-                return@launch
-            }
-
-            val userResult = userRepository.getCurrentUserProfile(authUser.id)
-            val reviews = reviewRepository.getReviewsByUser(authUser.id)
-                .getOrElse { emptyList() }
-            // Foto de cada vehículo reseñado. Si falla, las reseñas se
-            // muestran igual, sin miniatura.
-            val vehicleImages = vehicleRepository.getVehicles()
-                .getOrElse { emptyList() }
-                .associate { it.id to it.imageUrl }
-
-            _uiState.update { current ->
-                userResult.fold(
-                    onSuccess = { user ->
-                        current.copy(
-                            isLoading = false,
-                            errorMessage = null,
-                            profile = user.toUserProfile(reviewsCount = reviews.size),
-                            reviews = reviews.map { it.toUserReviewUi(vehicleImages[it.vehicleId]) },
-                            coverImageUrl = user.coverUrl
-                        )
-                    },
-                    onFailure = { error ->
-                        current.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "No se pudo cargar el perfil"
-                        )
-                    }
+        val authUser = authRepository.getCurrentUser()
+        if (authUser == null) {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = "No se encontró tu sesión, vuelve a iniciar sesión"
                 )
             }
+            return
+        }
+
+        loadVehicleImages()
+
+        profileJob?.cancel()
+        profileJob = viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            combine(
+                userRepository.observeUserProfile(authUser.id),
+                reviewRepository.observeReviewsByUsers(listOf(authUser.id)),
+                vehicleImagesByVehicleId
+            ) { userResult, reviewsResult, images ->
+                Triple(userResult, reviewsResult, images)
+            }.collect { (userResult, reviewsResult, images) ->
+                // Si fallan las reseñas el perfil se muestra igual, sin lista.
+                val reviews = reviewsResult.getOrElse { emptyList() }
+
+                _uiState.update { current ->
+                    userResult.fold(
+                        onSuccess = { user ->
+                            current.copy(
+                                isLoading = false,
+                                errorMessage = null,
+                                profile = user.toUserProfile(reviewsCount = reviews.size),
+                                reviews = reviews.map { it.toUserReviewUi(images[it.vehicleId]) },
+                                coverImageUrl = user.coverUrl
+                            )
+                        },
+                        onFailure = { error ->
+                            current.copy(
+                                isLoading = false,
+                                errorMessage = error.message ?: "No se pudo cargar el perfil"
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    /** Si falla, las reseñas se muestran igual, sin miniatura. */
+    private fun loadVehicleImages() {
+        viewModelScope.launch {
+            vehicleImagesByVehicleId.value = vehicleRepository.getVehicles()
+                .getOrElse { emptyList() }
+                .associate { it.id to it.imageUrl }
+        }
+    }
+
+    /**
+     * Salida de emergencia: si el perfil no carga (p. ej. la cuenta quedó
+     * sin documento en Firestore), desde aquí se puede cerrar sesión sin
+     * tener que pasar por Editar perfil. Mismo patrón que EditProfileViewModel.
+     */
+    fun logOut(onLoggedOut: () -> Unit) {
+        viewModelScope.launch {
+            authRepository.signOut()
+            onLoggedOut()
         }
     }
 
@@ -106,19 +139,17 @@ class UserViewModel @Inject constructor(
         _uiState.update { it.copy(pendingDeleteReviewId = null) }
     }
 
+    /** No hace falta recargar: el flow repinta la lista y el conteo. */
     fun confirmDeleteReview() {
         val reviewId = _uiState.value.pendingDeleteReviewId ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(pendingDeleteReviewId = null) }
 
-            reviewRepository.deleteReview(reviewId).fold(
-                onSuccess = { load() },
-                onFailure = { error ->
-                    _uiState.update {
-                        it.copy(errorMessage = error.message ?: "No se pudo eliminar la reseña")
-                    }
+            reviewRepository.deleteReview(reviewId).onFailure { error ->
+                _uiState.update {
+                    it.copy(errorMessage = error.message ?: "No se pudo eliminar la reseña")
                 }
-            )
+            }
         }
     }
 }

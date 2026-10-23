@@ -3,6 +3,7 @@ package com.example.motormates.ui.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.repository.AuthRepository
+import com.example.motormates.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +13,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -45,6 +47,25 @@ class LoginViewModel @Inject constructor(
 
             val result = authRepository.signIn(currentState.email, currentState.password)
 
+            // La cuenta puede autenticarse y no tener perfil en esta base de
+            // datos (cuentas de versiones anteriores de la app). Si se entrara
+            // igual, el Splash cerraría la sesión en el siguiente arranque y
+            // el usuario quedaría dando vueltas.
+            // getOrDefault(true): si no se pudo comprobar (sin red) se deja
+            // pasar, mismo criterio que el Splash.
+            val user = result.getOrNull()
+            if (user != null && !userRepository.hasProfile(user.id).getOrDefault(true)) {
+                authRepository.signOut()
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = ACCOUNT_WITHOUT_PROFILE,
+                        isLoggedIn = false
+                    )
+                }
+                return@launch
+            }
+
             _uiState.update {
                 if (result.isSuccess) {
                     it.copy(
@@ -66,5 +87,11 @@ class LoginViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private companion object {
+        const val ACCOUNT_WITHOUT_PROFILE =
+            "Esta cuenta es de una versión anterior de la app y ya no tiene perfil. " +
+                "Regístrate con otro correo."
     }
 }

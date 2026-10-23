@@ -42,7 +42,7 @@ fun CommentsScreen(
             title = { Text(text = "Eliminar reseña") },
             text = { Text(text = "¿Seguro que quieres eliminar tu reseña? Esta acción no se puede deshacer.") },
             confirmButton = {
-                TextButton(onClick = { viewModel.confirmDeleteReview(vehicleId) }) {
+                TextButton(onClick = { viewModel.confirmDeleteReview() }) {
                     Text(text = "Eliminar", color = MaterialTheme.colorScheme.error)
                 }
             },

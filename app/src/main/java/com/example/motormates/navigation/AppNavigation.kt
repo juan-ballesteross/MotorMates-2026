@@ -89,7 +89,8 @@ fun AppNavigation(
                 },
                 onStoryClick = { index ->
                     navController.navigate(ScreenRoute.Story.createRoute(index))
-                }
+                },
+                onAuthorClick = ::openAuthor
             )
         }
         composable(ScreenRoute.Explore.route) {
@@ -136,6 +137,11 @@ fun AppNavigation(
                         navController.navigate(
                             ScreenRoute.FollowList.createRoute(uid, ScreenRoute.FollowList.MODE_FOLLOWING)
                         )
+                    }
+                },
+                onLoggedOut = {
+                    navController.navigate(ScreenRoute.Login.route) {
+                        popUpTo(0) { inclusive = true }
                     }
                 },
                 reloadSignal = reviewsChanged || profileChanged,
