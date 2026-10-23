@@ -28,6 +28,7 @@ fun UserScreen(
     onEditReviewClick: (String, String) -> Unit = { _, _ -> },
     onFollowersClick: () -> Unit = {},
     onFollowingClick: () -> Unit = {},
+    onLoggedOut: () -> Unit = {},
     reloadSignal: Boolean = false,
     onReloadHandled: () -> Unit = {},
     viewModel: UserViewModel = hiltViewModel(),
@@ -84,6 +85,7 @@ fun UserScreen(
         onDeleteReviewClick = viewModel::askDeleteReview,
         onFollowersClick = onFollowersClick,
         onFollowingClick = onFollowingClick,
+        onLogOutClick = { viewModel.logOut(onLoggedOut) },
         modifier = modifier
     )
 }

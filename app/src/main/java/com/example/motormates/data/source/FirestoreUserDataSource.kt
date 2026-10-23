@@ -3,6 +3,9 @@ package com.example.motormates.data.source
 import com.example.motormates.data.dto.UserDto
 import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 
@@ -41,5 +44,29 @@ class FirestoreUserDataSource @Inject constructor(
     override suspend fun getAllUsers(): List<UserDto> {
         val snapshot = firestore.collection(USERS_COLLECTION).get().await()
         return snapshot.toObjects(UserDto::class.java)
+    }
+
+    /**
+     * Mismo molde que authState en FirebaseAuthDataSource. Gracias a esto el
+     * contador de seguidores del perfil se mueve solo: lo escribe la
+     * transacción de follow desde el otro lado.
+     */
+    override fun observeUser(uid: String): Flow<UserDto?> = callbackFlow {
+        val registration = firestore.collection(USERS_COLLECTION).document(uid)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                // Un documento que no está en el caché local llega como un
+                // primer evento con exists=false e isFromCache=true, antes de
+                // que responda el servidor: eso no es "no existe", es que
+                // todavía no se sabe.
+                if (snapshot != null && !snapshot.exists() && snapshot.metadata.isFromCache) {
+                    return@addSnapshotListener
+                }
+                trySend(snapshot?.toObject(UserDto::class.java))
+            }
+        awaitClose { registration.remove() }
     }
 }

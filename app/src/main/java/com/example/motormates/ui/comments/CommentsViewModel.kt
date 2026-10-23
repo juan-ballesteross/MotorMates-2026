@@ -3,7 +3,6 @@ package com.example.motormates.ui.comments
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.model.NotificationType
-import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.data.model.toReviewUi
 import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.LikeRepository
@@ -11,8 +10,10 @@ import com.example.motormates.data.repository.NotificationRepository
 import com.example.motormates.data.repository.ReviewRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -34,51 +35,74 @@ class CommentsViewModel @Inject constructor(
 
     private var currentVehicleId: String? = null
 
+    // Mismo criterio que en VehicleDetailViewModel: el "ya di like" no viene
+    // en el snapshot de la reseña, se consulta una vez y lo mueve toggleLike.
+    private val likedReviewIds = MutableStateFlow<Set<String>>(emptySet())
+    private var likedIdsLoaded = false
+
+    private var reviewsJob: Job? = null
+
+    /** Las reseñas quedan escuchándose: llegan y se actualizan solas. */
     fun load(vehicleId: String) {
         currentVehicleId = vehicleId
-        viewModelScope.launch {
+        likedIdsLoaded = false
+        likedReviewIds.value = emptySet()
+        reviewsJob?.cancel()
+
+        val currentUserId = authRepository.getCurrentUser()?.id
+
+        reviewsJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            val result = reviewRepository.getReviewsByVehicle(vehicleId)
-            val currentUserId = authRepository.getCurrentUser()?.id
-            val likedReviewIds = if (currentUserId != null) {
-                val reviews = result.getOrElse { emptyList() }
-                likeRepository.getLikedReviewIds(currentUserId, reviews.map { it.id }).getOrElse { emptySet() }
-            } else {
-                emptySet()
-            }
+            combine(
+                reviewRepository.observeReviewsByVehicle(vehicleId),
+                likedReviewIds
+            ) { result, liked -> result to liked }
+                .collect { (result, liked) ->
+                    result.fold(
+                        onSuccess = { reviews ->
+                            if (currentUserId != null && !likedIdsLoaded) {
+                                likedIdsLoaded = true
+                                loadLikedIds(currentUserId, reviews.map { it.id })
+                            }
 
-            _uiState.update { current ->
-                result.fold(
-                    onSuccess = { reviews ->
-                        current.copy(
-                            isLoading = false,
-                            errorMessage = null,
-                            reviews = reviews.map { it.toReviewUi(currentUserId, likedReviewIds) }
-                        )
-                    },
-                    onFailure = { error ->
-                        current.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "No se pudieron cargar las reseñas"
-                        )
-                    }
-                )
-            }
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    errorMessage = null,
+                                    reviews = reviews.map { review ->
+                                        review.toReviewUi(currentUserId, liked)
+                                    }
+                                )
+                            }
+                        },
+                        onFailure = { error ->
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    errorMessage = error.message ?: "No se pudieron cargar las reseñas"
+                                )
+                            }
+                        }
+                    )
+                }
         }
     }
 
+    private fun loadLikedIds(userId: String, reviewIds: List<String>) {
+        viewModelScope.launch {
+            likedReviewIds.value = likeRepository.getLikedReviewIds(userId, reviewIds)
+                .getOrElse { emptySet() }
+        }
+    }
+
+    /** Optimista solo con el corazón: el contador llega del snapshot. */
     fun toggleLike(reviewId: String) {
         val userId = authRepository.getCurrentUser()?.id ?: return
         val review = _uiState.value.reviews.find { it.id == reviewId } ?: return
         val wasLiked = review.isLikedByMe
 
-        updateReview(reviewId) {
-            it.copy(
-                isLikedByMe = !wasLiked,
-                likesCount = (it.likesCount + if (wasLiked) -1 else 1).coerceAtLeast(0)
-            )
-        }
+        setLiked(reviewId, !wasLiked)
 
         viewModelScope.launch {
             val result = if (wasLiked) {
@@ -87,14 +111,7 @@ class CommentsViewModel @Inject constructor(
                 likeRepository.likeReview(reviewId, userId)
             }
 
-            result.onFailure {
-                updateReview(reviewId) {
-                    it.copy(
-                        isLikedByMe = wasLiked,
-                        likesCount = (it.likesCount + if (wasLiked) 1 else -1).coerceAtLeast(0)
-                    )
-                }
-            }
+            result.onFailure { setLiked(reviewId, wasLiked) }
 
             if (!wasLiked && result.isSuccess) {
                 notificationRepository.notify(
@@ -108,12 +125,8 @@ class CommentsViewModel @Inject constructor(
         }
     }
 
-    private fun updateReview(reviewId: String, transform: (ReviewUi) -> ReviewUi) {
-        _uiState.update { current ->
-            current.copy(
-                reviews = current.reviews.map { if (it.id == reviewId) transform(it) else it }
-            )
-        }
+    private fun setLiked(reviewId: String, liked: Boolean) {
+        likedReviewIds.update { if (liked) it + reviewId else it - reviewId }
     }
 
     fun askDeleteReview(reviewId: String) {
@@ -124,19 +137,17 @@ class CommentsViewModel @Inject constructor(
         _uiState.update { it.copy(pendingDeleteReviewId = null) }
     }
 
-    fun confirmDeleteReview(vehicleId: String) {
+    /** No hace falta recargar: el flow repinta la lista. */
+    fun confirmDeleteReview() {
         val reviewId = _uiState.value.pendingDeleteReviewId ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(pendingDeleteReviewId = null) }
 
-            reviewRepository.deleteReview(reviewId).fold(
-                onSuccess = { load(vehicleId) },
-                onFailure = { error ->
-                    _uiState.update {
-                        it.copy(errorMessage = error.message ?: "No se pudo eliminar la reseña")
-                    }
+            reviewRepository.deleteReview(reviewId).onFailure { error ->
+                _uiState.update {
+                    it.copy(errorMessage = error.message ?: "No se pudo eliminar la reseña")
                 }
-            )
+            }
         }
     }
 }

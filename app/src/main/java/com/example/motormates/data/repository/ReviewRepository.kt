@@ -1,19 +1,31 @@
 package com.example.motormates.data.repository
 
+import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.model.NewReview
 import com.example.motormates.data.model.Review
 import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
 import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
 import com.example.motormates.data.source.AuthDataSource
+import com.example.motormates.data.source.ReviewRealtimeDataSource
 import com.example.motormates.data.source.UserDataSource
 import com.google.firebase.firestore.FirebaseFirestoreException
 import java.io.IOException
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import retrofit2.HttpException
 
 interface ReviewRepository {
     suspend fun getReviewsByVehicle(vehicleId: String): Result<List<Review>>
     suspend fun getReviewsByUser(userId: String): Result<List<Review>>
+
+    /**
+     * Las dos consultas en tiempo real: emiten de nuevo cada vez que alguien
+     * publica, edita o borra una reseña, o cuando cambia su likesCount.
+     */
+    fun observeReviewsByVehicle(vehicleId: String): Flow<Result<List<Review>>>
+    fun observeReviewsByUsers(userIds: List<String>): Flow<Result<List<Review>>>
 
     /** El autor es siempre el usuario autenticado: no se recibe por parámetro. */
     suspend fun createReview(vehicleId: String, rating: Int, comment: String?): Result<Review>
@@ -29,6 +41,7 @@ interface ReviewRepository {
  */
 class ReviewRepositoryImpl @Inject constructor(
     private val remoteDataSource: ReviewRemoteDataSource,
+    private val realtimeDataSource: ReviewRealtimeDataSource,
     private val vehicleDataSource: VehicleRemoteDataSource,
     private val userDataSource: UserDataSource,
     private val authDataSource: AuthDataSource
@@ -43,6 +56,21 @@ class ReviewRepositoryImpl @Inject constructor(
         safeCall(notFound = "Este usuario no existe", fallback = "No se pudieron cargar las reseñas") {
             remoteDataSource.getReviewsByUser(userId).map { it.toDomain() }
         }
+
+    override fun observeReviewsByVehicle(vehicleId: String): Flow<Result<List<Review>>> =
+        realtimeDataSource.observeReviewsByVehicle(vehicleId).toDomainResults()
+
+    override fun observeReviewsByUsers(userIds: List<String>): Flow<Result<List<Review>>> =
+        realtimeDataSource.observeReviewsByUsers(userIds).toDomainResults()
+
+    /**
+     * safeCall no sirve aquí porque es suspend y envuelve una sola llamada:
+     * un Flow puede fallar en cualquier emisión, así que el error se atrapa
+     * con catch y se emite como Result.failure, igual que en el resto.
+     */
+    private fun Flow<List<ReviewDtoGeneric>>.toDomainResults(): Flow<Result<List<Review>>> =
+        map { dtos -> Result.success(dtos.map { it.toDomain() }) }
+            .catch { emit(Result.failure(Exception("No se pudieron cargar las reseñas"))) }
 
     override suspend fun createReview(
         vehicleId: String,

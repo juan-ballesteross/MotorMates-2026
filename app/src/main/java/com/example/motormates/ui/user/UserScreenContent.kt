@@ -3,6 +3,7 @@ package com.example.motormates.ui.user
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,13 +14,17 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.motormates.R
 import com.example.motormates.data.model.GarageCar
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
@@ -55,6 +60,7 @@ fun UserScreenContent(
     onDeleteReviewClick: (String) -> Unit = {},
     onFollowersClick: () -> Unit = {},
     onFollowingClick: () -> Unit = {},
+    onLogOutClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -106,11 +112,27 @@ fun UserScreenContent(
                 }
 
                 errorMessage != null -> item(span = { GridItemSpan(maxLineSpan) }) {
-                    Text(
-                        text = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(vertical = Spacing.lg)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.lg),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center
+                        )
+                        // Sin esto el usuario queda atrapado: el "Cerrar
+                        // sesión" normal está dentro de Editar perfil, al que
+                        // solo se llega desde esta misma pantalla.
+                        Button(
+                            onClick = onLogOutClick,
+                            modifier = Modifier.padding(top = Spacing.md)
+                        ) {
+                            Text(text = stringResource(R.string.edit_profile_logout_button))
+                        }
+                    }
                 }
 
                 reviews.isEmpty() -> item(span = { GridItemSpan(maxLineSpan) }) {
