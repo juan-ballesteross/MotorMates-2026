@@ -30,8 +30,6 @@ class VehicleDetailViewModel @Inject constructor(
     private val _state = MutableStateFlow(VehicleDetailState())
     val state: StateFlow<VehicleDetailState> = _state
 
-    // Se guarda para poder avisarle al autor de la reseña qué carro era, sin
-    // tener que pasarlo de nuevo como parámetro en cada toggleLike.
     private var currentVehicleId: String? = null
 
     /**
@@ -73,10 +71,6 @@ class VehicleDetailViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Optimista: cambia el corazón y el contador de una vez y llama a
-     * Firestore después; si falla, revierte ese mismo review a como estaba.
-     */
     fun toggleLike(reviewId: String) {
         val userId = authRepository.getCurrentUser()?.id ?: return
         val review = _state.value.reviews.find { it.id == reviewId } ?: return
@@ -105,7 +99,6 @@ class VehicleDetailViewModel @Inject constructor(
                 }
             }
 
-            // Solo al dar like (no al quitarlo), y solo si sí se guardó.
             if (!wasLiked && result.isSuccess) {
                 notificationRepository.notify(
                     recipientUid = review.userId,

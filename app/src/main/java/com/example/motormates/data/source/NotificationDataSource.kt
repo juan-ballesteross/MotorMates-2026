@@ -24,7 +24,6 @@ class FirestoreNotificationDataSource @Inject constructor(
     private fun notifications(uid: String) =
         firestore.collection(USERS_COLLECTION).document(uid).collection(NOTIFICATIONS_COLLECTION)
 
-    /** No te notificas a ti mismo: pasa si te das like o te sigues a vos mismo. */
     override suspend fun createNotification(
         recipientUid: String,
         type: String,

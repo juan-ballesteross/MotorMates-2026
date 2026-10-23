@@ -32,8 +32,6 @@ class CommentsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(CommentsUiState())
     val uiState: StateFlow<CommentsUiState> = _uiState
 
-    // Igual que en VehicleDetailViewModel: se guarda para avisarle al autor
-    // de la reseña a qué carro le dieron like.
     private var currentVehicleId: String? = null
 
     fun load(vehicleId: String) {

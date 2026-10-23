@@ -40,7 +40,6 @@ class LikeRepositoryImpl @Inject constructor(
         return try {
             Result.success(likeDataSource.getLikedReviewIds(userId, reviewIds))
         } catch (e: Exception) {
-            // No bloquea la pantalla: si falla, las reseñas se ven sin like marcado.
             Result.success(emptySet())
         }
     }

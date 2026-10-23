@@ -116,11 +116,6 @@ fun UserDto.toUserSearchResult(): UserSearchResult = UserSearchResult(
     avatarUrl = avatarUrl
 )
 
-/**
- * section agrupa por antigüedad (igual criterio que antes se veía quemado
- * en los datos de ejemplo): HOY si fue en las últimas 24 h, ESTA SEMANA si
- * fue en los últimos 7 días, ANTES para el resto.
- */
 fun Notification.toNotificationUi(): NotificationUi {
     val vehicleName = if (!vehicleBrand.isNullOrBlank()) "$vehicleBrand $vehicleModel" else null
 

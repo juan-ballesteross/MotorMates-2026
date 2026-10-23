@@ -132,10 +132,6 @@ class NewReviewViewModel @Inject constructor(
                 comment = trimmed.ifBlank { null }
             )
 
-            // Solo al crear (no al editar): se avisa a quienes ya habían
-            // reseñado este mismo carro, para que sepan que alguien más lo
-            // reseñó. No es por el "dueño" del carro (eso no existe en el
-            // backend), es porque ambos reseñaron el mismo vehículo.
             if (isNewReview) {
                 result.getOrNull()?.let { newReview ->
                     notifyOtherReviewers(vehicleId, newReview.id, newReview.userId)

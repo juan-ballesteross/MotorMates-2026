@@ -81,10 +81,6 @@ class PublicProfileViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Optimista: cambia el botón y el contador de seguidores de una vez y
-     * llama a Firestore después; si falla, revierte.
-     */
     fun toggleFollow() {
         val targetUid = profileUid ?: return
         val myId = authRepository.getCurrentUser()?.id ?: return
@@ -117,7 +113,6 @@ class PublicProfileViewModel @Inject constructor(
                 }
             }
 
-            // Solo al seguir (no al dejar de seguir), y solo si sí se guardó.
             if (!wasFollowing && result.isSuccess) {
                 notificationRepository.notify(
                     recipientUid = targetUid,

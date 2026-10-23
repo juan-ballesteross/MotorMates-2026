@@ -11,7 +11,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
 interface NotificationRepository {
-    /** No lanza error visible: que falle una notificación no debe tumbar el like/follow/reseña. */
     suspend fun notify(
         recipientUid: String,
         type: NotificationType,
@@ -41,11 +40,6 @@ class NotificationRepositoryImpl @Inject constructor(
         }
     }
 
-    /**
-     * Se resuelven el actor y el vehículo de cada notificación en paralelo
-     * (una lectura por id, igual que getFollowers/getFollowing), no con un
-     * whereIn: así no hace falta crear índices compuestos.
-     */
     override suspend fun getNotifications(uid: String): Result<List<Notification>> {
         return try {
             val dtos = notificationDataSource.getNotifications(uid)

@@ -108,10 +108,6 @@ fun NotificationItem(
     }
 }
 
-/**
- * Si el actor tiene foto, se muestra ella (como en cualquier feed de
- * notificaciones); si no, se cae al ícono de siempre según el tipo.
- */
 @Composable
 private fun NotificationIcon(type: NotificationType, avatarUrl: String? = null) {
     if (avatarUrl != null) {

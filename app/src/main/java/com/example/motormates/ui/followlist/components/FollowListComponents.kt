@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.motormates.data.model.UserSearchResult
 
-/** Barra superior: flecha de volver, título (Seguidores/Siguiendo) y contador. */
 @Composable
 fun FollowListTopBar(
     title: String,
@@ -63,7 +62,6 @@ fun FollowListTopBar(
     }
 }
 
-/** Fila de un usuario en la lista de seguidores/seguidos. */
 @Composable
 fun FollowListUserRow(
     user: UserSearchResult,

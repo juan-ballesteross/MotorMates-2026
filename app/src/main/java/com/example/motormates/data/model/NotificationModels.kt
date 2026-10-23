@@ -14,7 +14,7 @@ data class NotificationUi(
     val timeAgo: String,
     val section: String, // ej. "HOY", "ESTA SEMANA" — agrupa la lista
     val thumbnailResId: Int? = null, // null = sin miniatura; 0 = con miniatura pero foto pendiente; id real = foto ya puesta
-    val thumbnailUrl: String? = null // miniatura real (foto del vehículo), para las notificaciones que vienen del backend
+    val thumbnailUrl: String? = null
 )
 
 // ===== Datos locales quemados =====
