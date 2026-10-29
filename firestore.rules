@@ -58,6 +58,15 @@ service cloud.firestore {
         allow create, delete: if isUser(userId);
       }
 
+      // users/{uid}/fcmTokens/{token}: los dispositivos del usuario. Solo él
+      // los registra o los borra, y nadie los lee desde la app: el único que
+      // los necesita es la Cloud Function, que usa el Admin SDK.
+      // write y no create: al volver a entrar se reescribe el mismo token
+      // para refrescarle la fecha, y eso cuenta como update.
+      match /fcmTokens/{token} {
+        allow write: if isUser(userId);
+      }
+
       // Cualquiera puede avisarle a otro, pero firmando con su propio uid.
       // Solo el dueño lee su bandeja.
       match /notifications/{notificationId} {

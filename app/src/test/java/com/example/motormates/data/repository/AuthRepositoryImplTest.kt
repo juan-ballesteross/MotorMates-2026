@@ -22,7 +22,8 @@ class AuthRepositoryImplTest {
         )
         val repository = AuthRepositoryImpl(
             FakeAuthDataSource(signInResult = Result.success(expectedUser)),
-            FakeUserDataSource()
+            FakeUserDataSource(),
+            FakePushTokenRepository()
         )
 
         val result = repository.signIn(" jose@example.com ", "secret")
@@ -34,7 +35,8 @@ class AuthRepositoryImplTest {
     fun signInFailureIsPropagated() = runTest {
         val repository = AuthRepositoryImpl(
             FakeAuthDataSource(signInResult = Result.failure(IllegalArgumentException("invalid credentials"))),
-            FakeUserDataSource()
+            FakeUserDataSource(),
+            FakePushTokenRepository()
         )
 
         val result = repository.signIn("jose@example.com", "wrong")
@@ -51,7 +53,8 @@ class AuthRepositoryImplTest {
         )
         val repository = AuthRepositoryImpl(
             FakeAuthDataSource(currentUser = currentUser),
-            FakeUserDataSource()
+            FakeUserDataSource(),
+            FakePushTokenRepository()
         )
 
         val result = repository.signOut()
@@ -68,7 +71,7 @@ class AuthRepositoryImplTest {
             displayName = "Jose"
         )
         val dataSource = FakeAuthDataSource(currentUser = currentUser)
-        val repository = AuthRepositoryImpl(dataSource, FakeUserDataSource())
+        val repository = AuthRepositoryImpl(dataSource, FakeUserDataSource(), FakePushTokenRepository())
 
         assertEquals(dataSource.authState, repository.authState)
     }
@@ -137,4 +140,11 @@ internal class FakeUserDataSource(
     }
 
     override suspend fun getAllUsers(): List<UserDto> = usersById.values.toList()
+}
+
+/** El registro del token no se prueba acá: solo hace falta para construir el repositorio. */
+internal class FakePushTokenRepository : PushTokenRepository {
+    override suspend fun registerCurrentDevice() = Unit
+    override suspend fun unregisterCurrentDevice() = Unit
+    override suspend fun saveToken(token: String) = Unit
 }

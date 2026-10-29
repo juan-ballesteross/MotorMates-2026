@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Desde Android 17 (API 37) hace falta para hablar con el backend propio en la red local (10.0.2.2 / 192.168.x) -->
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+    <!-- Desde Android 13 (API 33) las notificaciones no se muestran si el usuario no da este permiso -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".MotorMatesApplication"
@@ -30,6 +32,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Recibe los mensajes que manda la Cloud Function por FCM -->
+        <service
+            android:name=".notifications.MotorMatesMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Canal con el que Android agrupa las notificaciones que llegan sin
+             canal propio (las que el sistema pinta solo, con la app cerrada).
+             El servicio crea este mismo canal al arrancar. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/notification_channel_id" />
     </application>
 
 </manifest>

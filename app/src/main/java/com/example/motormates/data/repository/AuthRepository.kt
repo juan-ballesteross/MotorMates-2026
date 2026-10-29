@@ -31,7 +31,8 @@ interface AuthRepository {
 
 class AuthRepositoryImpl @Inject constructor(
     private val authDataSource: AuthDataSource,
-    private val userDataSource: UserDataSource
+    private val userDataSource: UserDataSource,
+    private val pushTokenRepository: PushTokenRepository
 ) : AuthRepository {
 
     override val authState: Flow<AuthUser?> = authDataSource.authState
@@ -86,8 +87,17 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * El token de FCM se borra antes de cerrar la sesión, no después: las
+     * reglas solo dejan al dueño tocar sus tokens. Va aquí y no en los
+     * ViewModels porque hay cuatro pantallas que cierran sesión y en todas
+     * hay que dejar de recibir los avisos de esta cuenta.
+     */
     override suspend fun signOut(): Result<Unit> =
-        runCatching { authDataSource.signOut() }
+        runCatching {
+            pushTokenRepository.unregisterCurrentDevice()
+            authDataSource.signOut()
+        }
 
     override fun getCurrentUser(): AuthUser? = authDataSource.getCurrentUser()
 
