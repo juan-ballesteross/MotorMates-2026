@@ -15,4 +15,7 @@ interface AuthDataSource {
     fun getCurrentUser(): AuthUser?
 
     suspend fun deleteCurrentUser()
+
+    /** Mantiene el displayName de la cuenta al día cuando se edita el perfil. */
+    suspend fun updateDisplayName(name: String)
 }

@@ -2,10 +2,8 @@ package com.example.motormates.ui.review
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.motormates.data.model.NotificationType
 import com.example.motormates.data.model.ReviewAspect
 import com.example.motormates.data.model.toReviewCarSummary
-import com.example.motormates.data.repository.NotificationRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.VehicleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,8 +16,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class NewReviewViewModel @Inject constructor(
     private val vehicleRepository: VehicleRepository,
-    private val reviewRepository: ReviewRepository,
-    private val notificationRepository: NotificationRepository
+    private val reviewRepository: ReviewRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NewReviewUiState())
@@ -116,7 +113,6 @@ class NewReviewViewModel @Inject constructor(
             _uiState.update { it.copy(isSaving = true, errorMessage = null) }
 
             val trimmed = current.experience.trim()
-            val isNewReview = current.reviewId == null
             val result = current.reviewId?.let { reviewId ->
                 // Al editar se manda el texto tal cual, incluso vacío: si se
                 // mandara null, Gson omitiría el campo y el backend (que solo
@@ -125,18 +121,13 @@ class NewReviewViewModel @Inject constructor(
                 reviewRepository.updateReview(reviewId, current.rating, trimmed)
             } ?: reviewRepository.createReview(
                 // El autor lo pone el repositorio: es el usuario autenticado.
+                // El repositorio también avisa a quienes ya reseñaron el carro.
                 vehicleId = vehicleId,
                 rating = current.rating,
                 // Al crear sí conviene null: deja la columna nula en vez de
                 // guardar una cadena vacía.
                 comment = trimmed.ifBlank { null }
             )
-
-            if (isNewReview) {
-                result.getOrNull()?.let { newReview ->
-                    notifyOtherReviewers(vehicleId, newReview.id, newReview.userId)
-                }
-            }
 
             _uiState.update { state ->
                 result.fold(
@@ -149,24 +140,6 @@ class NewReviewViewModel @Inject constructor(
                     }
                 )
             }
-        }
-    }
-
-    private suspend fun notifyOtherReviewers(vehicleId: String, newReviewId: String, authorId: String) {
-        val otherReviewerIds = reviewRepository.getReviewsByVehicle(vehicleId)
-            .getOrElse { emptyList() }
-            .map { it.userId }
-            .filter { it != authorId }
-            .distinct()
-
-        otherReviewerIds.forEach { recipientId ->
-            notificationRepository.notify(
-                recipientUid = recipientId,
-                type = NotificationType.REVIEW,
-                actorId = authorId,
-                vehicleId = vehicleId,
-                reviewId = newReviewId
-            )
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.motormates.data.remote.mapper
 
-import com.example.motormates.data.model.BackendUser
 import com.example.motormates.data.model.Review
 import com.example.motormates.data.model.ReviewAuthor
 import com.example.motormates.data.model.ReviewVehicleRef
@@ -8,7 +7,6 @@ import com.example.motormates.data.model.Vehicle
 import com.example.motormates.data.remote.dto.ReviewDto
 import com.example.motormates.data.remote.dto.ReviewUserDto
 import com.example.motormates.data.remote.dto.ReviewVehicleDto
-import com.example.motormates.data.remote.dto.UserDto
 import com.example.motormates.data.remote.dto.VehicleDto
 
 /**
@@ -31,13 +29,8 @@ internal fun VehicleDto.mapToDomain(): Vehicle = Vehicle(
     traccion = traccion
 )
 
-fun UserDto.toDomain(): BackendUser = BackendUser(
-    id = id,
-    fullName = fullName,
-    email = email
-)
-
-fun ReviewUserDto.toDomain(): ReviewAuthor = ReviewAuthor(id = id.toString(), fullName = fullName)
+fun ReviewUserDto.toDomain(): ReviewAuthor =
+    ReviewAuthor(id = id, fullName = fullName, avatarUrl = avatarUrl)
 
 fun ReviewVehicleDto.toDomain(): ReviewVehicleRef =
     ReviewVehicleRef(id = id.toString(), brand = brand, model = model)
@@ -46,9 +39,10 @@ internal fun ReviewDto.mapToDomain(): Review = Review(
     id = id.toString(),
     rating = rating,
     comment = comment,
-    userId = userId.toString(),
+    userId = userId,
     vehicleId = vehicleId.toString(),
     createdAt = createdAt,
+    likesCount = likesCount,
     author = user?.toDomain(),
     vehicle = vehicle?.toDomain()
 )

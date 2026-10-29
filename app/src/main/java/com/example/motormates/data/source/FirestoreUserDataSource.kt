@@ -23,11 +23,37 @@ class FirestoreUserDataSource @Inject constructor(
         return snapshot.toObject(UserDto::class.java)
     }
 
-    override suspend fun updateUser(uid: String, fullName: String, bio: String) {
+    override suspend fun updateUser(
+        uid: String,
+        fullName: String,
+        username: String,
+        location: String,
+        bio: String
+    ) {
         firestore.collection(USERS_COLLECTION).document(uid)
-            .update(mapOf("fullName" to fullName, "bio" to bio))
+            .update(
+                mapOf(
+                    "fullName" to fullName,
+                    "username" to username,
+                    "location" to location,
+                    "bio" to bio
+                )
+            )
             .await()
     }
+
+    /**
+     * whereEqualTo sobre un solo campo no necesita índice compuesto. limit(2)
+     * alcanza: basta con encontrar un documento que no sea el propio.
+     */
+    override suspend fun isUsernameTaken(username: String, exceptUid: String): Boolean =
+        firestore.collection(USERS_COLLECTION)
+            .whereEqualTo("username", username)
+            .limit(2)
+            .get()
+            .await()
+            .documents
+            .any { it.id != exceptUid }
 
     override suspend fun updateAvatarUrl(uid: String, avatarUrl: String) {
         firestore.collection(USERS_COLLECTION).document(uid)

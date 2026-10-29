@@ -1,0 +1,102 @@
+rules_version = '2';
+
+// Reglas de la base "motormatesdb" (ver firebase.json). Refuerzan en el
+// servidor lo que la app ya valida, para que un cliente modificado o con
+// errores no pueda dejar datos inconsistentes. La Cloud Function usa el
+// Admin SDK y no pasa por estas reglas.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Un contador solo puede moverse de a una unidad por escritura (lo que
+    // hacen las transacciones de like y de follow) y nunca quedar negativo.
+    function stepsByOne(field) {
+      let before = resource.data.get(field, 0);
+      let after = request.resource.data.get(field, 0);
+      return after is int && after >= 0
+        && (after == before || after == before + 1 || after == before - 1);
+    }
+
+    function onlyChanges(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    // Catálogo de vehículos: solo lectura desde la app.
+    match /vehicles/{vehicleId} {
+      allow read: if signedIn();
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create: if isUser(userId);
+
+      // El dueño edita su perfil. Otro usuario solo puede mover su contador
+      // de seguidores en ±1 (la transacción de follow lo hace al seguirlo).
+      allow update: if (isUser(userId)
+          && stepsByOne('followersCount')
+          && stepsByOne('followingCount'))
+        || (signedIn()
+          && onlyChanges(['followersCount'])
+          && stepsByOne('followersCount'));
+
+      // users/{target}/followers/{followerId}: lo escribe quien sigue.
+      match /followers/{followerId} {
+        allow read: if signedIn();
+        allow create, delete: if isUser(followerId);
+      }
+
+      // users/{uid}/following/{targetId}: lo escribe el propio usuario.
+      match /following/{targetId} {
+        allow read: if signedIn();
+        allow create, delete: if isUser(userId);
+      }
+
+      // Cualquiera puede avisarle a otro, pero firmando con su propio uid.
+      // Solo el dueño lee su bandeja.
+      match /notifications/{notificationId} {
+        allow read: if isUser(userId);
+        allow create: if signedIn() && request.resource.data.actorId == request.auth.uid;
+      }
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if signedIn();
+
+      // Se publica a nombre propio, con calificación válida y sin likes.
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 0
+        && request.resource.data.rating <= 5
+        && request.resource.data.get('likesCount', 0) == 0;
+
+      // El autor edita su reseña (sin cambiar de dueño). Cualquier otro solo
+      // puede mover likesCount en ±1, que es lo que hace la transacción de like.
+      allow update: if (signedIn()
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.rating is int
+          && request.resource.data.rating >= 0
+          && request.resource.data.rating <= 5
+          && stepsByOne('likesCount'))
+        || (signedIn()
+          && onlyChanges(['likesCount'])
+          && stepsByOne('likesCount'));
+
+      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+
+      // reviews/{id}/likes/{uid}: cada quien solo da o quita su propio like.
+      match /likes/{likeUserId} {
+        allow read: if signedIn();
+        allow create, delete: if isUser(likeUserId);
+      }
+    }
+  }
+}

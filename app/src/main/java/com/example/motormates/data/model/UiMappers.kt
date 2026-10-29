@@ -1,6 +1,5 @@
 package com.example.motormates.data.model
 
-import com.example.motormates.data.dto.UserDto
 import com.example.motormates.data.util.toRelativeTimeEs
 import java.time.Duration
 import java.time.Instant
@@ -101,28 +100,8 @@ fun Review.toUserReviewUi(vehicleImageUrl: String? = null): UserReviewUi = UserR
     timeAgo = createdAt.toRelativeTimeEs()
 )
 
-/**
- * El backend solo guarda nombre y correo del usuario. El resto de los
- * campos que pide UserProfile se sintetizan: el handle sale del correo y
- * ubicación/bio quedan vacíos (ProfileInfoSection omite los campos en
- * blanco). reviewsCount se calcula con las reseñas consultadas, porque
- * tampoco es un dato que el backend devuelva.
- */
-fun BackendUser.toUserProfile(reviewsCount: Int): UserProfile = UserProfile(
-    name = fullName,
-    handle = "@" + email.substringBefore("@"),
-    location = "",
-    bio = "",
-    reviewsCount = reviewsCount,
-    followersDisplay = "0",
-    followingDisplay = "0"
-)
-
-/**
- * Perfil del usuario autenticado con Firebase, leído desde Firestore.
- * A diferencia de BackendUser, aquí sí hay location/bio/username propios.
- */
-fun UserDto.toUserProfile(reviewsCount: Int): UserProfile = UserProfile(
+/** Perfil de un usuario, venga de Firestore o del backend propio. */
+fun User.toUserProfile(reviewsCount: Int): UserProfile = UserProfile(
     name = fullName,
     handle = "@" + username.ifBlank { email.substringBefore("@") },
     location = location,
@@ -132,7 +111,7 @@ fun UserDto.toUserProfile(reviewsCount: Int): UserProfile = UserProfile(
     followingDisplay = "$followingCount"
 )
 
-fun UserDto.toUserSearchResult(): UserSearchResult = UserSearchResult(
+fun User.toUserSearchResult(): UserSearchResult = UserSearchResult(
     uid = id,
     name = fullName,
     handle = "@" + username.ifBlank { email.substringBefore("@") },

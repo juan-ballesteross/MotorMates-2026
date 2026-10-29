@@ -2,20 +2,14 @@ package com.example.motormates.di
 
 import com.example.motormates.data.remote.BASE_URL
 import com.example.motormates.data.remote.service.ReviewApiService
-import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
 import com.example.motormates.data.remote.service.UserApiService
-import com.example.motormates.data.remote.datasource.UserRemoteDataSource
-import com.example.motormates.data.remote.datasource.UserRetrofitDataSource
 import com.example.motormates.data.remote.service.VehicleApiService
-import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.ReviewRepositoryImpl
 import com.example.motormates.data.repository.UserRepository
 import com.example.motormates.data.repository.UserRepositoryImpl
 import com.example.motormates.data.repository.VehicleRepository
 import com.example.motormates.data.repository.VehicleRepositoryImpl
-import com.example.motormates.data.source.FirestoreReviewDataSource
-import com.example.motormates.data.source.FirestoreVehicleDataSource
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Binds
@@ -83,28 +77,8 @@ object NetworkProvidersModule {
 @InstallIn(SingletonComponent::class)
 abstract class NetworkBindingsModule {
 
-    /**
-     * Vehículos y reseñas salen de Firestore. Para volver al backend propio
-     * basta con cambiar FirestoreXDataSource por XRetrofitDataSource aquí:
-     * ni los repositorios ni la UI se enteran del cambio.
-     */
-    @Binds
-    @Singleton
-    abstract fun bindVehicleRemoteDataSource(
-        dataSource: FirestoreVehicleDataSource
-    ): VehicleRemoteDataSource
-
-    @Binds
-    @Singleton
-    abstract fun bindUserRemoteDataSource(
-        dataSource: UserRetrofitDataSource
-    ): UserRemoteDataSource
-
-    @Binds
-    @Singleton
-    abstract fun bindReviewRemoteDataSource(
-        dataSource: FirestoreReviewDataSource
-    ): ReviewRemoteDataSource
+    // Las fuentes de datos (Firestore o backend propio) las elige
+    // DataSourceModule según ACTIVE_BACKEND; aquí solo van los repositorios.
 
     @Binds
     @Singleton

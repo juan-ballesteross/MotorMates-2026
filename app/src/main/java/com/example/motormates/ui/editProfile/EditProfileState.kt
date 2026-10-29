@@ -3,7 +3,9 @@ package com.example.motormates.ui.editProfile
 import com.example.motormates.data.model.GarageCar
 
 data class EditProfileUiState(
+    val fullName: String = "",
     val username: String = "",
+    val location: String = "",
     val bio: String = "",
     val cars: List<GarageCar> = emptyList(),
     val profileImageUrl: String? = null,

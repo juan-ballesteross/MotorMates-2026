@@ -6,6 +6,8 @@ import com.example.motormates.data.dto.ReviewVehicleSnapshot
 import com.example.motormates.data.source.REVIEWS_COLLECTION
 import com.example.motormates.data.source.USERS_COLLECTION
 import com.example.motormates.data.source.VEHICLES_COLLECTION
+import com.example.motormates.di.ACTIVE_BACKEND
+import com.example.motormates.di.DataBackend
 import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,6 +24,9 @@ class FirestoreSeeder @Inject constructor(
 ) {
 
     suspend fun seedIfEmpty() {
+        // Con el backend propio los datos iniciales los carga el servidor.
+        if (ACTIVE_BACKEND != DataBackend.FIREBASE) return
+
         val alreadySeeded = !firestore.collection(VEHICLES_COLLECTION)
             .limit(1).get().await()
             .isEmpty

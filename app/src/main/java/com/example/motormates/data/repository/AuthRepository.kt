@@ -10,8 +10,10 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.firestore.FirebaseFirestoreException
+import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import retrofit2.HttpException
 
 interface AuthRepository {
     val authState: Flow<AuthUser?>
@@ -23,6 +25,8 @@ interface AuthRepository {
     suspend fun signOut(): Result<Unit>
 
     fun getCurrentUser(): AuthUser?
+
+    suspend fun updateDisplayName(name: String): Result<Unit>
 }
 
 class AuthRepositoryImpl @Inject constructor(
@@ -72,6 +76,11 @@ class AuthRepositoryImpl @Inject constructor(
                 else -> "No se pudo guardar tu perfil, intenta de nuevo"
             }
             Result.failure(Exception(message))
+        } catch (e: IOException) {
+            // El perfil se guarda en el backend propio y no respondió.
+            Result.failure(Exception(NO_CONNECTION_MESSAGE))
+        } catch (e: HttpException) {
+            Result.failure(Exception("No se pudo guardar tu perfil, intenta de nuevo"))
         } catch (e: Exception) {
             Result.failure(Exception("Error al registrar la cuenta"))
         }
@@ -81,6 +90,9 @@ class AuthRepositoryImpl @Inject constructor(
         runCatching { authDataSource.signOut() }
 
     override fun getCurrentUser(): AuthUser? = authDataSource.getCurrentUser()
+
+    override suspend fun updateDisplayName(name: String): Result<Unit> =
+        runCatching { authDataSource.updateDisplayName(name.trim()) }
 
     /**
      * Si guardar el perfil falla, la cuenta de Auth ya existe sin perfil.

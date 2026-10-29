@@ -35,8 +35,12 @@ fun EditProfileScreen(
     }
 
     EditProfileScreenContent(
+        fullName = uiState.fullName,
+        onFullNameChange = viewModel::updateFullName,
         username = uiState.username,
         onUsernameChange = viewModel::updateUsername,
+        location = uiState.location,
+        onLocationChange = viewModel::updateLocation,
         bio = uiState.bio,
         onBioChange = viewModel::updateBio,
         cars = uiState.cars,
@@ -72,8 +76,12 @@ fun EditProfileScreen(
 private fun EditProfileScreenPreview() {
     MotorMatesTheme {
         EditProfileScreenContent(
-            username = "Rodrigo",
+            fullName = "Rodrigo Salinas",
+            onFullNameChange = {},
+            username = "rodrigo",
             onUsernameChange = {},
+            location = "Bogotá",
+            onLocationChange = {},
             bio = "Amante de los autos clasicos",
             onBioChange = {},
             cars = emptyList(),

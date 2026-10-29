@@ -1,5 +1,6 @@
 package com.example.motormates.data.source
 
+import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.dto.ReviewFirestoreDto
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -12,12 +13,13 @@ import kotlinx.coroutines.flow.flowOf
 
 /**
  * Lectura de reseñas en tiempo real. Va aparte de ReviewRemoteDataSource
- * porque esa interfaz también la implementa la versión de Retrofit, que no
- * puede escuchar cambios: un listener solo tiene sentido contra Firestore.
+ * porque cada fuente lo resuelve distinto: Firestore con listeners y el
+ * backend propio con polling (ReviewRealtimeRetrofitDataSource). Devuelve
+ * el contrato común ReviewDtoGeneric para no amarrar a nadie a Firestore.
  */
 interface ReviewRealtimeDataSource {
-    fun observeReviewsByVehicle(vehicleId: String): Flow<List<ReviewFirestoreDto>>
-    fun observeReviewsByUsers(userIds: List<String>): Flow<List<ReviewFirestoreDto>>
+    fun observeReviewsByVehicle(vehicleId: String): Flow<List<ReviewDtoGeneric>>
+    fun observeReviewsByUsers(userIds: List<String>): Flow<List<ReviewDtoGeneric>>
 }
 
 class FirestoreReviewRealtimeDataSource @Inject constructor(

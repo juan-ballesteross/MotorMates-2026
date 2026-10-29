@@ -2,8 +2,6 @@ package com.example.motormates.data.injection
 
 import com.example.motormates.data.repository.NotificationRepository
 import com.example.motormates.data.repository.NotificationRepositoryImpl
-import com.example.motormates.data.source.FirestoreNotificationDataSource
-import com.example.motormates.data.source.NotificationDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,10 +11,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class NotificationDataModule {
-
-    @Binds
-    @Singleton
-    abstract fun bindNotificationDataSource(impl: FirestoreNotificationDataSource): NotificationDataSource
 
     @Binds
     @Singleton

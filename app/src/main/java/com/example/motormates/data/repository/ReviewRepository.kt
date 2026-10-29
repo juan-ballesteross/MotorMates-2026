@@ -2,7 +2,9 @@ package com.example.motormates.data.repository
 
 import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.model.NewReview
+import com.example.motormates.data.model.NotificationType
 import com.example.motormates.data.model.Review
+import com.example.motormates.data.model.ReviewAuthor
 import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
 import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
 import com.example.motormates.data.source.AuthDataSource
@@ -11,6 +13,9 @@ import com.example.motormates.data.source.UserDataSource
 import com.google.firebase.firestore.FirebaseFirestoreException
 import java.io.IOException
 import javax.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -44,17 +49,18 @@ class ReviewRepositoryImpl @Inject constructor(
     private val realtimeDataSource: ReviewRealtimeDataSource,
     private val vehicleDataSource: VehicleRemoteDataSource,
     private val userDataSource: UserDataSource,
-    private val authDataSource: AuthDataSource
+    private val authDataSource: AuthDataSource,
+    private val notificationRepository: NotificationRepository
 ) : ReviewRepository {
 
     override suspend fun getReviewsByVehicle(vehicleId: String): Result<List<Review>> =
         safeCall(notFound = "Este vehículo ya no existe", fallback = "No se pudieron cargar las reseñas") {
-            remoteDataSource.getReviewsByVehicle(vehicleId).map { it.toDomain() }
+            remoteDataSource.getReviewsByVehicle(vehicleId).map { it.toDomain() }.withCurrentAuthors()
         }
 
     override suspend fun getReviewsByUser(userId: String): Result<List<Review>> =
         safeCall(notFound = "Este usuario no existe", fallback = "No se pudieron cargar las reseñas") {
-            remoteDataSource.getReviewsByUser(userId).map { it.toDomain() }
+            remoteDataSource.getReviewsByUser(userId).map { it.toDomain() }.withCurrentAuthors()
         }
 
     override fun observeReviewsByVehicle(vehicleId: String): Flow<Result<List<Review>>> =
@@ -69,8 +75,32 @@ class ReviewRepositoryImpl @Inject constructor(
      * con catch y se emite como Result.failure, igual que en el resto.
      */
     private fun Flow<List<ReviewDtoGeneric>>.toDomainResults(): Flow<Result<List<Review>>> =
-        map { dtos -> Result.success(dtos.map { it.toDomain() }) }
+        map { dtos -> Result.success(dtos.map { it.toDomain() }.withCurrentAuthors()) }
             .catch { emit(Result.failure(Exception("No se pudieron cargar las reseñas"))) }
+
+    /**
+     * La reseña trae una copia del autor guardada al publicarla, que queda
+     * vieja si después cambió su foto o su nombre. Aquí se reemplaza por el
+     * perfil actual de cada autor (una lectura por autor, en paralelo). Si
+     * un perfil no se puede leer, se deja la copia guardada.
+     */
+    private suspend fun List<Review>.withCurrentAuthors(): List<Review> = coroutineScope {
+        val profiles = map { it.userId }.distinct()
+            .map { uid -> async { uid to runCatching { userDataSource.getUser(uid) }.getOrNull() } }
+            .awaitAll()
+            .toMap()
+
+        map { review ->
+            val profile = profiles[review.userId] ?: return@map review
+            val author = review.author ?: ReviewAuthor(id = review.userId, fullName = profile.fullName)
+            review.copy(
+                author = author.copy(
+                    fullName = profile.fullName.ifBlank { author.fullName },
+                    avatarUrl = profile.avatarUrl ?: author.avatarUrl
+                )
+            )
+        }
+    }
 
     override suspend fun createReview(
         vehicleId: String,
@@ -83,7 +113,7 @@ class ReviewRepositoryImpl @Inject constructor(
             return Result.failure(Exception(INVALID_RATING))
         }
 
-        return safeCall(
+        val result = safeCall(
             notFound = "El usuario o el vehículo ya no existe",
             fallback = "No se pudo publicar la reseña"
         ) {
@@ -104,6 +134,32 @@ class ReviewRepositoryImpl @Inject constructor(
                     vehicleModel = vehicle.model
                 )
             ).toDomain()
+        }
+
+        result.getOrNull()?.let { newReview -> notifyOtherReviewers(newReview) }
+        return result
+    }
+
+    /**
+     * Solo al crear (no al editar): se avisa a quienes ya habían reseñado
+     * este mismo carro, para que sepan que alguien más lo reseñó. Es
+     * best-effort: si falla la consulta, la reseña igual quedó publicada.
+     */
+    private suspend fun notifyOtherReviewers(newReview: Review) {
+        val otherReviewerIds = runCatching { remoteDataSource.getReviewsByVehicle(newReview.vehicleId) }
+            .getOrElse { emptyList() }
+            .map { it.toDomain().userId }
+            .filter { it != newReview.userId }
+            .distinct()
+
+        otherReviewerIds.forEach { recipientId ->
+            notificationRepository.notify(
+                recipientUid = recipientId,
+                type = NotificationType.REVIEW,
+                actorId = newReview.userId,
+                vehicleId = newReview.vehicleId,
+                reviewId = newReview.id
+            )
         }
     }
 

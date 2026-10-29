@@ -33,8 +33,12 @@ import com.example.motormates.ui.theme.Spacing
  */
 @Composable
 fun EditProfileScreenContent(
+    fullName: String,
+    onFullNameChange: (String) -> Unit,
     username: String,
     onUsernameChange: (String) -> Unit,
+    location: String,
+    onLocationChange: (String) -> Unit,
     bio: String,
     onBioChange: (String) -> Unit,
     cars: List<GarageCar>,
@@ -63,8 +67,12 @@ fun EditProfileScreenContent(
     ) {
         EditProfileTopBar(onCloseClick = onCloseClick, onSaveClick = onSaveClick)
         EditProfileForm(
+            fullName = fullName,
+            onFullNameChange = onFullNameChange,
             username = username,
             onUsernameChange = onUsernameChange,
+            location = location,
+            onLocationChange = onLocationChange,
             bio = bio,
             onBioChange = onBioChange,
             cars = cars,
@@ -87,8 +95,12 @@ fun EditProfileScreenContent(
 
 @Composable
 private fun EditProfileForm(
+    fullName: String,
+    onFullNameChange: (String) -> Unit,
     username: String,
     onUsernameChange: (String) -> Unit,
+    location: String,
+    onLocationChange: (String) -> Unit,
     bio: String,
     onBioChange: (String) -> Unit,
     cars: List<GarageCar>,
@@ -159,10 +171,26 @@ private fun EditProfileForm(
         }
         item {
             RegisterTextField(
+                label = stringResource(R.string.edit_profile_fullname_label),
+                value = fullName,
+                onValueChange = onFullNameChange,
+                placeholder = stringResource(R.string.edit_profile_fullname_placeholder)
+            )
+        }
+        item {
+            RegisterTextField(
                 label = stringResource(R.string.edit_profile_username_label),
                 value = username,
                 onValueChange = onUsernameChange,
                 placeholder = stringResource(R.string.edit_profile_username_placeholder)
+            )
+        }
+        item {
+            RegisterTextField(
+                label = stringResource(R.string.edit_profile_location_label),
+                value = location,
+                onValueChange = onLocationChange,
+                placeholder = stringResource(R.string.edit_profile_location_placeholder)
             )
         }
         item {
