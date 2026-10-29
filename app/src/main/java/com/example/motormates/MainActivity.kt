@@ -1,5 +1,6 @@
 package com.example.motormates
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -22,10 +23,14 @@ class MainActivity : ComponentActivity() {
     private val localNetworkPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestLocalNetworkPermissionIfNeeded()
+        requestNotificationPermissionIfNeeded()
         setContent {
             MotorMatesTheme {
                 MotorMatesApp()
@@ -44,5 +49,18 @@ class MainActivity : ComponentActivity() {
         val granted = ContextCompat.checkSelfPermission(this, ACCESS_LOCAL_NETWORK) ==
             PackageManager.PERMISSION_GRANTED
         if (!granted) localNetworkPermissionLauncher.launch(ACCESS_LOCAL_NETWORK)
+    }
+
+    /**
+     * Desde Android 13 el sistema descarta las notificaciones de una app que
+     * no tenga este permiso, así que sin pedirlo el push de la Cloud Function
+     * llegaría pero no se vería. Este sí se pide con cualquier backend: FCM
+     * siempre va por Firebase.
+     */
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (!granted) notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 }

@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.messaging)
     implementation(libs.coil.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.retrofit)

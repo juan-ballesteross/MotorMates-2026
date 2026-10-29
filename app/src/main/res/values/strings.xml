@@ -145,4 +145,9 @@
     <string name="car_detail_write_review">Escribir reseña</string>
     <string name="review_edit_top_bar_title">Editar reseña</string>
     <string name="review_save_button">Guardar cambios</string>
+
+    <!-- Notificaciones push (FCM) -->
+    <string name="notification_channel_id">motormates_general</string>
+    <string name="notification_channel_name">Actividad de MotorMates</string>
+    <string name="notification_channel_description">Avisos cuando alguien te sigue o interactúa con tus reseñas</string>
 </resources>

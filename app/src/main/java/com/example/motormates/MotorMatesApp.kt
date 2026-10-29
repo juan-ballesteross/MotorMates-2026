@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -15,6 +16,7 @@ import com.example.motormates.navigation.AppNavigation
 import com.example.motormates.navigation.ScreenRoute
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
+import com.example.motormates.ui.notifications.PushTokenViewModel
 import com.example.motormates.ui.theme.MotorMatesBackground
 
 /**
@@ -24,6 +26,10 @@ import com.example.motormates.ui.theme.MotorMatesBackground
  */
 @Composable
 fun MotorMatesApp(modifier: Modifier = Modifier) {
+    // Solo se instancia: en su init se queda registrando el token de FCM
+    // mientras haya sesión. Acá porque es la raíz, así vive una sola vez.
+    hiltViewModel<PushTokenViewModel>()
+
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
