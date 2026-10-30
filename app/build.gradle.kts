@@ -20,6 +20,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Se agrego para que funcione en la tablet
+        buildConfigField("boolean", "CONNECT_TO_FIREBASE_EMULATOR", "false")
     }
 
     buildTypes {

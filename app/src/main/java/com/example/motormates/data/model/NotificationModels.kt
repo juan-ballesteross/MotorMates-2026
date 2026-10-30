@@ -3,7 +3,7 @@ package com.example.motormates.data.model
 import com.example.motormates.data.mock.VehicleImages
 
 /** Tipo de evento que generó la notificación — determina el ícono mostrado. */
-enum class NotificationType { LIKE, COMMENT, FOLLOW, RATING, REVIEW }
+enum class NotificationType { LIKE, COMMENT, FOLLOW, RATING, REVIEW, LIKE_STORY }
 
 data class NotificationUi(
     val id: String,

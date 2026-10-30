@@ -58,6 +58,7 @@
     <string name="story_close_cd">Cerrar historia</string>
     <string name="story_like_cd">Me gusta</string>
     <string name="story_send_cd">Enviar</string>
+    <string name="story_options_cd">Opciones de la historia</string>
 
     <!-- Search -->
     <string name="search_top_bar_title">Buscar</string>

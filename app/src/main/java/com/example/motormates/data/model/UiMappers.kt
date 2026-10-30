@@ -127,6 +127,7 @@ fun Notification.toNotificationUi(): NotificationUi {
         NotificationType.REVIEW ->
             if (vehicleName != null) "también dejó una reseña en el $vehicleName" else "también dejó una reseña en un carro que reseñaste"
         NotificationType.FOLLOW -> "empezó a seguirte"
+        NotificationType.LIKE_STORY -> "le dio like a tu historia"
         NotificationType.COMMENT, NotificationType.RATING -> ""
     }
 
@@ -154,3 +155,12 @@ fun Notification.toNotificationUi(): NotificationUi {
         thumbnailUrl = vehicleImageUrl
     )
 }
+
+fun Story.toStoryUser(): StoryUser = StoryUser(
+    id = id,
+    userId = userId,
+    name = userName,
+    avatarUrl = userAvatarUrl,
+    imageUrl = imageUrl,
+    timeAgo = createdAt.toRelativeTimeEs()
+)

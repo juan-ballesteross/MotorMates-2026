@@ -1,15 +1,17 @@
 package com.example.motormates.ui.feed
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.motormates.data.mock.FeedMocks
 import com.example.motormates.data.model.FeedTab
 import com.example.motormates.data.model.toFeedReviewUi
 import com.example.motormates.data.model.toFeedVehicleUi
+import com.example.motormates.data.model.toStoryUser
 import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.FollowRepository
 import com.example.motormates.data.repository.LikeRepository
 import com.example.motormates.data.repository.ReviewRepository
+import com.example.motormates.data.repository.StoryRepository
 import com.example.motormates.data.repository.VehicleRepository
 import com.example.motormates.data.seed.FirestoreSeeder
 import com.example.motormates.ui.common.LikedReviewsState
@@ -34,6 +36,7 @@ class FeedViewModel @Inject constructor(
     private val followRepository: FollowRepository,
     private val authRepository: AuthRepository,
     private val likeRepository: LikeRepository,
+    private val storyRepository: StoryRepository,
     private val firestoreSeeder: FirestoreSeeder
 ) : ViewModel() {
 
@@ -51,10 +54,10 @@ class FeedViewModel @Inject constructor(
     private val vehicleImagesByVehicleId = MutableStateFlow<Map<String, String?>>(emptyMap())
 
     private var followingJob: Job? = null
+    private var storiesJob: Job? = null
 
     init {
-        // Las historias siguen siendo datos locales, el backend no las modela.
-        _uiState.update { it.copy(stories = FeedMocks.sampleStories) }
+        observeStories()
         viewModelScope.launch {
             // Primera vez en una BD vacía: se queman los datos de prueba
             // antes de pedir los vehículos. Si falla (p. ej. reglas de
@@ -63,6 +66,41 @@ class FeedViewModel @Inject constructor(
             loadVehicles()
         }
         observeFollowingReviews()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observeStories() {
+        val currentUserId = authRepository.getCurrentUser()?.id ?: return
+
+        storiesJob?.cancel()
+        storiesJob = viewModelScope.launch {
+            followRepository.observeFollowingIds(currentUserId)
+                .flatMapLatest { followingIds ->
+                    val visibleUserIds = followingIds.toSet() + currentUserId
+                    storyRepository.observeActiveStories()
+                        .map { stories -> stories.filter { it.userId in visibleUserIds } }
+                }
+                .collect { stories ->
+                    _uiState.update { it.copy(stories = stories.map { story -> story.toStoryUser() }) }
+                }
+        }
+    }
+
+    fun postStory(imageUri: Uri) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isPostingStory = true, storyErrorMessage = null) }
+            val result = storyRepository.postStory(imageUri)
+            _uiState.update {
+                it.copy(
+                    isPostingStory = false,
+                    storyErrorMessage = result.exceptionOrNull()?.message
+                )
+            }
+        }
+    }
+
+    fun dismissStoryError() {
+        _uiState.update { it.copy(storyErrorMessage = null) }
     }
 
     fun loadVehicles() {

@@ -18,5 +18,7 @@ data class FeedUiState(
     val errorMessage: String? = null,
     val followingReviews: List<FeedReviewUi> = emptyList(),
     val isFollowingLoading: Boolean = false,
-    val followingErrorMessage: String? = null
+    val followingErrorMessage: String? = null,
+    val isPostingStory: Boolean = false,
+    val storyErrorMessage: String? = null
 )

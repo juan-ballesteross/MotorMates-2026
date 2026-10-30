@@ -107,5 +107,20 @@ service cloud.firestore {
         allow create, delete: if isUser(likeUserId);
       }
     }
+
+    match /stories/{storyId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.get('likesCount', 0) == 0;
+      allow update: if (signedIn() && resource.data.userId == request.auth.uid)
+        || (signedIn() && onlyChanges(['likesCount']) && stepsByOne('likesCount'));
+      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+
+      match /likes/{likeUserId} {
+        allow read: if signedIn();
+        allow create, delete: if isUser(likeUserId);
+      }
+    }
   }
 }

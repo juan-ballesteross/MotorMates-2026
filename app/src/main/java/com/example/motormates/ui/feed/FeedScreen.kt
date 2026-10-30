@@ -1,5 +1,8 @@
 package com.example.motormates.ui.feed
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +24,11 @@ fun FeedScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val storyPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let(viewModel::postStory)
+    }
 
     Column(
         modifier = modifier
@@ -41,8 +49,15 @@ fun FeedScreen(
             followingReviews = uiState.followingReviews,
             isFollowingLoading = uiState.isFollowingLoading,
             followingErrorMessage = uiState.followingErrorMessage,
+            storyErrorMessage = uiState.storyErrorMessage,
             onVehicleClick = onVehicleClick,
             onStoryClick = onStoryClick,
+            onAddStoryClick = {
+                storyPickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            },
+            onDismissStoryError = viewModel::dismissStoryError,
             onRetryClick = viewModel::loadVehicles,
             onFollowingRetryClick = viewModel::retryFollowingReviews,
             onAuthorClick = onAuthorClick,

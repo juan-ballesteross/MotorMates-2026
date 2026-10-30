@@ -1,6 +1,5 @@
 package com.example.motormates.ui.story
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
 import com.example.motormates.data.model.StoryUser
 import com.example.motormates.ui.story.components.StoryBottomBar
 import com.example.motormates.ui.story.components.StoryTopBar
@@ -23,14 +22,19 @@ import com.example.motormates.ui.story.components.StoryTopBar
 fun StoryScreenContent(
     story: StoryUser,
     isLiked: Boolean,
+    isOwnStory: Boolean,
+    likesCount: Long,
+    progress: Float,
     onLikeClick: () -> Unit,
+    onLikesCountClick: () -> Unit,
     onCloseClick: () -> Unit,
     onUserClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val imageRes = story.imageRes ?: return
+    val imageUrl = story.imageUrl ?: return
     val caption = story.caption.orEmpty()
 
     Box(
@@ -38,8 +42,8 @@ fun StoryScreenContent(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        Image(
-            painter = painterResource(imageRes),
+        AsyncImage(
+            model = imageUrl,
             contentDescription = caption,
             contentScale = ContentScale.Fit,
             modifier = Modifier
@@ -69,16 +73,23 @@ fun StoryScreenContent(
             )
         }
         StoryTopBar(
-            avatarResId = story.avatarResId,
+            avatarUrl = story.avatarUrl,
             userName = story.name,
+            timeAgo = story.timeAgo,
+            isOwnStory = isOwnStory,
+            progress = progress,
             onUserClick = onUserClick,
             onCloseClick = onCloseClick,
+            onDeleteClick = onDeleteClick,
             modifier = Modifier.align(Alignment.TopCenter)
         )
         StoryBottomBar(
             caption = caption,
             isLiked = isLiked,
+            isOwnStory = isOwnStory,
+            likesCount = likesCount,
             onLikeClick = onLikeClick,
+            onLikesCountClick = onLikesCountClick,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
