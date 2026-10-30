@@ -41,11 +41,12 @@ class MainActivity : ComponentActivity() {
     /**
      * Android 17 bloquea las conexiones a la red local (donde corre el
      * backend propio) si la app no tiene este permiso en tiempo de
-     * ejecución. Con Firebase no hace falta, así que solo se pide en modo
-     * Express.
+     * ejecución. Se pide en modo Express y también en debug, porque ahí
+     * Firebase apunta a los emuladores (10.0.2.2, que también es red local).
      */
     private fun requestLocalNetworkPermissionIfNeeded() {
-        if (ACTIVE_BACKEND != DataBackend.EXPRESS || Build.VERSION.SDK_INT < 37) return
+        val needsLocalNetwork = ACTIVE_BACKEND == DataBackend.EXPRESS || BuildConfig.DEBUG
+        if (!needsLocalNetwork || Build.VERSION.SDK_INT < 37) return
         val granted = ContextCompat.checkSelfPermission(this, ACCESS_LOCAL_NETWORK) ==
             PackageManager.PERMISSION_GRANTED
         if (!granted) localNetworkPermissionLauncher.launch(ACCESS_LOCAL_NETWORK)

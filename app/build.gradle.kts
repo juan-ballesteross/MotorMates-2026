@@ -23,6 +23,9 @@ android {
     }
 
     buildTypes {
+        debug{
+            isDebuggable = true
+        }
         release {
             optimization {
                 enable = false
@@ -35,6 +38,9 @@ android {
     }
     buildFeatures {
         compose = true
+        // Genera la clase BuildConfig (BuildConfig.DEBUG), con la que la app
+        // decide si hablar con los emuladores de Firebase o con producción
+        buildConfig = true
     }
 }
 
