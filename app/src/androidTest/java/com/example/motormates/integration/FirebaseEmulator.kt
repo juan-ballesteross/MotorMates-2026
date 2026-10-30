@@ -1,5 +1,6 @@
 package com.example.motormates.integration
 
+import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -26,9 +27,17 @@ object FirebaseEmulator {
     private const val AUTH_PORT = 9099
     private const val DATABASE_ID = "motormatesdb"
     private const val PASSWORD = "secreto123"
+    private const val ACCESS_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
 
     private val app: FirebaseApp by lazy {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        // Desde Android 17 conectarse a la red local (10.0.2.2 incluido) es un
+        // permiso en tiempo de ejecución: sin concederlo, cada conexión al
+        // emulador se queda colgada hasta que runTest corta la prueba.
+        if (Build.VERSION.SDK_INT >= 37) {
+            instrumentation.uiAutomation.grantRuntimePermission(context.packageName, ACCESS_LOCAL_NETWORK)
+        }
         FirebaseApp.initializeApp(context, FirebaseApp.getInstance().options, "integration-test")
     }
 
