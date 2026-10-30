@@ -23,6 +23,9 @@ android {
     }
 
     buildTypes {
+        debug{
+            isDebuggable = true
+        }
         release {
             optimization {
                 enable = false
@@ -35,6 +38,9 @@ android {
     }
     buildFeatures {
         compose = true
+        // Genera la clase BuildConfig (BuildConfig.DEBUG), con la que la app
+        // decide si hablar con los emuladores de Firebase o con producción
+        buildConfig = true
     }
 }
 
@@ -68,6 +74,7 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

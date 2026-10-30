@@ -6,6 +6,7 @@ import com.example.motormates.data.source.AuthDataSource
 import com.example.motormates.data.source.UserDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -112,6 +113,10 @@ internal class FakeAuthDataSource(
     override suspend fun deleteCurrentUser() {
         session.value = null
     }
+
+    override suspend fun updateDisplayName(name: String) {
+        session.value = session.value?.copy(displayName = name)
+    }
 }
 
 /** UserDataSource en memoria, compartido por las pruebas de repositorios. */
@@ -127,9 +132,14 @@ internal class FakeUserDataSource(
 
     override suspend fun getUser(uid: String): UserDto? = usersById[uid]
 
-    override suspend fun updateUser(uid: String, fullName: String, bio: String) {
-        usersById[uid]?.let { usersById[uid] = it.copy(fullName = fullName, bio = bio) }
+    override suspend fun updateUser(uid: String, fullName: String, username: String, location: String, bio: String) {
+        usersById[uid]?.let {
+            usersById[uid] = it.copy(fullName = fullName, username = username, location = location, bio = bio)
+        }
     }
+
+    override suspend fun isUsernameTaken(username: String, exceptUid: String): Boolean =
+        usersById.values.any { it.username == username && it.id != exceptUid }
 
     override suspend fun updateAvatarUrl(uid: String, avatarUrl: String) {
         usersById[uid]?.let { usersById[uid] = it.copy(avatarUrl = avatarUrl) }
@@ -140,6 +150,8 @@ internal class FakeUserDataSource(
     }
 
     override suspend fun getAllUsers(): List<UserDto> = usersById.values.toList()
+
+    override fun observeUser(uid: String): Flow<UserDto?> = flowOf(usersById[uid])
 }
 
 /** El registro del token no se prueba acá: solo hace falta para construir el repositorio. */

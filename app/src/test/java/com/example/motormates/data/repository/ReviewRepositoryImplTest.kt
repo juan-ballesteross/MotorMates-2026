@@ -13,6 +13,11 @@ import com.example.motormates.data.model.toCarDetailUi
 import com.example.motormates.data.model.toReviewUi
 import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
 import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
+import com.example.motormates.data.model.Notification
+import com.example.motormates.data.model.NotificationType
+import com.example.motormates.data.source.ReviewRealtimeDataSource
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -116,10 +121,39 @@ class ReviewRepositoryImplTest {
         users: List<UserDto> = emptyList()
     ) = ReviewRepositoryImpl(
         remoteDataSource = reviews,
+        realtimeDataSource = FakeReviewRealtimeDataSource(),
         vehicleDataSource = FakeVehicleDataSource(listOf(porsche)),
         userDataSource = FakeUserDataSource(users),
-        authDataSource = FakeAuthDataSource(currentUser = currentUser)
+        authDataSource = FakeAuthDataSource(currentUser = currentUser),
+        notificationRepository = FakeNotificationRepository()
     )
+}
+
+/** El tiempo real no se prueba acá: solo hace falta para construir el repositorio. */
+private class FakeReviewRealtimeDataSource : ReviewRealtimeDataSource {
+    override fun observeReviewsByVehicle(vehicleId: String): Flow<List<ReviewDtoGeneric>> = flowOf(emptyList())
+    override fun observeReviewsByUsers(userIds: List<String>): Flow<List<ReviewDtoGeneric>> = flowOf(emptyList())
+}
+
+/** Guarda los avisos en memoria para poder revisar a quién se notificó. */
+private class FakeNotificationRepository : NotificationRepository {
+
+    val notified = mutableListOf<String>()
+
+    override suspend fun notify(
+        recipientUid: String,
+        type: NotificationType,
+        actorId: String,
+        vehicleId: String?,
+        reviewId: String?
+    ) {
+        notified += recipientUid
+    }
+
+    override suspend fun getNotifications(uid: String): Result<List<Notification>> = Result.success(emptyList())
+
+    override fun observeNotifications(uid: String): Flow<Result<List<Notification>>> =
+        flowOf(Result.success(emptyList()))
 }
 
 private class FakeVehicleDataSource(
