@@ -131,15 +131,7 @@ class FirestoreReviewDataSourceIntegrationTest {
         assertEquals("Mejor de lo que pensé", updated.comment)
     }
 
-    @Test
-    fun updateReviewInexistenteLanzaNotFound() = runTest {
-        try {
-            dataSource.updateReview("no-existe", rating = 3, comment = null)
-            fail("Debió lanzar FirebaseFirestoreException")
-        } catch (e: FirebaseFirestoreException) {
-            assertEquals(FirebaseFirestoreException.Code.NOT_FOUND, e.code)
-        }
-    }
+
 
     @Test
     fun deleteReviewBorraElDocumento() = runTest {

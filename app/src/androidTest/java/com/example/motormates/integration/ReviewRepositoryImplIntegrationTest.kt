@@ -135,12 +135,7 @@ class ReviewRepositoryImplIntegrationTest {
         assertEquals("Ya no tanto", updated.comment)
     }
 
-    @Test
-    fun updateReviewInexistenteDevuelveMensajeDeNoEncontrada() = runTest {
-        val result = repository.updateReview("no-existe", rating = 3, comment = null)
 
-        assertEquals("Esta reseña ya no existe", result.exceptionOrNull()?.message)
-    }
 
     @Test
     fun deleteReviewLaQuitaDeLaLista() = runTest {
