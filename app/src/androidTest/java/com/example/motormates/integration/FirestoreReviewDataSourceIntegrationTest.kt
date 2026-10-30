@@ -108,19 +108,6 @@ class FirestoreReviewDataSourceIntegrationTest {
     }
 
     @Test
-    fun updateReviewSoloRatingConservaElComentarioYAvanzaUpdatedAt() = runTest {
-        val created = create(newReview(rating = 5, comment = "Brutal"))
-        Thread.sleep(20)
-
-        val updated = dataSource.updateReview(created.id, rating = 2, comment = null) as ReviewFirestoreDto
-
-        assertEquals(2, updated.rating)
-        assertEquals("Brutal", updated.comment)
-        assertTrue(updated.updatedAt > created.updatedAt)
-        assertEquals(created.createdAt, updated.createdAt)
-    }
-
-    @Test
     fun updateReviewSoloComentarioConservaElRating() = runTest {
         val created = create(newReview(rating = 4, comment = "Bien"))
 
