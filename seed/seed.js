@@ -16,7 +16,8 @@
  * duplicarlos.
  */
 
-const { initializeApp, cert } = require("firebase-admin/app");
+const path = require("path");
+const { initializeApp, applicationDefault } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { faker } = require("@faker-js/faker/locale/es");
 
@@ -36,7 +37,21 @@ const USERS_COUNT = 8;
 const MIN_REVIEWS_PER_VEHICLE = 1;
 const MAX_REVIEWS_PER_VEHICLE = 4;
 
-initializeApp({ credential: cert(serviceAccount) });
+// Con cert(serviceAccount), firebase-admin le pasa las llaves a
+// google-auth-library por la opción `credentials`, que está deprecada y
+// suelta un aviso en consola. Apuntando GOOGLE_APPLICATION_CREDENTIALS al
+// mismo archivo, la librería lo lee ella misma y no hay aviso. Si la
+// variable ya viene del entorno, se respeta.
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(__dirname, "serviceAccountKey.json");
+}
+
+initializeApp({
+  credential: applicationDefault(),
+  // Con credenciales por defecto el projectId no se infiere solo; se toma
+  // del mismo archivo de llave.
+  projectId: serviceAccount.project_id,
+});
 const db = getFirestore(DATABASE_ID);
 
 /**
