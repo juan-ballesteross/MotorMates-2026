@@ -33,8 +33,6 @@ class VehicleDetailViewModel @Inject constructor(
     private val _state = MutableStateFlow(VehicleDetailState())
     val state: StateFlow<VehicleDetailState> = _state
 
-    // Se guarda para poder avisarle al autor de la reseña qué carro era, sin
-    // tener que pasarlo de nuevo como parámetro en cada toggleLike.
     private var currentVehicleId: String? = null
 
     // El vehículo se consulta una sola vez, pero la cabecera (promedio y

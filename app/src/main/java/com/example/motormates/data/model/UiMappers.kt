@@ -118,11 +118,6 @@ fun User.toUserSearchResult(): UserSearchResult = UserSearchResult(
     avatarUrl = avatarUrl
 )
 
-/**
- * section agrupa por antigüedad (igual criterio que antes se veía quemado
- * en los datos de ejemplo): HOY si fue en las últimas 24 h, ESTA SEMANA si
- * fue en los últimos 7 días, ANTES para el resto.
- */
 fun Notification.toNotificationUi(): NotificationUi {
     val vehicleName = if (!vehicleBrand.isNullOrBlank()) "$vehicleBrand $vehicleModel" else null
 
@@ -132,6 +127,7 @@ fun Notification.toNotificationUi(): NotificationUi {
         NotificationType.REVIEW ->
             if (vehicleName != null) "también dejó una reseña en el $vehicleName" else "también dejó una reseña en un carro que reseñaste"
         NotificationType.FOLLOW -> "empezó a seguirte"
+        NotificationType.LIKE_STORY -> "le dio like a tu historia"
         NotificationType.COMMENT, NotificationType.RATING -> ""
     }
 
@@ -159,3 +155,12 @@ fun Notification.toNotificationUi(): NotificationUi {
         thumbnailUrl = vehicleImageUrl
     )
 }
+
+fun Story.toStoryUser(): StoryUser = StoryUser(
+    id = id,
+    userId = userId,
+    name = userName,
+    avatarUrl = userAvatarUrl,
+    imageUrl = imageUrl,
+    timeAgo = createdAt.toRelativeTimeEs()
+)

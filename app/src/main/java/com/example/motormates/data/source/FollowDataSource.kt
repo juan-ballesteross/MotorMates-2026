@@ -31,11 +31,6 @@ class FirestoreFollowDataSource @Inject constructor(
 
     private fun userRef(uid: String) = firestore.collection(USERS_COLLECTION).document(uid)
 
-    /**
-     * Una transacción con las 4 escrituras: el seguidor queda anotado en
-     * "followers" del otro, el otro queda anotado en "following" del
-     * seguidor, y se suma 1 a cada contador. Si ya lo seguía, no hace nada.
-     */
     override suspend fun followUser(followerUid: String, targetUid: String) {
         val followerDoc = userRef(targetUid).collection(FOLLOWERS_COLLECTION).document(followerUid)
         val followingDoc = userRef(followerUid).collection(FOLLOWING_COLLECTION).document(targetUid)
@@ -104,7 +99,6 @@ class FirestoreFollowDataSource @Inject constructor(
         awaitClose { registration.remove() }
     }
 
-    /** Una lectura por uid (no un whereIn): la lista de la subcolección ya trae los ids. */
     private suspend fun getUsers(uids: List<String>): List<UserDto> = coroutineScope {
         uids
             .map { uid -> async { userRef(uid).get().await().toObject(UserDto::class.java) } }

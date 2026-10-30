@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 interface NotificationRepository {
-    /** No lanza error visible: que falle una notificación no debe tumbar el like/follow/reseña. */
     suspend fun notify(
         recipientUid: String,
         type: NotificationType,

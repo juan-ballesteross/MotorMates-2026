@@ -12,7 +12,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.motormates.data.mock.FeedMocks
 import com.example.motormates.ui.alerts.AlertsScreen
 import com.example.motormates.ui.comments.CommentsScreen
 import com.example.motormates.ui.editProfile.EditProfileScreen
@@ -254,9 +253,7 @@ fun AppNavigation(
             StoryScreen(
                 storyIndex = storyIndex,
                 onCloseClick = { navController.popBackStack() },
-                onUserClick = { index ->
-                    FeedMocks.sampleStories.getOrNull(index)?.let { openAuthor(it.userId) }
-                }
+                onUserClick = ::openAuthor
             )
         }
         composable(

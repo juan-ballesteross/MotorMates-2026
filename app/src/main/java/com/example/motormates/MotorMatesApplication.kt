@@ -18,7 +18,8 @@ class MotorMatesApplication : Application() {
         // porque useEmulator() solo vale si se llama antes de la primera
         // lectura o escritura: cuando Hilt pida estas instancias (AuthModule,
         // FirestoreModule) recibirá las mismas, ya apuntando al emulador.
-        if (BuildConfig.DEBUG) {
+        // Se agrego para que funcione en la tablet
+        if (BuildConfig.DEBUG && BuildConfig.CONNECT_TO_FIREBASE_EMULATOR) {
             FirebaseAuth.getInstance().useEmulator(EMULATOR_HOST, 9099)
             FirebaseFirestore.getInstance("motormatesdb").useEmulator(EMULATOR_HOST, 8080)
         }

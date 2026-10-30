@@ -108,10 +108,6 @@ fun NotificationItem(
     }
 }
 
-/**
- * Si el actor tiene foto, se muestra ella (como en cualquier feed de
- * notificaciones); si no, se cae al ícono de siempre según el tipo.
- */
 @Composable
 private fun NotificationIcon(type: NotificationType, avatarUrl: String? = null) {
     if (avatarUrl != null) {
@@ -127,7 +123,7 @@ private fun NotificationIcon(type: NotificationType, avatarUrl: String? = null) 
     }
 
     val (icon, tint) = when (type) {
-        NotificationType.LIKE -> Icons.Filled.Favorite to MaterialTheme.colorScheme.primary
+        NotificationType.LIKE, NotificationType.LIKE_STORY -> Icons.Filled.Favorite to MaterialTheme.colorScheme.primary
         NotificationType.RATING -> Icons.Filled.Star to MaterialTheme.colorScheme.primary
         NotificationType.COMMENT, NotificationType.REVIEW ->
             Icons.AutoMirrored.Filled.Comment to MaterialTheme.colorScheme.onSurfaceVariant

@@ -45,10 +45,6 @@ class FirestoreLikeDataSource @Inject constructor(
         }.await()
     }
 
-    /**
-     * Mismo criterio que likeReview: todo en una transacción para que el
-     * borrado del like y la resta del contador queden consistentes.
-     */
     override suspend fun unlikeReview(reviewId: String, userId: String) {
         val reviewRef = firestore.collection(REVIEWS_COLLECTION).document(reviewId)
         val likeRef = reviewRef.collection(LIKES_COLLECTION).document(userId)

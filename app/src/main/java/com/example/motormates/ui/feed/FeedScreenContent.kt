@@ -1,6 +1,7 @@
 package com.example.motormates.ui.feed
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,8 +41,11 @@ fun FeedScreenContent(
     isFollowingLoading: Boolean,
     followingErrorMessage: String?,
     modifier: Modifier = Modifier,
+    storyErrorMessage: String? = null,
     onVehicleClick: (String) -> Unit = {},
     onStoryClick: (Int) -> Unit = {},
+    onAddStoryClick: () -> Unit = {},
+    onDismissStoryError: () -> Unit = {},
     onRetryClick: () -> Unit = {},
     onFollowingRetryClick: () -> Unit = {},
     onAuthorClick: (String) -> Unit = {},
@@ -56,7 +60,27 @@ fun FeedScreenContent(
     ) {
         when (selectedTab) {
             FeedTab.EXPLORAR -> {
-                item { StoriesRow(stories, onStoryClick = onStoryClick) }
+                item {
+                    StoriesRow(
+                        stories,
+                        onAddStoryClick = onAddStoryClick,
+                        onStoryClick = onStoryClick
+                    )
+                }
+
+                if (storyErrorMessage != null) {
+                    item {
+                        Text(
+                            text = storyErrorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = Spacing.gutter)
+                                .clickable(onClick = onDismissStoryError)
+                        )
+                    }
+                }
 
                 // Lo que viene del backend tiene cuatro estados: cargando,
                 // error, vacío o lista con datos.

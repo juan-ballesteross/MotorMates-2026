@@ -75,7 +75,6 @@ class FollowRepositoryImpl @Inject constructor(
         return try {
             Result.success(followDataSource.isFollowing(followerUid, targetUid))
         } catch (e: Exception) {
-            // No bloquea la pantalla: si falla, el botón arranca en "Seguir".
             Result.success(false)
         }
     }
