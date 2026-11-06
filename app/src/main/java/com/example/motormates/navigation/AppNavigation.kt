@@ -12,7 +12,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.motormates.data.model.NotificationType
 import com.example.motormates.ui.alerts.AlertsScreen
+import com.example.motormates.ui.chat.ChatListScreen
+import com.example.motormates.ui.chat.ChatScreen
 import com.example.motormates.ui.comments.CommentsScreen
 import com.example.motormates.ui.editProfile.EditProfileScreen
 import com.example.motormates.ui.feed.FeedScreen
@@ -89,7 +92,8 @@ fun AppNavigation(
                 onStoryClick = { index ->
                     navController.navigate(ScreenRoute.Story.createRoute(index))
                 },
-                onAuthorClick = ::openAuthor
+                onAuthorClick = ::openAuthor,
+                onAlertsClick = { navController.navigate(ScreenRoute.Alerts.route) }
             )
         }
         composable(ScreenRoute.Explore.route) {
@@ -151,7 +155,13 @@ fun AppNavigation(
             )
         }
         composable(ScreenRoute.Alerts.route) {
-            AlertsScreen()
+            AlertsScreen(
+                onNotificationClick = { notification ->
+                    if (notification.type == NotificationType.MESSAGE) {
+                        navController.navigate(ScreenRoute.Chat.createRoute(notification.actorId))
+                    }
+                }
+            )
         }
         composable(ScreenRoute.EditProfile.route) {
             EditProfileScreen(
@@ -278,6 +288,9 @@ fun AppNavigation(
                     navController.navigate(
                         ScreenRoute.FollowList.createRoute(targetUid, ScreenRoute.FollowList.MODE_FOLLOWING)
                     )
+                },
+                onMessageClick = { otherUid ->
+                    navController.navigate(ScreenRoute.Chat.createRoute(otherUid))
                 }
             )
         }
@@ -296,6 +309,26 @@ fun AppNavigation(
                 isFollowers = mode == ScreenRoute.FollowList.MODE_FOLLOWERS,
                 onBackClick = { navController.popBackStack() },
                 onUserClick = { user -> openAuthor(user.uid) }
+            )
+        }
+        composable(ScreenRoute.ChatList.route) {
+            ChatListScreen(
+                onBackClick = { navController.popBackStack() },
+                onChatClick = { otherUid ->
+                    navController.navigate(ScreenRoute.Chat.createRoute(otherUid))
+                }
+            )
+        }
+        composable(
+            route = ScreenRoute.Chat.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.Chat.ARG_OTHER_UID) { type = NavType.StringType }
+            )
+        ) { entry ->
+            val otherUid = entry.arguments?.getString(ScreenRoute.Chat.ARG_OTHER_UID).orEmpty()
+            ChatScreen(
+                otherUid = otherUid,
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

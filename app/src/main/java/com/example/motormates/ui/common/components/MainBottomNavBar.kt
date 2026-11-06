@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,13 +25,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 
-enum class MainBottomDestination { FEED, EXPLORE, ALERTS, PROFILE }
+enum class MainBottomDestination { FEED, EXPLORE, MESSAGES, PROFILE }
 
 @Composable
 fun MainBottomNavBar(
@@ -40,8 +42,9 @@ fun MainBottomNavBar(
     onFeedClick: () -> Unit = {},
     onExploreClick: () -> Unit = {},
     onPublishClick: () -> Unit = {},
-    onAlertsClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {}
+    onMessagesClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
+    hasUnreadMessages: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -78,10 +81,11 @@ fun MainBottomNavBar(
             )
         }
         BottomNavItem(
-            icon = Icons.Filled.Notifications,
-            label = stringResource(R.string.common_bottom_nav_alerts),
-            selected = selected == MainBottomDestination.ALERTS,
-            onClick = onAlertsClick
+            icon = Icons.AutoMirrored.Filled.Chat,
+            label = stringResource(R.string.common_bottom_nav_messages),
+            selected = selected == MainBottomDestination.MESSAGES,
+            showBadge = hasUnreadMessages,
+            onClick = onMessagesClick
         )
         BottomNavItem(
             icon = Icons.Filled.Person,
@@ -98,6 +102,7 @@ private fun BottomNavItem(
     label: String,
     selected: Boolean,
     modifier: Modifier = Modifier,
+    showBadge: Boolean = false,
     onClick: () -> Unit = {}
 ) {
     val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
@@ -105,7 +110,18 @@ private fun BottomNavItem(
         modifier = modifier.clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(imageVector = icon, contentDescription = label, tint = color, modifier = Modifier.size(24.dp))
+        Box {
+            Icon(imageVector = icon, contentDescription = label, tint = color, modifier = Modifier.size(24.dp))
+            if (showBadge) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(Color.Red)
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(2.dp))
         Text(text = label, color = color, fontSize = 11.sp)
     }

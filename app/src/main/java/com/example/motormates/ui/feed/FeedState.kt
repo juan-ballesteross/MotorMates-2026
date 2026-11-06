@@ -20,5 +20,5 @@ data class FeedUiState(
     val isFollowingLoading: Boolean = false,
     val followingErrorMessage: String? = null,
     val isPostingStory: Boolean = false,
-    val storyErrorMessage: String? = null
+    val storyErrorMessage: String? = null,
 )

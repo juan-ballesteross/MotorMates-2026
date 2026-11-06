@@ -20,6 +20,7 @@ fun FeedScreen(
     onVehicleClick: (String) -> Unit = {},
     onStoryClick: (Int) -> Unit = {},
     onAuthorClick: (String) -> Unit = {},
+    onAlertsClick: () -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -35,7 +36,7 @@ fun FeedScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        FeedTopBar()
+        FeedTopBar(onAlertsClick = onAlertsClick)
         FeedTabsRow(
             selectedTab = uiState.selectedTab,
             onTabClick = viewModel::updateSelectedTab

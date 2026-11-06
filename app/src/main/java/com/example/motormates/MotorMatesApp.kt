@@ -8,12 +8,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.motormates.navigation.AppNavigation
 import com.example.motormates.navigation.ScreenRoute
+import com.example.motormates.ui.chat.ChatBadgeViewModel
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.notifications.PushTokenViewModel
@@ -29,6 +31,8 @@ fun MotorMatesApp(modifier: Modifier = Modifier) {
     // Solo se instancia: en su init se queda registrando el token de FCM
     // mientras haya sesión. Acá porque es la raíz, así vive una sola vez.
     hiltViewModel<PushTokenViewModel>()
+    val chatBadgeViewModel = hiltViewModel<ChatBadgeViewModel>()
+    val hasUnreadMessages by chatBadgeViewModel.hasUnreadChats.collectAsStateWithLifecycle()
 
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -39,6 +43,7 @@ fun MotorMatesApp(modifier: Modifier = Modifier) {
         ScreenRoute.Explore.route,
         ScreenRoute.Post.route,
         ScreenRoute.Alerts.route,
+        ScreenRoute.ChatList.route,
         ScreenRoute.Profile.route
     )
     val isNewReview = currentRoute == ScreenRoute.NewReview.route
@@ -53,8 +58,9 @@ fun MotorMatesApp(modifier: Modifier = Modifier) {
                     onFeedClick = { navController.navigateToBottomTab(ScreenRoute.Feed.route) },
                     onExploreClick = { navController.navigateToBottomTab(ScreenRoute.Explore.route) },
                     onPublishClick = { navController.navigateToBottomTab(ScreenRoute.Post.route) },
-                    onAlertsClick = { navController.navigateToBottomTab(ScreenRoute.Alerts.route) },
-                    onProfileClick = { navController.navigateToBottomTab(ScreenRoute.Profile.route) }
+                    onMessagesClick = { navController.navigateToBottomTab(ScreenRoute.ChatList.route) },
+                    onProfileClick = { navController.navigateToBottomTab(ScreenRoute.Profile.route) },
+                    hasUnreadMessages = hasUnreadMessages
                 )
             }
         }
@@ -76,7 +82,7 @@ fun MotorMatesApp(modifier: Modifier = Modifier) {
 private fun String?.toMainBottomDestination(): MainBottomDestination = when (this) {
     ScreenRoute.Feed.route -> MainBottomDestination.FEED
     ScreenRoute.Explore.route -> MainBottomDestination.EXPLORE
-    ScreenRoute.Alerts.route -> MainBottomDestination.ALERTS
+    ScreenRoute.ChatList.route -> MainBottomDestination.MESSAGES
     ScreenRoute.Profile.route -> MainBottomDestination.PROFILE
     else -> MainBottomDestination.FEED
 }

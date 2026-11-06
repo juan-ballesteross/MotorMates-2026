@@ -4,7 +4,7 @@
     <!-- Common / shared bottom navigation -->
     <string name="common_bottom_nav_feed">Feed</string>
     <string name="common_bottom_nav_explore">Explorar</string>
-    <string name="common_bottom_nav_alerts">Alertas</string>
+    <string name="common_bottom_nav_messages">Mensajes</string>
     <string name="common_bottom_nav_profile">Perfil</string>
     <string name="common_bottom_nav_publish_cd">Publicar</string>
 
@@ -85,6 +85,15 @@
     <string name="public_profile_following_button">Siguiendo</string>
     <string name="public_profile_message_button">Enviar mensaje</string>
     <string name="public_profile_back_cd">Volver</string>
+
+    <!-- Chat -->
+    <string name="chat_list_title">Mensajes</string>
+    <string name="chat_list_back_cd">Volver</string>
+    <string name="chat_list_empty">No tienes conversaciones todavía. Escríbele a alguien desde su perfil.</string>
+    <string name="chat_list_no_messages">Inicia la conversación</string>
+    <string name="chat_back_cd">Volver</string>
+    <string name="chat_input_placeholder">Escribe un mensaje…</string>
+    <string name="chat_send_cd">Enviar</string>
 
     <!-- Edit profile -->
     <string name="edit_profile_title">Editar perfil</string>
