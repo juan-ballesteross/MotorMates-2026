@@ -128,6 +128,7 @@ fun Notification.toNotificationUi(): NotificationUi {
             if (vehicleName != null) "también dejó una reseña en el $vehicleName" else "también dejó una reseña en un carro que reseñaste"
         NotificationType.FOLLOW -> "empezó a seguirte"
         NotificationType.LIKE_STORY -> "le dio like a tu historia"
+        NotificationType.MESSAGE -> "te envió un mensaje"
         NotificationType.COMMENT, NotificationType.RATING -> ""
     }
 
@@ -147,6 +148,7 @@ fun Notification.toNotificationUi(): NotificationUi {
     return NotificationUi(
         id = id,
         type = type,
+        actorId = actorId,
         actorName = actorName,
         actorAvatarUrl = actorAvatarUrl,
         message = message,

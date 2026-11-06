@@ -1,6 +1,7 @@
 package com.example.motormates.ui.feed.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,7 +24,10 @@ import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 
 @Composable
-fun FeedTopBar(modifier: Modifier = Modifier) {
+fun FeedTopBar(
+    onAlertsClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -41,6 +45,11 @@ fun FeedTopBar(modifier: Modifier = Modifier) {
         )
         Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.feed_search_cd), tint = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.width(16.dp))
-        Icon(Icons.Filled.Notifications, contentDescription = stringResource(R.string.feed_alerts_cd), tint = MaterialTheme.colorScheme.onBackground)
+        Icon(
+            Icons.Filled.Notifications,
+            contentDescription = stringResource(R.string.feed_alerts_cd),
+            tint = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.clickable(onClick = onAlertsClick)
+        )
     }
 }

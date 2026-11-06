@@ -59,4 +59,11 @@ sealed class ScreenRoute(val route: String) {
         const val MODE_FOLLOWING = "following"
         fun createRoute(uid: String, mode: String) = "followList/$uid/$mode"
     }
+
+    object ChatList : ScreenRoute("chatList")
+
+    object Chat : ScreenRoute("chat/{otherUid}") {
+        const val ARG_OTHER_UID = "otherUid"
+        fun createRoute(otherUid: String) = "chat/$otherUid"
+    }
 }

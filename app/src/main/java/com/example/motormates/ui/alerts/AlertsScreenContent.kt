@@ -32,7 +32,7 @@ fun AlertsScreenContent(
     notifications: List<NotificationUi>,
     isLoading: Boolean = false,
     errorMessage: String? = null,
-    onNotificationClick: (String) -> Unit,
+    onNotificationClick: (NotificationUi) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val grouped = notifications.groupBy { it.section }
@@ -94,7 +94,7 @@ fun AlertsScreenContent(
                 items(itemsInSection) { notification ->
                     NotificationItem(
                         notification = notification,
-                        onClick = { onNotificationClick(notification.id) }
+                        onClick = { onNotificationClick(notification) }
                     )
                 }
             }

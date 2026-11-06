@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
@@ -128,6 +129,7 @@ private fun NotificationIcon(type: NotificationType, avatarUrl: String? = null) 
         NotificationType.COMMENT, NotificationType.REVIEW ->
             Icons.AutoMirrored.Filled.Comment to MaterialTheme.colorScheme.onSurfaceVariant
         NotificationType.FOLLOW -> Icons.Filled.Person to MaterialTheme.colorScheme.onSurfaceVariant
+        NotificationType.MESSAGE -> Icons.AutoMirrored.Filled.Chat to MaterialTheme.colorScheme.primary
     }
 
     Box(
