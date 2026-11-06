@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -288,12 +289,17 @@ fun ReviewItem(
         Spacer(modifier = Modifier.height(6.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable { onLikeClick(review.id) }
+            modifier = Modifier
+                .clickable { onLikeClick(review.id) }
+                .testTag("likeButton_${review.id}")
         ) {
             Text(
                 text = "${review.likesCount}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 13.sp
+                fontSize = 13.sp,
+                // El contador es un numero pelado: sin tag no se distingue
+                // del que pinta la barra superior de comentarios.
+                modifier = Modifier.testTag("likesCount_${review.id}")
             )
             Spacer(modifier = Modifier.width(6.dp))
             Icon(

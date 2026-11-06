@@ -19,7 +19,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.example.motormates.e2e.EmulatorTestRunner"
         // Se agrego para que funcione en la tablet
         buildConfigField("boolean", "CONNECT_TO_FIREBASE_EMULATOR", "false")
     }

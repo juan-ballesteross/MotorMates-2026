@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -50,7 +51,8 @@ fun ProfileStatsRow(
             label = stringResource(R.string.user_stat_followers),
             modifier = Modifier
                 .weight(1f)
-                .clickable(onClick = onFollowersClick)
+                .clickable(onClick = onFollowersClick),
+            valueTestTag = "statFollowersValue"
         )
         StatItem(
             value = profile.followingDisplay,
@@ -63,9 +65,20 @@ fun ProfileStatsRow(
 }
 
 @Composable
-private fun StatItem(value: String, label: String, modifier: Modifier = Modifier) {
+private fun StatItem(
+    value: String,
+    label: String,
+    modifier: Modifier = Modifier,
+    valueTestTag: String? = null
+) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = value, color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = value,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = if (valueTestTag != null) Modifier.testTag(valueTestTag) else Modifier
+        )
         Text(text = label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
     }
 }

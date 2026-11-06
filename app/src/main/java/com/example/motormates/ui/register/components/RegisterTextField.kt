@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -33,7 +34,10 @@ fun RegisterTextField(
     modifier: Modifier = Modifier,
     isPassword: Boolean = false,
     isError: Boolean = false,
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    // El tag va en el OutlinedTextField y no en el Column: performTextInput
+    // de las pruebas E2E necesita el nodo editable, no el contenedor.
+    testTag: String? = null
 ) {
     Column(modifier = modifier) {
         Text(text = label, color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontWeight = FontWeight.Medium)
@@ -57,7 +61,9 @@ fun RegisterTextField(
                 errorBorderColor = MaterialTheme.colorScheme.primary,
                 cursorColor = MaterialTheme.colorScheme.primary
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (testTag != null) Modifier.testTag(testTag) else Modifier)
         )
     }
 }

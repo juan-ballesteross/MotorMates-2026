@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -55,6 +56,7 @@ fun RegisterScreenContent(
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
+            .testTag("registerScreen")
     ) {
         Spacer(modifier = Modifier.height(4.dp))
         RegisterTopBar(onBackClick = onBackClick)
@@ -78,7 +80,8 @@ fun RegisterScreenContent(
             label = stringResource(R.string.register_fullname_label),
             value = fullName,
             onValueChange = onFullNameChange,
-            placeholder = stringResource(R.string.register_fullname_placeholder)
+            placeholder = stringResource(R.string.register_fullname_placeholder),
+            testTag = "registerFullName"
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -87,7 +90,8 @@ fun RegisterScreenContent(
             value = email,
             onValueChange = onEmailChange,
             placeholder = stringResource(R.string.register_email_placeholder),
-            keyboardType = KeyboardType.Email
+            keyboardType = KeyboardType.Email,
+            testTag = "registerEmail"
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -96,7 +100,8 @@ fun RegisterScreenContent(
             value = password,
             onValueChange = onPasswordChange,
             placeholder = stringResource(R.string.register_password_placeholder),
-            isPassword = true
+            isPassword = true,
+            testTag = "registerPassword"
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -106,7 +111,8 @@ fun RegisterScreenContent(
             onValueChange = onConfirmPasswordChange,
             placeholder = stringResource(R.string.register_password_placeholder),
             isPassword = true,
-            isError = !passwordsMatch
+            isError = !passwordsMatch,
+            testTag = "registerConfirmPassword"
         )
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -121,7 +127,9 @@ fun RegisterScreenContent(
                 text = errorMessage,
                 color = MaterialTheme.colorScheme.error,
                 fontSize = 13.sp,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("registerError")
             )
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -136,6 +144,7 @@ fun RegisterScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
+                .testTag("registerSubmit")
         ) {
             Text(
                 text = if (isLoading) {

@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
@@ -56,7 +57,8 @@ fun PublicProfileScreenContent(
         columns = GridCells.Fixed(2),
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .testTag("publicProfileScreen"),
         contentPadding = PaddingValues(horizontal = Spacing.gutter, vertical = Spacing.sm),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalArrangement = Arrangement.spacedBy(Spacing.md)

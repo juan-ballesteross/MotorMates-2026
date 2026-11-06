@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -54,6 +55,7 @@ fun LoginScreenContent(
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
+            .testTag("loginScreen")
     ) {
         Spacer(modifier = Modifier.height(56.dp))
 
@@ -80,7 +82,8 @@ fun LoginScreenContent(
             onValueChange = onEmailChange,
             placeholder = stringResource(R.string.login_email_placeholder),
             leadingIcon = Icons.Filled.Email,
-            keyboardType = KeyboardType.Email
+            keyboardType = KeyboardType.Email,
+            testTag = "loginEmail"
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -92,7 +95,8 @@ fun LoginScreenContent(
             leadingIcon = Icons.Filled.Lock,
             isPassword = true,
             passwordVisible = passwordVisible,
-            onTogglePasswordVisibility = onTogglePasswordVisibility
+            onTogglePasswordVisibility = onTogglePasswordVisibility,
+            testTag = "loginPassword"
         )
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -129,6 +133,7 @@ fun LoginScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
+                .testTag("loginSubmit")
         ) {
             Text(
                 text = if (isLoading) {

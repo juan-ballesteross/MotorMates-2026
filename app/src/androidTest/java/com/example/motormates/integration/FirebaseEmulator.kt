@@ -26,7 +26,8 @@ object FirebaseEmulator {
     private const val FIRESTORE_PORT = 8080
     private const val AUTH_PORT = 9099
     private const val DATABASE_ID = "motormatesdb"
-    private const val PASSWORD = "secreto123"
+    /** Publica: las pruebas E2E inician sesion por la UI con esta misma clave. */
+    const val PASSWORD = "secreto123"
     private const val ACCESS_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
 
     private val app: FirebaseApp by lazy {
@@ -72,20 +73,44 @@ object FirebaseEmulator {
      * siembra por REST con el token "owner", que en el emulador se salta
      * las reglas.
      */
-    suspend fun seedVehicle(id: String, brand: String, model: String, year: Int = 2024) {
-        val body = """
-            {"fields": {
-              "brand": {"stringValue": "$brand"},
-              "model": {"stringValue": "$model"},
-              "year": {"integerValue": "$year"}
-            }}
-        """.trimIndent()
+    suspend fun seedVehicle(
+        id: String,
+        brand: String,
+        model: String,
+        year: Int = 2024,
+        category: String? = null,
+        imageUrl: String? = null,
+        potencia: String? = null,
+        aceleracion: String? = null,
+        velocidadMaxima: String? = null,
+        traccion: String? = null
+    ) {
+        // Solo se manda lo que tiene valor; lo que falte lo rellena
+        // VehicleFirestoreDto con su valor por defecto al deserializar.
+        val fields = buildList {
+            add("brand" to stringValue(brand))
+            add("model" to stringValue(model))
+            add("year" to """{"integerValue": "$year"}""")
+            category?.let { add("category" to stringValue(it)) }
+            imageUrl?.let { add("imageUrl" to stringValue(it)) }
+            potencia?.let { add("potencia" to stringValue(it)) }
+            aceleracion?.let { add("aceleracion" to stringValue(it)) }
+            velocidadMaxima?.let { add("velocidadMaxima" to stringValue(it)) }
+            traccion?.let { add("traccion" to stringValue(it)) }
+        }
+        val body = fields.joinToString(
+            separator = ",",
+            prefix = """{"fields": {""",
+            postfix = "}}"
+        ) { (name, value) -> """"$name": $value""" }
         request(
             "POST",
             "http://$HOST:$FIRESTORE_PORT/v1/projects/$projectId/databases/$DATABASE_ID/documents/vehicles?documentId=$id",
             body
         )
     }
+
+    private fun stringValue(value: String) = """{"stringValue": "$value"}"""
 
     private suspend fun request(method: String, url: String, body: String? = null) = withContext(Dispatchers.IO) {
         val connection = URL(url).openConnection() as HttpURLConnection

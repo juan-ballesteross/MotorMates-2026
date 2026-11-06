@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import com.example.motormates.data.model.FeedReviewUi
 import com.example.motormates.data.model.FeedTab
@@ -54,7 +55,8 @@ fun FeedScreenContent(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground),
+            .background(MotorMatesBackground)
+            .testTag("feedScreen"),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
         contentPadding = PaddingValues(top = Spacing.xxs, bottom = Spacing.gutter)
     ) {

@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -128,7 +129,8 @@ fun PublicProfileHeader(
             if (isFollowing) {
                 OutlinedButton(
                     onClick = onFollowClick,
-                    shape = RoundedCornerShape(Radius.sm)
+                    shape = RoundedCornerShape(Radius.sm),
+                    modifier = Modifier.testTag("followButton")
                 ) {
                     Text(
                         text = stringResource(R.string.public_profile_following_button),
@@ -140,7 +142,8 @@ fun PublicProfileHeader(
                 Button(
                     onClick = onFollowClick,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(Radius.sm)
+                    shape = RoundedCornerShape(Radius.sm),
+                    modifier = Modifier.testTag("followButton")
                 ) {
                     Text(
                         text = stringResource(R.string.public_profile_follow_button),

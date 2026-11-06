@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.example.motormates.data.model.FeedTab
 import com.example.motormates.ui.theme.Spacing
 
@@ -34,7 +35,8 @@ fun FeedTabsRow(
             FilterChip(
                 selected = tab == selectedTab,
                 onClick = { onTabClick(tab) },
-                label = { Text(text = tab.label) }
+                label = { Text(text = tab.label) },
+                modifier = Modifier.testTag("feedTab_${tab.name.lowercase()}")
             )
         }
     }
