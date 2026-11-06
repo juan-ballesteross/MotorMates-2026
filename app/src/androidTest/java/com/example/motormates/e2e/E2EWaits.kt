@@ -13,13 +13,24 @@ import androidx.compose.ui.test.onAllNodesWithText
  * antes de que llegue la respuesta (la condición de carrera que describe la
  * guía en §9). El timeout por defecto de waitUntil es de 1 segundo, muy poco
  * para una ida y vuelta al emulador: aquí se usan 15 s.
+ *
+ * Sobre useUnmergedTree: Modifier.clickable fusiona la semántica de sus
+ * hijos (mergeDescendants), así que un testTag puesto DENTRO de algo
+ * clicable —el contador de likes dentro de su fila, el número de seguidores
+ * dentro del StatItem— no existe en el árbol fusionado, que es el que
+ * consultan los matchers por defecto. Para esos hay que pedir el árbol sin
+ * fusionar.
  */
 const val E2E_TIMEOUT_MS = 15_000L
 
 /** Espera a que exista un nodo con ese testTag. */
-fun ComposeTestRule.waitForTag(tag: String, timeoutMillis: Long = E2E_TIMEOUT_MS) {
+fun ComposeTestRule.waitForTag(
+    tag: String,
+    useUnmergedTree: Boolean = false,
+    timeoutMillis: Long = E2E_TIMEOUT_MS
+) {
     waitUntil(timeoutMillis) {
-        onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
+        onAllNodesWithTag(tag, useUnmergedTree).fetchSemanticsNodes().isNotEmpty()
     }
 }
 
@@ -43,10 +54,11 @@ fun ComposeTestRule.waitForText(
 fun ComposeTestRule.waitForTagText(
     tag: String,
     text: String,
+    useUnmergedTree: Boolean = false,
     timeoutMillis: Long = E2E_TIMEOUT_MS
 ) {
     waitUntil(timeoutMillis) {
-        onAllNodesWithTag(tag).fetchSemanticsNodes().any { node ->
+        onAllNodesWithTag(tag, useUnmergedTree).fetchSemanticsNodes().any { node ->
             node.config.getOrNull(SemanticsProperties.Text)
                 ?.any { it.text == text } == true
         }

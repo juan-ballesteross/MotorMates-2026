@@ -1,9 +1,9 @@
 package com.example.motormates.e2e
 
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -102,11 +102,12 @@ class RegisterAndLikeReviewE2E {
 
         // --- Sección de reseñas: like al primer comentario ---
         abrirSeccionDeResenias()
-        composeRule.onNodeWithTag(contadorDeLikes).assertTextEquals("0")
+        composeRule.onNodeWithTag(contadorDeLikes, useUnmergedTree = true)
+            .assertTextEquals("0")
 
         composeRule.onNodeWithTag(botonDeLike).performClick()
-        composeRule.waitForTagText(contadorDeLikes, "1")
-        composeRule.onNodeWithContentDescription("Quitar like").assertIsDisplayed()
+        composeRule.waitForTagText(contadorDeLikes, "1", useUnmergedTree = true)
+        composeRule.onNodeWithTag(botonDeLike).assertContentDescriptionEquals("Quitar like")
 
         // --- Va atrás, vuelve a entrar y quita el like ---
         Espresso.pressBack() // de la lista de reseñas al detalle
@@ -115,11 +116,11 @@ class RegisterAndLikeReviewE2E {
 
         abrirPublicacion()
         abrirSeccionDeResenias()
-        composeRule.waitForTagText(contadorDeLikes, "1")
+        composeRule.waitForTagText(contadorDeLikes, "1", useUnmergedTree = true)
 
         composeRule.onNodeWithTag(botonDeLike).performClick()
-        composeRule.waitForTagText(contadorDeLikes, "0")
-        composeRule.onNodeWithContentDescription("Dar like").assertIsDisplayed()
+        composeRule.waitForTagText(contadorDeLikes, "0", useUnmergedTree = true)
+        composeRule.onNodeWithTag(botonDeLike).assertContentDescriptionEquals("Dar like")
     }
 
     private val botonDeLike = "likeButton_${E2ESeed.FIRST_REVIEW_ID}"
@@ -149,6 +150,6 @@ class RegisterAndLikeReviewE2E {
     private fun abrirSeccionDeResenias() {
         composeRule.waitForText("Ver todas")
         composeRule.onNodeWithText("Ver todas").performClick()
-        composeRule.waitForTag(contadorDeLikes)
+        composeRule.waitForTag(contadorDeLikes, useUnmergedTree = true)
     }
 }

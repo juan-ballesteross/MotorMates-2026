@@ -85,11 +85,11 @@ class FollowAndFollowingFeedE2E {
         composeRule.onNodeWithText("@${E2ESeed.AUTHOR_USERNAME} · ${E2ESeed.AUTHOR_LOCATION}")
             .assertIsDisplayed()
         composeRule.onNodeWithText(E2ESeed.AUTHOR_BIO).assertIsDisplayed()
-        composeRule.waitForTagText("statFollowersValue", "0")
+        composeRule.waitForTagText("statFollowersValue", "0", useUnmergedTree = true)
 
         // --- Follow: el botón es optimista, el contador llega del listener ---
         composeRule.onNodeWithTag("followButton").performClick()
-        composeRule.waitForTagText("statFollowersValue", "1")
+        composeRule.waitForTagText("statFollowersValue", "1", useUnmergedTree = true)
         composeRule.onNodeWithTag("followButton").assertTextEquals("Siguiendo")
 
         // --- De vuelta al home, pestaña "Siguiendo" ---
