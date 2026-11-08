@@ -2,6 +2,7 @@ package com.example.motormates
 
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,7 +20,6 @@ import com.example.motormates.ui.chat.ChatBadgeViewModel
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
 import com.example.motormates.ui.notifications.PushTokenViewModel
-import com.example.motormates.ui.theme.MotorMatesBackground
 
 /**
  * Contenedor raíz de la app: dueño del Scaffold único (bottom bar + fondo),
@@ -50,7 +50,7 @@ fun MotorMatesApp(modifier: Modifier = Modifier) {
 
     Scaffold(
         modifier = modifier,
-        containerColor = if (isNewReview) Color.Black else MotorMatesBackground,
+        containerColor = if (isNewReview) Color.Black else MaterialTheme.colorScheme.background,
         bottomBar = {
             if (showBottomBar) {
                 MainBottomNavBar(

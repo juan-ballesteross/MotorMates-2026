@@ -1,5 +1,6 @@
 package com.example.motormates.ui.review.components
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,16 +19,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -247,7 +252,6 @@ fun ReviewAspectChips(
  */
 @Composable
 fun ReviewAddPhotoButton(
-    photoCount: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -263,15 +267,105 @@ fun ReviewAddPhotoButton(
             ),
         contentAlignment = Alignment.Center
     ) {
-        if (photoCount > 0) {
-            Text(
-                text = "$photoCount",
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+        Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = stringResource(R.string.review_add_photo_cd),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun ReviewPhotoThumbnail(
+    model: Any?,
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.size(64.dp)) {
+        AsyncImage(
+            model = model,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(14.dp))
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.background)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = onRemove
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = stringResource(R.string.review_remove_photo_cd),
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(14.dp)
             )
         }
     }
+}
+
+@Composable
+fun ReviewPhotosRow(
+    existingImageUrls: List<String>,
+    newPhotoUris: List<Uri>,
+    onAddClick: () -> Unit,
+    onRemoveExisting: (String) -> Unit,
+    onRemoveNew: (Uri) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        existingImageUrls.forEach { url ->
+            ReviewPhotoThumbnail(model = url, onRemove = { onRemoveExisting(url) })
+        }
+        newPhotoUris.forEach { uri ->
+            ReviewPhotoThumbnail(model = uri, onRemove = { onRemoveNew(uri) })
+        }
+        if (existingImageUrls.size + newPhotoUris.size < 3) {
+            ReviewAddPhotoButton(onClick = onAddClick)
+        }
+    }
+}
+
+@Composable
+fun PhotoSourceDialog(
+    onDismiss: () -> Unit,
+    onCameraClick: () -> Unit,
+    onGalleryClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = modifier,
+        title = { Text(text = stringResource(R.string.review_photo_source_title)) },
+        text = {
+            Column {
+                TextButton(onClick = onCameraClick, modifier = Modifier.fillMaxWidth()) {
+                    Text(text = stringResource(R.string.review_photo_source_camera))
+                }
+                TextButton(onClick = onGalleryClick, modifier = Modifier.fillMaxWidth()) {
+                    Text(text = stringResource(R.string.review_photo_source_gallery))
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.review_photo_source_cancel))
+            }
+        }
+    )
 }
 
 @Composable

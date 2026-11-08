@@ -31,6 +31,7 @@ service cloud.firestore {
     // Catálogo de vehículos: solo lectura desde la app.
     match /vehicles/{vehicleId} {
       allow read: if signedIn();
+      allow update: if signedIn() && onlyChanges(['ownerId', 'owner']);
     }
 
     match /users/{userId} {

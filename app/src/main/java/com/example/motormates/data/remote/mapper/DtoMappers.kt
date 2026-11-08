@@ -26,7 +26,10 @@ internal fun VehicleDto.mapToDomain(): Vehicle = Vehicle(
     potencia = potencia,
     aceleracion = aceleracion,
     velocidadMaxima = velocidadMaxima,
-    traccion = traccion
+    traccion = traccion,
+    ownerId = ownerId,
+    ownerName = ownerName,
+    ownerAvatarUrl = ownerAvatarUrl
 )
 
 fun ReviewUserDto.toDomain(): ReviewAuthor =

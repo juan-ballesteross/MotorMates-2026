@@ -1,5 +1,6 @@
 package com.example.motormates.data.remote.datasource
 
+import android.net.Uri
 import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.model.NewReview
 import com.example.motormates.data.remote.dto.CreateReviewRequest
@@ -36,7 +37,13 @@ class ReviewRetrofitDataSource @Inject constructor(
             )
         )
 
-    override suspend fun updateReview(id: String, rating: Int?, comment: String?): ReviewDtoGeneric =
+    override suspend fun updateReview(
+        id: String,
+        rating: Int?,
+        comment: String?,
+        keepImageUrls: List<String>,
+        newImageUris: List<Uri>
+    ): ReviewDtoGeneric =
         service.updateReview(id, UpdateReviewRequest(rating = rating, comment = comment))
 
     override suspend fun deleteReview(id: String) = service.deleteReview(id)

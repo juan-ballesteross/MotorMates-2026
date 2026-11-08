@@ -1,5 +1,7 @@
 package com.example.motormates.data.model
 
+import android.net.Uri
+
 /**
  * Modelo de dominio de una reseña. Los ids son String porque en Firestore
  * el id de un documento es un texto (y el userId es el uid de Firebase Auth).
@@ -15,7 +17,8 @@ data class Review(
     val createdAt: String?,
     val likesCount: Int = 0,
     val author: ReviewAuthor?,
-    val vehicle: ReviewVehicleRef?
+    val vehicle: ReviewVehicleRef?,
+    val imageUrls: List<String> = emptyList()
 )
 
 data class ReviewAuthor(val id: String, val fullName: String, val avatarUrl: String? = null)
@@ -35,5 +38,6 @@ data class NewReview(
     val authorName: String,
     val authorAvatarUrl: String?,
     val vehicleBrand: String,
-    val vehicleModel: String
+    val vehicleModel: String,
+    val imageUris: List<Uri> = emptyList()
 )

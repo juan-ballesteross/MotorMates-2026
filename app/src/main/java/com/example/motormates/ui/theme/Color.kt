@@ -3,7 +3,7 @@ package com.example.motormates.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // ===== Colores de marca (se mantienen, se siguen usando en varias pantallas) =====
-val MotorMatesBackground = Color(0xFF121212)
+val MotorMatesBackground = Color(0xFF0A0A0A)
 val MotorMatesSurface = Color(0xFF1E1E1E)
 val MotorMatesRed = Color(0xFFB3282D)
 val MotorMatesRedLight = Color(0xFFE05257)
@@ -69,7 +69,7 @@ val md3_light_onErrorContainer = Color(0xFF410002)
 val md3_light_background = Color(0xFFFFF8F7)
 val md3_light_onBackground = Color(0xFF231918)
 
-val md3_light_surface = Color(0xFFFFF8F7)
+val md3_light_surface = Color(0xFFF6E8E6)
 val md3_light_onSurface = Color(0xFF231918)
 val md3_light_surfaceVariant = Color(0xFFF5DDDA)
 val md3_light_onSurfaceVariant = Color(0xFF534342)

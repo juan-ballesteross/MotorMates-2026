@@ -1,5 +1,6 @@
 package com.example.motormates.ui.review
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.model.ReviewAspect
@@ -61,6 +62,7 @@ class NewReviewViewModel @Inject constructor(
                     reviewId = existing?.id,
                     rating = existing?.rating ?: 0,
                     experience = existing?.comment.orEmpty(),
+                    existingImageUrls = existing?.imageUrls.orEmpty(),
                     errorMessage = if (isEditing && existing == null) {
                         "No se encontró la reseña que querías editar"
                     } else {
@@ -90,10 +92,19 @@ class NewReviewViewModel @Inject constructor(
         }
     }
 
-    fun addPhotoButtonPress() {
+    fun addPhoto(uri: Uri) {
         _uiState.update { current ->
-            if (current.photoCount < 3) current.copy(photoCount = current.photoCount + 1) else current
+            val totalPhotos = current.existingImageUrls.size + current.newPhotoUris.size
+            if (totalPhotos < 3) current.copy(newPhotoUris = current.newPhotoUris + uri) else current
         }
+    }
+
+    fun removeNewPhoto(uri: Uri) {
+        _uiState.update { it.copy(newPhotoUris = it.newPhotoUris - uri) }
+    }
+
+    fun removeExistingPhoto(url: String) {
+        _uiState.update { it.copy(existingImageUrls = it.existingImageUrls - url) }
     }
 
     /**
@@ -118,7 +129,13 @@ class NewReviewViewModel @Inject constructor(
                 // mandara null, Gson omitiría el campo y el backend (que solo
                 // toca los campos presentes) dejaría el comentario anterior,
                 // así que no habría forma de borrarlo.
-                reviewRepository.updateReview(reviewId, current.rating, trimmed)
+                reviewRepository.updateReview(
+                    reviewId = reviewId,
+                    rating = current.rating,
+                    comment = trimmed,
+                    keepImageUrls = current.existingImageUrls,
+                    newImageUris = current.newPhotoUris
+                )
             } ?: reviewRepository.createReview(
                 // El autor lo pone el repositorio: es el usuario autenticado.
                 // El repositorio también avisa a quienes ya reseñaron el carro.
@@ -126,7 +143,8 @@ class NewReviewViewModel @Inject constructor(
                 rating = current.rating,
                 // Al crear sí conviene null: deja la columna nula en vez de
                 // guardar una cadena vacía.
-                comment = trimmed.ifBlank { null }
+                comment = trimmed.ifBlank { null },
+                imageUris = current.newPhotoUris
             )
 
             _uiState.update { state ->
