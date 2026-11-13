@@ -33,7 +33,10 @@ class ReviewRetrofitDataSource @Inject constructor(
                 userId = review.userId,
                 vehicleId = review.vehicleId,
                 rating = review.rating,
-                comment = review.comment
+                comment = review.comment,
+                lat = review.location?.lat,
+                lng = review.location?.lng,
+                placeName = review.location?.placeName
             )
         )
 

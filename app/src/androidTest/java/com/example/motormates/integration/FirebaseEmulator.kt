@@ -5,6 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +52,14 @@ object FirebaseEmulator {
     val auth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance(app).apply { useEmulator(HOST, AUTH_PORT) }
     }
+
+    /**
+     * Va sin useEmulator a propósito: no hay emulador de Storage en
+     * firebase.json y estas pruebas publican reseñas sin fotos, así que
+     * FirestoreReviewDataSource nunca llega a subir nada. Existe solo para
+     * poder construir el data source, que lo pide en el constructor.
+     */
+    val storage: FirebaseStorage by lazy { FirebaseStorage.getInstance(app) }
 
     /** Borra todos los documentos de motormatesdb en el emulador. */
     suspend fun clearFirestore() =

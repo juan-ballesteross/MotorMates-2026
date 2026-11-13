@@ -3,12 +3,16 @@ package com.example.motormates.ui.review
 import com.example.motormates.MainDispatcherRule
 import com.example.motormates.data.model.Review
 import com.example.motormates.data.model.Vehicle
+import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.VehicleRepository
+import com.example.motormates.data.source.DeviceLocationDataSource
+import com.example.motormates.data.source.PlaceNameDataSource
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -29,7 +33,11 @@ class NewReviewViewModelTest {
 
     private lateinit var vehicleRepository: VehicleRepository
     private lateinit var reviewRepository: ReviewRepository
+    private lateinit var deviceLocationDataSource: DeviceLocationDataSource
+    private lateinit var placeNameDataSource: PlaceNameDataSource
     private lateinit var viewModel: NewReviewViewModel
+
+    private val bogota = ReviewLocation(lat = 4.6280, lng = -74.0643)
 
     private val porsche = Vehicle(
         id = "1", brand = "Porsche", model = "911 GT3", year = 2024, category = "Deportivo",
@@ -40,7 +48,18 @@ class NewReviewViewModelTest {
     fun setUp() {
         vehicleRepository = mockk()
         reviewRepository = mockk()
-        viewModel = NewReviewViewModel(vehicleRepository, reviewRepository)
+        deviceLocationDataSource = mockk()
+        placeNameDataSource = mockk()
+        // Por defecto, sin ubicación: es el caso más común (el usuario no dio
+        // el permiso o el dispositivo no tiene posición todavía).
+        coEvery { deviceLocationDataSource.lastKnownLocation() } returns null
+        coEvery { placeNameDataSource.placeNameFor(any()) } returns null
+        viewModel = NewReviewViewModel(
+            vehicleRepository,
+            reviewRepository,
+            deviceLocationDataSource,
+            placeNameDataSource
+        )
     }
 
     // ---------- start ----------
@@ -128,19 +147,19 @@ class NewReviewViewModelTest {
         assertThat(viewModel.uiState.value.errorMessage)
             .isEqualTo("Selecciona una calificación de 1 a 5 estrellas")
         assertThat(viewModel.uiState.value.isSaved).isFalse()
-        coVerify(exactly = 0) { reviewRepository.createReview(any(), any(), any()) }
+        coVerify(exactly = 0) { reviewRepository.createReview(any(), any(), any(), any()) }
     }
 
     @Test
     fun `save al crear con comentario en blanco envia null y marca guardado`() = runTest {
-        coEvery { reviewRepository.createReview("1", 4, null) } returns Result.success(review(id = "nueva", rating = 4))
+        coEvery { reviewRepository.createReview("1", 4, null, null) } returns Result.success(review(id = "nueva", rating = 4))
         viewModel.updateRating(4)
         viewModel.updateExperience("   ")
 
         viewModel.save(vehicleId = "1")
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { reviewRepository.createReview("1", 4, null) }
+        coVerify(exactly = 1) { reviewRepository.createReview("1", 4, null, null) }
         assertThat(viewModel.uiState.value.isSaved).isTrue()
         assertThat(viewModel.uiState.value.isSaving).isFalse()
     }
@@ -161,13 +180,132 @@ class NewReviewViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { reviewRepository.updateReview("r1", 5, "Mejoró mucho") }
-        coVerify(exactly = 0) { reviewRepository.createReview(any(), any(), any()) }
+        coVerify(exactly = 0) { reviewRepository.createReview(any(), any(), any(), any()) }
         assertThat(viewModel.uiState.value.isSaved).isTrue()
+    }
+
+    // ---------- ubicación ----------
+
+    @Test
+    fun `captureLocation deja la ubicacion con su nombre en el estado`() = runTest {
+        coEvery { deviceLocationDataSource.lastKnownLocation() } returns bogota
+        coEvery { placeNameDataSource.placeNameFor(bogota) } returns "Chapinero, Bogotá"
+
+        viewModel.captureLocation()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertThat(state.capturedLocation?.lat).isEqualTo(bogota.lat)
+        assertThat(state.capturedLocation?.placeName).isEqualTo("Chapinero, Bogotá")
+        assertThat(state.isLocationLoading).isFalse()
+        assertThat(state.isLocationUnavailable).isFalse()
+    }
+
+    /**
+     * El nombre es un adorno: si el geocodificador no responde, la ubicación
+     * sigue guardándose y la reseña sale en el mapa, solo sin texto.
+     */
+    @Test
+    fun `captureLocation sin nombre guarda igual la ubicacion`() = runTest {
+        coEvery { deviceLocationDataSource.lastKnownLocation() } returns bogota
+        coEvery { placeNameDataSource.placeNameFor(bogota) } returns null
+
+        viewModel.captureLocation()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertThat(state.capturedLocation).isNotNull()
+        assertThat(state.capturedLocation?.placeName).isNull()
+        assertThat(state.isLocationUnavailable).isFalse()
+    }
+
+    @Test
+    fun `captureLocation sin ubicacion marca que no esta disponible`() = runTest {
+        coEvery { deviceLocationDataSource.lastKnownLocation() } returns null
+
+        viewModel.captureLocation()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertThat(state.capturedLocation).isNull()
+        assertThat(state.isLocationUnavailable).isTrue()
+        assertThat(state.isLocationLoading).isFalse()
+        // No se pide el nombre de algo que no existe.
+        coVerify(exactly = 0) { placeNameDataSource.placeNameFor(any()) }
+    }
+
+    @Test
+    fun `removeLocation descarta la ubicacion capturada`() = runTest {
+        coEvery { deviceLocationDataSource.lastKnownLocation() } returns bogota
+        coEvery { placeNameDataSource.placeNameFor(bogota) } returns "Chapinero, Bogotá"
+        viewModel.captureLocation()
+        advanceUntilIdle()
+
+        viewModel.removeLocation()
+
+        val state = viewModel.uiState.value
+        assertThat(state.capturedLocation).isNull()
+        // Quitarla a propósito no es lo mismo que no haberla conseguido.
+        assertThat(state.isLocationUnavailable).isFalse()
+    }
+
+    @Test
+    fun `save manda la ubicacion que ya se habia capturado`() = runTest {
+        val enviada = slot<ReviewLocation>()
+        coEvery { deviceLocationDataSource.lastKnownLocation() } returns bogota
+        coEvery { placeNameDataSource.placeNameFor(bogota) } returns "Chapinero, Bogotá"
+        coEvery { reviewRepository.createReview("1", 5, null, capture(enviada)) } returns
+            Result.success(review(id = "nueva", rating = 5))
+        viewModel.captureLocation()
+        advanceUntilIdle()
+        viewModel.updateRating(5)
+
+        viewModel.save(vehicleId = "1")
+        advanceUntilIdle()
+
+        assertThat(enviada.captured.placeName).isEqualTo("Chapinero, Bogotá")
+        assertThat(viewModel.uiState.value.isSaved).isTrue()
+    }
+
+    /**
+     * El acuerdo con el cliente: si no hay ubicación (permiso negado, sin GPS)
+     * o el usuario la quitó, la reseña se publica igual y solo no aparece en
+     * el mapa.
+     */
+    @Test
+    fun `save sin ubicacion publica la resenia igual`() = runTest {
+        coEvery { reviewRepository.createReview("1", 5, null, null) } returns
+            Result.success(review(id = "nueva", rating = 5))
+        viewModel.updateRating(5)
+
+        viewModel.save(vehicleId = "1")
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { reviewRepository.createReview("1", 5, null, null) }
+        assertThat(viewModel.uiState.value.isSaved).isTrue()
+        assertThat(viewModel.uiState.value.errorMessage).isNull()
+    }
+
+    /**
+     * Publicar no espera al GPS: la ubicación ya venía resuelta en el estado.
+     * Esto es lo que permitió quitar el bloqueo del botón mientras se pedía
+     * el permiso (antes dos toques seguidos publicaban dos veces).
+     */
+    @Test
+    fun `save no consulta la ubicacion al dispositivo`() = runTest {
+        coEvery { reviewRepository.createReview(any(), any(), any(), any()) } returns
+            Result.success(review(id = "nueva", rating = 5))
+        viewModel.updateRating(5)
+
+        viewModel.save(vehicleId = "1")
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { deviceLocationDataSource.lastKnownLocation() }
     }
 
     @Test
     fun `save si el repositorio falla muestra su mensaje y no marca guardado`() = runTest {
-        coEvery { reviewRepository.createReview(any(), any(), any()) } returns
+        coEvery { reviewRepository.createReview(any(), any(), any(), any()) } returns
             Result.failure(Exception("No se pudo publicar la reseña"))
         viewModel.updateRating(5)
 

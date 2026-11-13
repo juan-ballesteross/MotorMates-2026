@@ -1,5 +1,6 @@
 package com.example.motormates.data.repository
 
+import android.net.Uri
 import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.dto.ReviewFirestoreDto
 import com.example.motormates.data.dto.ReviewUserSnapshot
@@ -9,6 +10,7 @@ import com.example.motormates.data.dto.VehicleDtoGeneric
 import com.example.motormates.data.dto.VehicleFirestoreDto
 import com.example.motormates.data.model.AuthUser
 import com.example.motormates.data.model.NewReview
+import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.model.toCarDetailUi
 import com.example.motormates.data.model.toReviewUi
 import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
@@ -29,6 +31,7 @@ class ReviewRepositoryImplTest {
 
     private val porsche = VehicleFirestoreDto(id = "1", brand = "Porsche", model = "911 GT3", year = 2024)
     private val jose = AuthUser(id = "uid-jose", email = "jose@example.com", displayName = "Jose Auth")
+    private val bogota = ReviewLocation(lat = 4.6280, lng = -74.0643)
 
     @Test
     fun createReviewGuardaAutorYVehiculoDesnormalizados() = runTest {
@@ -39,7 +42,9 @@ class ReviewRepositoryImplTest {
             users = listOf(UserDto(id = jose.id, fullName = "Jose Perfil", avatarUrl = "https://foto"))
         )
 
-        val created = repository.createReview(vehicleId = "1", rating = 5, comment = "Brutal").getOrThrow()
+        val created = repository
+            .createReview(vehicleId = "1", rating = 5, comment = "Brutal", location = bogota)
+            .getOrThrow()
 
         val saved = reviews.created.single()
         assertEquals("uid-jose", saved.userId)
@@ -49,6 +54,20 @@ class ReviewRepositoryImplTest {
         assertEquals("911 GT3", saved.vehicleModel)
         assertEquals("uid-jose", created.userId)
         assertEquals("Jose Perfil", created.author?.fullName)
+        // La ubicación llega tal cual a la fuente de datos: es lo que luego
+        // permite pintar la reseña en el mapa.
+        assertEquals(bogota, saved.location)
+    }
+
+    @Test
+    fun createReviewSinUbicacionSeGuardaIgual() = runTest {
+        val reviews = FakeReviewDataSource()
+        val repository = repository(reviews = reviews, currentUser = jose)
+
+        val result = repository.createReview(vehicleId = "1", rating = 4, comment = null, location = null)
+
+        assertTrue(result.isSuccess)
+        assertNull(reviews.created.single().location)
     }
 
     @Test
@@ -56,7 +75,7 @@ class ReviewRepositoryImplTest {
         val reviews = FakeReviewDataSource()
         val repository = repository(reviews = reviews, currentUser = null)
 
-        val result = repository.createReview(vehicleId = "1", rating = 4, comment = null)
+        val result = repository.createReview(vehicleId = "1", rating = 4, comment = null, location = null)
 
         assertTrue(result.isFailure)
         assertTrue(reviews.created.isEmpty())
@@ -66,7 +85,7 @@ class ReviewRepositoryImplTest {
     fun createReviewEnVehiculoInexistenteDevuelveMensajeEnEspanol() = runTest {
         val repository = repository(reviews = FakeReviewDataSource(), currentUser = jose)
 
-        val result = repository.createReview(vehicleId = "999", rating = 4, comment = null)
+        val result = repository.createReview(vehicleId = "999", rating = 4, comment = null, location = null)
 
         assertEquals("El usuario o el vehículo ya no existe", result.exceptionOrNull()?.message)
     }
@@ -133,6 +152,7 @@ class ReviewRepositoryImplTest {
 private class FakeReviewRealtimeDataSource : ReviewRealtimeDataSource {
     override fun observeReviewsByVehicle(vehicleId: String): Flow<List<ReviewDtoGeneric>> = flowOf(emptyList())
     override fun observeReviewsByUsers(userIds: List<String>): Flow<List<ReviewDtoGeneric>> = flowOf(emptyList())
+    override fun observeRecentReviews(sinceMillis: Long): Flow<List<ReviewDtoGeneric>> = flowOf(emptyList())
 }
 
 /** Guarda los avisos en memoria para poder revisar a quién se notificó. */
@@ -187,8 +207,13 @@ private class FakeReviewDataSource : ReviewRemoteDataSource {
         )
     }
 
-    override suspend fun updateReview(id: String, rating: Int?, comment: String?): ReviewDtoGeneric =
-        throw NoSuchElementException(id)
+    override suspend fun updateReview(
+        id: String,
+        rating: Int?,
+        comment: String?,
+        keepImageUrls: List<String>,
+        newImageUris: List<Uri>
+    ): ReviewDtoGeneric = throw NoSuchElementException(id)
 
     override suspend fun deleteReview(id: String) = Unit
 }

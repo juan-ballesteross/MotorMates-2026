@@ -34,6 +34,21 @@ fun ComposeTestRule.waitForTag(
     }
 }
 
+/**
+ * Espera a que ya NO exista un nodo con ese testTag. La usa el mapa para
+ * esperar a que se vaya el indicador de carga: un assert de "no está vacío"
+ * hecho mientras todavía carga pasaría por la razón equivocada.
+ */
+fun ComposeTestRule.waitForTagToVanish(
+    tag: String,
+    useUnmergedTree: Boolean = false,
+    timeoutMillis: Long = E2E_TIMEOUT_MS
+) {
+    waitUntil(timeoutMillis) {
+        onAllNodesWithTag(tag, useUnmergedTree).fetchSemanticsNodes().isEmpty()
+    }
+}
+
 /** Espera a que ese texto aparezca en pantalla. */
 fun ComposeTestRule.waitForText(
     text: String,

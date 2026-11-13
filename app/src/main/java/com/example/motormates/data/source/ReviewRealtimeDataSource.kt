@@ -20,6 +20,14 @@ import kotlinx.coroutines.flow.flowOf
 interface ReviewRealtimeDataSource {
     fun observeReviewsByVehicle(vehicleId: String): Flow<List<ReviewDtoGeneric>>
     fun observeReviewsByUsers(userIds: List<String>): Flow<List<ReviewDtoGeneric>>
+
+    /**
+     * Todas las reseñas publicadas desde sinceMillis (epoch en millis), sin
+     * importar de quién o de qué vehículo. Es la consulta del mapa: no filtra
+     * por ubicación porque Firestore no sabe preguntar "donde location no sea
+     * null"; las que no la tengan se descartan al mapear a la UI.
+     */
+    fun observeRecentReviews(sinceMillis: Long): Flow<List<ReviewDtoGeneric>>
 }
 
 class FirestoreReviewRealtimeDataSource @Inject constructor(
@@ -52,6 +60,29 @@ class FirestoreReviewRealtimeDataSource @Inject constructor(
     }
 
     /**
+     * La consulta del mapa. Es la única del proyecto que usa orderBy, y sí se
+     * puede: el campo del orden es el mismo del filtro de rango (createdAt),
+     * así que lo resuelve el índice de un solo campo que Firestore crea solo
+     * — no hace falta índice compuesto, que es justo lo que se evita en el
+     * resto de las consultas.
+     *
+     * Y hace falta: Firestore ordena de forma implícita por el campo del
+     * filtro de rango de manera ASCENDENTE, así que sin este orderBy el
+     * limit() se traería las reseñas más VIEJAS de la ventana en vez de las
+     * más recientes.
+     *
+     * Los documentos sin createdAt (o con un tipo distinto) quedan fuera del
+     * filtro de rango, que es exactamente lo que se quiere.
+     */
+    override fun observeRecentReviews(sinceMillis: Long): Flow<List<ReviewFirestoreDto>> =
+        observeQuery(
+            reviews
+                .whereGreaterThanOrEqualTo("createdAt", sinceMillis)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(RECENT_REVIEWS_LIMIT)
+        )
+
+    /**
      * Mismo molde que authState en FirebaseAuthDataSource: el listener se
      * registra al empezar a recolectar y se quita en awaitClose, para que
      * no queden escuchas vivas cuando la pantalla se va.
@@ -74,5 +105,12 @@ class FirestoreReviewRealtimeDataSource @Inject constructor(
 
     private companion object {
         const val WHERE_IN_LIMIT = 30
+
+        /**
+         * Techo de seguridad del mapa: con la ventana de 24 h se esperan
+         * pocas reseñas, pero sin limit un pico de actividad abriría un
+         * listener sobre cientos de documentos.
+         */
+        const val RECENT_REVIEWS_LIMIT = 200L
     }
 }

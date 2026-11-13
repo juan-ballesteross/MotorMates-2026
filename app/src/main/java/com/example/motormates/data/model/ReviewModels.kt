@@ -23,7 +23,9 @@ data class UserReviewUi(
     val vehicleImageUrl: String? = null,
     val rating: Int,
     val comment: String,
-    val timeAgo: String
+    val timeAgo: String,
+    /** Dónde se publicó, ya legible. Null si no tiene ubicación o nombre. */
+    val lugarTexto: String? = null
 )
 
 fun SearchCategoryKey.toSingularLabel(): String = when (this) {

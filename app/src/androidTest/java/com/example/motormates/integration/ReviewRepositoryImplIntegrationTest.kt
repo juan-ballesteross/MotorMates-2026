@@ -2,6 +2,7 @@ package com.example.motormates.integration
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.motormates.data.dto.UserDto
+import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.repository.NotificationRepositoryImpl
 import com.example.motormates.data.repository.ReviewRepositoryImpl
 import com.example.motormates.data.source.FirebaseAuthDataSource
@@ -17,6 +18,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -38,7 +40,7 @@ class ReviewRepositoryImplIntegrationTest {
     private val authDataSource = FirebaseAuthDataSource(FirebaseEmulator.auth)
 
     private val repository = ReviewRepositoryImpl(
-        remoteDataSource = FirestoreReviewDataSource(firestore),
+        remoteDataSource = FirestoreReviewDataSource(firestore, FirebaseEmulator.storage),
         realtimeDataSource = FirestoreReviewRealtimeDataSource(firestore),
         vehicleDataSource = vehicleDataSource,
         userDataSource = userDataSource,
@@ -66,7 +68,7 @@ class ReviewRepositoryImplIntegrationTest {
 
     @Test
     fun createReviewUsaElPerfilDelAutorYElVehiculo() = runTest {
-        val review = repository.createReview(vehicleId = "1", rating = 5, comment = "Brutal").getOrThrow()
+        val review = repository.createReview(vehicleId = "1", rating = 5, comment = "Brutal", location = null).getOrThrow()
 
         assertEquals(uid, review.userId)
         assertEquals("Jose Perfil", review.author?.fullName)
@@ -75,11 +77,34 @@ class ReviewRepositoryImplIntegrationTest {
         assertEquals(listOf(review.id), repository.getReviewsByVehicle("1").getOrThrow().map { it.id })
     }
 
+    /**
+     * La ubicación tiene que sobrevivir la ida y vuelta a Firestore: se
+     * escribe como mapa anidado y se lee de vuelta como ReviewLocation. Si
+     * esto falla, el mapa no tendría marcadores aunque todo lo demás ande.
+     */
+    @Test
+    fun createReviewGuardaYDevuelveLaUbicacion() = runTest {
+        val bogota = ReviewLocation(lat = 4.6280, lng = -74.0643)
+
+        repository.createReview(vehicleId = "1", rating = 5, comment = null, location = bogota).getOrThrow()
+
+        val leida = repository.getReviewsByVehicle("1").getOrThrow().single()
+        assertEquals(bogota, leida.location)
+    }
+
+    /** Sin ubicación la reseña se publica igual, solo que no sale en el mapa. */
+    @Test
+    fun createReviewSinUbicacionSeGuardaConLocationNula() = runTest {
+        repository.createReview(vehicleId = "1", rating = 4, comment = null, location = null).getOrThrow()
+
+        assertNull(repository.getReviewsByVehicle("1").getOrThrow().single().location)
+    }
+
     @Test
     fun createReviewSinSesionFallaYNoEscribe() = runTest {
         FirebaseEmulator.auth.signOut()
 
-        val result = repository.createReview(vehicleId = "1", rating = 4, comment = null)
+        val result = repository.createReview(vehicleId = "1", rating = 4, comment = null, location = null)
 
         assertEquals("Debes iniciar sesión para publicar una reseña", result.exceptionOrNull()?.message)
         FirebaseEmulator.signInAs(JOSE_EMAIL) // las reglas exigen sesión para leer
@@ -88,7 +113,7 @@ class ReviewRepositoryImplIntegrationTest {
 
     @Test
     fun createReviewConCalificacionInvalidaFallaYNoEscribe() = runTest {
-        val result = repository.createReview(vehicleId = "1", rating = 7, comment = null)
+        val result = repository.createReview(vehicleId = "1", rating = 7, comment = null, location = null)
 
         assertEquals(INVALID_RATING, result.exceptionOrNull()?.message)
         assertTrue(repository.getReviewsByVehicle("1").getOrThrow().isEmpty())
@@ -96,14 +121,14 @@ class ReviewRepositoryImplIntegrationTest {
 
     @Test
     fun createReviewEnVehiculoInexistenteDevuelveMensajeEnEspanol() = runTest {
-        val result = repository.createReview(vehicleId = "999", rating = 4, comment = null)
+        val result = repository.createReview(vehicleId = "999", rating = 4, comment = null, location = null)
 
         assertEquals("El usuario o el vehículo ya no existe", result.exceptionOrNull()?.message)
     }
 
     @Test
     fun getReviewsByVehicleMuestraElNombreActualDelAutor() = runTest {
-        repository.createReview(vehicleId = "1", rating = 5, comment = null).getOrThrow()
+        repository.createReview(vehicleId = "1", rating = 5, comment = null, location = null).getOrThrow()
 
         // La reseña guardó "Jose Perfil"; el repositorio debe mostrar el nombre nuevo.
         userDataSource.updateUser(uid, fullName = "Jose Renombrado", username = "jose", location = "", bio = "")
@@ -115,8 +140,8 @@ class ReviewRepositoryImplIntegrationTest {
     @Test
     fun getReviewsByUserDevuelveLasReseniasDelUsuario() = runTest {
         FirebaseEmulator.seedVehicle(id = "2", brand = "Toyota", model = "Land Cruiser")
-        repository.createReview(vehicleId = "1", rating = 5, comment = null).getOrThrow()
-        repository.createReview(vehicleId = "2", rating = 3, comment = null).getOrThrow()
+        repository.createReview(vehicleId = "1", rating = 5, comment = null, location = null).getOrThrow()
+        repository.createReview(vehicleId = "2", rating = 3, comment = null, location = null).getOrThrow()
 
         val reviews = repository.getReviewsByUser(uid).getOrThrow()
 
@@ -126,7 +151,7 @@ class ReviewRepositoryImplIntegrationTest {
 
     @Test
     fun updateReviewDevuelveLaReseniaConLosCambios() = runTest {
-        val created = repository.createReview(vehicleId = "1", rating = 5, comment = "Brutal").getOrThrow()
+        val created = repository.createReview(vehicleId = "1", rating = 5, comment = "Brutal", location = null).getOrThrow()
 
         val updated = repository.updateReview(created.id, rating = 3, comment = "Ya no tanto").getOrThrow()
 
@@ -137,7 +162,7 @@ class ReviewRepositoryImplIntegrationTest {
 
     @Test
     fun deleteReviewLaQuitaDeLaLista() = runTest {
-        val created = repository.createReview(vehicleId = "1", rating = 5, comment = null).getOrThrow()
+        val created = repository.createReview(vehicleId = "1", rating = 5, comment = null, location = null).getOrThrow()
 
         assertTrue(repository.deleteReview(created.id).isSuccess)
 
@@ -148,10 +173,10 @@ class ReviewRepositoryImplIntegrationTest {
     fun createReviewNotificaAQuienYaHabiaReseniadoElVehiculo() = runTest {
         val otroUid = FirebaseEmulator.signInAs(OTRO_EMAIL)
         userDataSource.createUser(UserDto(id = otroUid, fullName = "Otro", email = OTRO_EMAIL, username = "otro"))
-        repository.createReview(vehicleId = "1", rating = 4, comment = null).getOrThrow()
+        repository.createReview(vehicleId = "1", rating = 4, comment = null, location = null).getOrThrow()
 
         FirebaseEmulator.signInAs(JOSE_EMAIL)
-        val nueva = repository.createReview(vehicleId = "1", rating = 5, comment = null).getOrThrow()
+        val nueva = repository.createReview(vehicleId = "1", rating = 5, comment = null, location = null).getOrThrow()
 
         // Solo el dueño puede leer su bandeja.
         FirebaseEmulator.signInAs(OTRO_EMAIL)
@@ -164,7 +189,7 @@ class ReviewRepositoryImplIntegrationTest {
 
     @Test
     fun observeReviewsByVehicleEmiteLaReseniaRecienCreada() = runTest {
-        val created = repository.createReview(vehicleId = "1", rating = 5, comment = null).getOrThrow()
+        val created = repository.createReview(vehicleId = "1", rating = 5, comment = null, location = null).getOrThrow()
 
         // Tope de 10 s reales (Dispatchers.Default): dentro de runTest el tiempo es
         // virtual y withTimeout saltaría antes de que Firestore alcance a emitir.

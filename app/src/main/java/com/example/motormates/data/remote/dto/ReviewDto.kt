@@ -21,7 +21,16 @@ data class ReviewDto(
     @SerializedName("updatedAt") val updatedAt: String?,
     @SerializedName("likesCount") val likesCount: Int = 0,
     @SerializedName("user") val user: ReviewUserDto? = null,
-    @SerializedName("vehicle") val vehicle: ReviewVehicleDto? = null
+    @SerializedName("vehicle") val vehicle: ReviewVehicleDto? = null,
+    /**
+     * Dónde se publicó la reseña. Llegan planas (y no como objeto anidado)
+     * porque en Postgres serían dos columnas. Nulables: el backend propio
+     * todavía no las manda, así que hoy siempre llegan en null.
+     */
+    @SerializedName("lat") val lat: Double? = null,
+    @SerializedName("lng") val lng: Double? = null,
+    /** Nombre legible del sitio, resuelto por la app al publicar. */
+    @SerializedName("placeName") val placeName: String? = null
 ) : ReviewDtoGeneric {
     override fun toDomain(): Review = mapToDomain()
 }

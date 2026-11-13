@@ -20,9 +20,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.motormates.data.model.FeedTab
 import com.example.motormates.ui.feed.components.FeedTabsRow
 import com.example.motormates.ui.feed.components.FeedTopBar
 import com.example.motormates.ui.review.components.PhotoSourceDialog
+import com.example.motormates.ui.reviewsMap.ReviewsMapScreen
 import java.io.File
 
 @Composable
@@ -85,6 +87,18 @@ fun FeedScreen(
             selectedTab = uiState.selectedTab,
             onTabClick = viewModel::updateSelectedTab
         )
+
+        // El mapa se compone acá y no dentro de FeedScreenContent por dos
+        // razones: un GoogleMap no puede ir dentro de un LazyColumn (recibe
+        // alto infinito), y FeedScreenContent es stateless — meterle un
+        // hiltViewModel() adentro le quitaría esa propiedad y rompería sus
+        // previews. Al vivir en la rama, el mapa solo se crea cuando la
+        // pestaña está activa y se destruye al salir, liberando la MapView.
+        if (uiState.selectedTab == FeedTab.MAPA) {
+            ReviewsMapScreen(onVehicleClick = onVehicleClick, onAuthorClick = onAuthorClick)
+            return@Column
+        }
+
         FeedScreenContent(
             selectedTab = uiState.selectedTab,
             stories = uiState.stories,

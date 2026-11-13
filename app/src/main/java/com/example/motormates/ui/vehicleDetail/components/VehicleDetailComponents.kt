@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,6 +53,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import com.example.motormates.R
 import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.data.seed.localAvatarResFor
 import com.example.motormates.ui.theme.Radius
@@ -247,9 +249,14 @@ fun ReviewItem(
                         fontSize = 14.sp
                     )
                     Text(
-                        text = review.tiempoTexto,
+                        // Con lugar queda "hace 2 h · Chapinero, Bogotá".
+                        text = review.lugarTexto?.let {
+                            stringResource(R.string.review_time_with_place, review.tiempoTexto, it)
+                        } ?: review.tiempoTexto,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

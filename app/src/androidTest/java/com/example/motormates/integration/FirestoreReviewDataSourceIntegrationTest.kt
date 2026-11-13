@@ -34,7 +34,7 @@ class FirestoreReviewDataSourceIntegrationTest {
         FirebaseEmulator.clearFirestore()
         FirebaseEmulator.clearAuth()
         uid = FirebaseEmulator.signInAs("jose@motormates.com")
-        dataSource = FirestoreReviewDataSource(firestore)
+        dataSource = FirestoreReviewDataSource(firestore, FirebaseEmulator.storage)
     }
 
     @After

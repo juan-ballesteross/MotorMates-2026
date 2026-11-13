@@ -7,6 +7,17 @@
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <!-- Desde Android 13 (API 33) las notificaciones no se muestran si el usuario no da este permiso -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Para guardar dónde se publicó una reseña y poder pintarla en el mapa.
+         Es opcional: si el usuario lo niega, la reseña se publica sin ubicación
+         y simplemente no aparece en el mapa.
+         Solo COARSE: al mapa le basta el barrio, y así alcanza con un
+         RequestPermission sencillo (declarar también FINE obligaría a pedir los
+         dos juntos desde API 31). -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- La app funciona sin GPS: sin él las reseñas se publican sin ubicación -->
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
@@ -50,6 +61,13 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/notification_channel_id" />
+
+        <!-- La llave sale de local.properties vía manifestPlaceholders (ver
+             build.gradle.kts). La de google-services.json no sirve: no está
+             habilitada para el Maps SDK. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

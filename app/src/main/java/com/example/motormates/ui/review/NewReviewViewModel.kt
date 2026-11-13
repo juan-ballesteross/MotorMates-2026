@@ -7,6 +7,8 @@ import com.example.motormates.data.model.ReviewAspect
 import com.example.motormates.data.model.toReviewCarSummary
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.VehicleRepository
+import com.example.motormates.data.source.DeviceLocationDataSource
+import com.example.motormates.data.source.PlaceNameDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +19,9 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class NewReviewViewModel @Inject constructor(
     private val vehicleRepository: VehicleRepository,
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    private val deviceLocationDataSource: DeviceLocationDataSource,
+    private val placeNameDataSource: PlaceNameDataSource
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NewReviewUiState())
@@ -70,6 +74,41 @@ class NewReviewViewModel @Inject constructor(
                     }
                 )
             }
+        }
+    }
+
+    /**
+     * Resuelve la ubicación y su nombre para mostrarlos en el formulario.
+     * La llama la pantalla al entrar (solo al crear), después de resolver el
+     * permiso: así el usuario ve qué se va a adjuntar antes de publicar, y
+     * publicar no tiene que esperar al GPS.
+     */
+    fun captureLocation() {
+        if (_uiState.value.isLocationLoading) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLocationLoading = true, isLocationUnavailable = false) }
+
+            val location = deviceLocationDataSource.lastKnownLocation()
+            // El nombre es un adorno: si no se resuelve, la ubicación sigue
+            // sirviendo para el mapa y solo se muestran las coordenadas sin
+            // texto.
+            val named = location?.let { it.copy(placeName = placeNameDataSource.placeNameFor(it)) }
+
+            _uiState.update {
+                it.copy(
+                    isLocationLoading = false,
+                    capturedLocation = named,
+                    isLocationUnavailable = named == null
+                )
+            }
+        }
+    }
+
+    /** El usuario decide no adjuntar la ubicación (la ✕ de la fila). */
+    fun removeLocation() {
+        _uiState.update {
+            it.copy(capturedLocation = null, isLocationUnavailable = false, isLocationLoading = false)
         }
     }
 
@@ -144,6 +183,11 @@ class NewReviewViewModel @Inject constructor(
                 // Al crear sí conviene null: deja la columna nula en vez de
                 // guardar una cadena vacía.
                 comment = trimmed.ifBlank { null },
+                // Ya resuelta al entrar a la pantalla (o quitada por el
+                // usuario): publicar no espera al GPS. Si es null, la reseña
+                // se publica igual y solo no sale en el mapa. Al editar no se
+                // toca: cambiar el texto no cambia dónde se publicó.
+                location = current.capturedLocation,
                 imageUris = current.newPhotoUris
             )
 

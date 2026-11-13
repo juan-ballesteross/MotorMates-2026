@@ -67,6 +67,7 @@ fun Review.toReviewUi(currentUserId: String?, likedReviewIds: Set<String> = empt
     isMine = userId == currentUserId,
     likesCount = likesCount,
     isLikedByMe = id in likedReviewIds,
+    lugarTexto = location?.placeName,
     imageUrls = imageUrls
 )
 
@@ -90,8 +91,42 @@ fun Review.toFeedReviewUi(
     calificacion = rating.coerceIn(0, 5),
     comentario = comment.orEmpty(),
     likesCount = likesCount,
-    isLikedByMe = id in likedReviewIds
+    isLikedByMe = id in likedReviewIds,
+    lugarTexto = location?.placeName
 )
+
+/**
+ * La reseña como marcador del mapa, o null si no tiene ubicación.
+ *
+ * Es el único mapper que devuelve null, y es a propósito: la regla "sin
+ * ubicación no hay marcador" queda en un solo lugar y se puede probar
+ * directamente, en vez de repartida en filtros por la UI.
+ *
+ * vehicleImageUrl llega por parámetro por la misma razón que en
+ * toUserReviewUi: la reseña no trae la foto del carro, la resuelve el
+ * ViewModel con el catálogo.
+ */
+fun Review.toReviewMapMarkerUi(vehicleImageUrl: String? = null): ReviewMapMarkerUi? {
+    val location = location ?: return null
+    return ReviewMapMarkerUi(
+        id = id,
+        userId = userId,
+        vehicleId = vehicleId,
+        lat = location.lat,
+        lng = location.lng,
+        // Mismos respaldos que toFeedReviewUi: la copia del autor que la
+        // reseña trae dentro puede venir vacía.
+        nombreUsuario = author?.fullName?.ifBlank { null } ?: "Usuario",
+        avatarUrl = author?.avatarUrl,
+        vehicleName = vehicle?.let { "${it.brand} ${it.model}" } ?: "Vehículo",
+        tiempoTexto = createdAt.toRelativeTimeEs(),
+        calificacion = rating.coerceIn(0, 5),
+        comentario = comment.orEmpty(),
+        lugarTexto = location.placeName,
+        vehicleImageUrl = vehicleImageUrl?.ifBlank { null },
+        likesCount = likesCount.coerceAtLeast(0)
+    )
+}
 
 /**
  * vehicleImageUrl no viaja dentro de la reseña (las ya guardadas en
@@ -104,7 +139,8 @@ fun Review.toUserReviewUi(vehicleImageUrl: String? = null): UserReviewUi = UserR
     vehicleImageUrl = vehicleImageUrl,
     rating = rating.coerceIn(0, 5),
     comment = comment.orEmpty(),
-    timeAgo = createdAt.toRelativeTimeEs()
+    timeAgo = createdAt.toRelativeTimeEs(),
+    lugarTexto = location?.placeName
 )
 
 /** Perfil de un usuario, venga de Firestore o del backend propio. */

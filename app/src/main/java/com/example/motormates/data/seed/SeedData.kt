@@ -78,28 +78,45 @@ internal object SeedData {
         )
     )
 
-    /** (autor, vehículo, rating, comentario), igual que initReviews.js. */
+    /**
+     * (autor, vehículo, rating, comentario, lat, lng), igual que
+     * initReviews.js.
+     *
+     * Las coordenadas están repartidas por Bogotá con unos 1-3 km de
+     * separación: así los marcadores se distinguen con el zoom de ciudad y
+     * todos caben en pantalla. El seeder les pone la fecha escalonada, y solo
+     * las primeras caen dentro de las 24 h que muestra el mapa.
+     */
     val reviews = listOf(
-        SeedReview(SEED_USER_RODRIGO, "1", 5, "El sonido del motor es otro nivel. Se siente pegado al piso en cada curva."),
-        SeedReview(SEED_USER_SOFIA, "1", 5, "Impecable en pista, pero para ciudad es incómodo y muy duro."),
-        SeedReview(SEED_USER_IVAN, "1", 4, "Una máquina, aunque el precio del mantenimiento asusta."),
-        SeedReview(SEED_USER_RODRIGO, "2", 4, "Lo saqué a trocha todo un fin de semana y no se quejó ni una vez."),
-        SeedReview(SEED_USER_IVAN, "2", 3, "Enorme y confiable, pero el consumo de gasolina es alto."),
-        SeedReview(SEED_USER_SOFIA, "3", 5, "Un clásico que voltea cabezas donde sea. Vale cada peso de la restauración."),
-        SeedReview(SEED_USER_IVAN, "3", 4, "Hermoso, aunque sin frenos modernos hay que manejarlo con respeto."),
-        SeedReview(SEED_USER_RODRIGO, "4", 4, "El ahorro mensual se nota muchísimo. La autonomía me alcanza de sobra."),
-        SeedReview(SEED_USER_SOFIA, "4", 3, "Buen carro, pero encontrar cargador rápido en carretera todavía cuesta."),
-        SeedReview(SEED_USER_IVAN, "5", 4, "Potencia de sobra y buen precio para lo que entrega."),
-        SeedReview(SEED_USER_RODRIGO, "6", 5, "Quitarle el techo un domingo no tiene comparación. Perfecto para montaña."),
-        SeedReview(SEED_USER_SOFIA, "6", 3, "Divertidísimo fuera de la ciudad, pero en autopista suena mucho."),
-        SeedReview(SEED_USER_SOFIA, "7", 4, "Sencillo, económico y se arregla con cualquier mecánico. Un amor.")
+        SeedReview(SEED_USER_RODRIGO, "1", 5, "El sonido del motor es otro nivel. Se siente pegado al piso en cada curva.", 4.6280, -74.0643, "Chapinero, Bogotá"),
+        SeedReview(SEED_USER_SOFIA, "1", 5, "Impecable en pista, pero para ciudad es incómodo y muy duro.", 4.6560, -74.0550, "Usaquén, Bogotá"),
+        SeedReview(SEED_USER_IVAN, "1", 4, "Una máquina, aunque el precio del mantenimiento asusta.", 4.6097, -74.0817, "La Candelaria, Bogotá"),
+        SeedReview(SEED_USER_RODRIGO, "2", 4, "Lo saqué a trocha todo un fin de semana y no se quejó ni una vez.", 4.6760, -74.0480, "La Calera, Bogotá"),
+        SeedReview(SEED_USER_IVAN, "2", 3, "Enorme y confiable, pero el consumo de gasolina es alto.", 4.7010, -74.0330, "Cerros Orientales, Bogotá"),
+        SeedReview(SEED_USER_SOFIA, "3", 5, "Un clásico que voltea cabezas donde sea. Vale cada peso de la restauración.", 4.5980, -74.0760, "Teusaquillo, Bogotá"),
+        SeedReview(SEED_USER_IVAN, "3", 4, "Hermoso, aunque sin frenos modernos hay que manejarlo con respeto.", 4.6440, -74.0900, "Barrios Unidos, Bogotá"),
+        SeedReview(SEED_USER_RODRIGO, "4", 4, "El ahorro mensual se nota muchísimo. La autonomía me alcanza de sobra.", 4.6680, -74.1050, "Suba, Bogotá"),
+        SeedReview(SEED_USER_SOFIA, "4", 3, "Buen carro, pero encontrar cargador rápido en carretera todavía cuesta.", 4.5810, -74.1180, "Kennedy, Bogotá"),
+        SeedReview(SEED_USER_IVAN, "5", 4, "Potencia de sobra y buen precio para lo que entrega.", 4.7180, -74.0720, "Autopista Norte, Bogotá"),
+        SeedReview(SEED_USER_RODRIGO, "6", 5, "Quitarle el techo un domingo no tiene comparación. Perfecto para montaña.", 4.6350, -74.0380, "Vía La Calera, Bogotá"),
+        SeedReview(SEED_USER_SOFIA, "6", 3, "Divertidísimo fuera de la ciudad, pero en autopista suena mucho.", 4.5690, -74.0970, "Bosa, Bogotá"),
+        SeedReview(SEED_USER_SOFIA, "7", 4, "Sencillo, económico y se arregla con cualquier mecánico. Un amor.", 4.6900, -74.0890, "Niza, Bogotá")
     )
 
+    /**
+     * placeName va quemado y no se geocodifica al sembrar: el seeder corre al
+     * abrir la app por primera vez y no debería depender de que haya red ni
+     * del servicio de geocodificación. Son las mismas coordenadas, con el
+     * nombre que les corresponde.
+     */
     data class SeedReview(
         val userId: String,
         val vehicleId: String,
         val rating: Int,
-        val comment: String
+        val comment: String,
+        val lat: Double,
+        val lng: Double,
+        val placeName: String
     )
 
     private fun seedUser(id: String, fullName: String, email: String, location: String, bio: String) =

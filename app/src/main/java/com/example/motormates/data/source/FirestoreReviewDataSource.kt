@@ -3,6 +3,7 @@ package com.example.motormates.data.source
 import android.net.Uri
 import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.dto.ReviewFirestoreDto
+import com.example.motormates.data.dto.ReviewLocationSnapshot
 import com.example.motormates.data.dto.ReviewUserSnapshot
 import com.example.motormates.data.dto.ReviewVehicleSnapshot
 import com.example.motormates.data.model.NewReview
@@ -53,12 +54,22 @@ class FirestoreReviewDataSource @Inject constructor(
                 brand = review.vehicleBrand,
                 model = review.vehicleModel
             ),
+            // Si no hay ubicación el campo no se escribe (queda null): la
+            // reseña existe igual, solo que no sale en el mapa.
+            location = review.location?.let {
+                ReviewLocationSnapshot(lat = it.lat, lng = it.lng, placeName = it.placeName)
+            },
             imageUrls = imageUrls
         )
         reviews.document(reviewId).set(dto).await()
         return dto
     }
 
+    /**
+     * Solo toca los campos que llegan, así que la ubicación original
+     * sobrevive intacta a una edición: editar el texto de una reseña no
+     * cambia el lugar donde se publicó.
+     */
     override suspend fun updateReview(
         id: String,
         rating: Int?,

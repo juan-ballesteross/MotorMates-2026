@@ -18,12 +18,39 @@ data class Review(
     val likesCount: Int = 0,
     val author: ReviewAuthor?,
     val vehicle: ReviewVehicleRef?,
+    /**
+     * Dónde se publicó la reseña, para pintarla en el mapa. Nulable porque es
+     * opcional: si el usuario niega el permiso de ubicación la reseña se
+     * publica igual, y las reseñas creadas antes de esta función no la tienen.
+     */
+    val location: ReviewLocation? = null,
     val imageUrls: List<String> = emptyList()
 )
 
 data class ReviewAuthor(val id: String, val fullName: String, val avatarUrl: String? = null)
 
 data class ReviewVehicleRef(val id: String, val brand: String, val model: String)
+
+/**
+ * Dónde se publicó una reseña.
+ *
+ * Las coordenadas se guardan como Double y no como el LatLng de Maps a
+ * propósito: data.model lo consumen las pruebas unitarias de JVM puro, y
+ * LatLng arrastraría el SDK de Android (y Robolectric) a los tests de los
+ * mappers. La conversión a LatLng se hace en la capa de UI.
+ *
+ * placeName es el nombre legible del sitio ("Chapinero, Bogotá"). Se resuelve
+ * UNA vez, al publicar, y viaja aquí dentro para quedar guardado junto a las
+ * coordenadas: es la misma idea de la copia desnormalizada del autor y del
+ * vehículo. Resolverlo al leer costaría una llamada de red por reseña en
+ * pantalla. Es nulable porque el geocodificador puede no tener respuesta, y
+ * porque las reseñas publicadas antes de esta función no lo tienen.
+ */
+data class ReviewLocation(
+    val lat: Double,
+    val lng: Double,
+    val placeName: String? = null
+)
 
 /**
  * Lo que el repositorio le entrega a la fuente de datos para crear una
@@ -39,5 +66,7 @@ data class NewReview(
     val authorAvatarUrl: String?,
     val vehicleBrand: String,
     val vehicleModel: String,
+    /** Null si no se pudo o no se quiso capturar la ubicación. */
+    val location: ReviewLocation? = null,
     val imageUris: List<Uri> = emptyList()
 )

@@ -34,8 +34,15 @@ const BATCH_LIMIT = 500;
 faker.seed(42);
 
 const USERS_COUNT = 8;
-const MIN_REVIEWS_PER_VEHICLE = 1;
-const MAX_REVIEWS_PER_VEHICLE = 4;
+// Cada usuario reseña cada carro a lo sumo una vez, así que el tope real es
+// USERS_COUNT. Con 4-7 por carro salen ~40 reseñas: suficientes para que el
+// mapa forme clusters y se separen al acercar.
+const MIN_REVIEWS_PER_VEHICLE = 4;
+const MAX_REVIEWS_PER_VEHICLE = 7;
+
+// Proporción de reseñas fechadas en las últimas 24 h (las que ve el mapa).
+// El resto se reparte en el último mes para que el feed siga variado.
+const RECENT_REVIEW_PROBABILITY = 0.8;
 
 // Con cert(serviceAccount), firebase-admin le pasa las llaves a
 // google-auth-library por la opción `credentials`, que está deprecada y
@@ -172,14 +179,23 @@ function makeUser(index) {
   };
 }
 
-/** Factoría de reseña, con el autor y el vehículo desnormalizados dentro. */
-function makeReview(index, author, vehicle) {
+/**
+ * Factoría de reseña, con el autor y el vehículo desnormalizados dentro.
+ *
+ * isRecent lo manda quien llama para la primera reseña de cada vehículo: esa
+ * se fecha dentro de las últimas 24 h para que el mapa de reseñas recientes
+ * nunca salga vacío después de sembrar. Las demás se reparten en el último
+ * mes, así el feed sigue viéndose variado.
+ */
+function makeReview(index, author, vehicle, isRecent = false) {
   const rating = faker.number.int({ min: 3, max: 5 });
   // Una reseña de 5 no lleva queja; las de 3 y 4 sí.
   const gripe = rating === 5 ? "" : `, ${faker.helpers.arrayElement(COMMENT_GRIPE)}`;
   const comment = `${faker.helpers.arrayElement(COMMENT_OPENERS)} ` +
     `${faker.helpers.arrayElement(COMMENT_PRAISE)}${gripe}.`;
-  const createdAt = faker.date.recent({ days: 30 }).getTime();
+  const createdAt = isRecent
+    ? Date.now() - faker.number.int({ min: 1, max: 20 }) * 60 * 60 * 1000
+    : faker.date.recent({ days: 30 }).getTime();
 
   return {
     id: `seed_review_${index + 1}`,
@@ -192,6 +208,61 @@ function makeReview(index, author, vehicle) {
     likesCount: 0, // se ajusta al repartir los likes
     user: { fullName: author.fullName, avatarUrl: author.avatarUrl },
     vehicle: { brand: vehicle.brand, model: vehicle.model },
+    // Dónde se publicó, para el mapa de reseñas recientes.
+    location: randomReviewLocation(index),
+  };
+}
+
+/**
+ * Zonas donde se concentran las reseñas. Puntos al azar por toda la ciudad
+ * casi nunca se agrupan; concentrados alrededor de sitios conocidos, al
+ * alejar el zoom se juntan en clusters y al acercar se separan. weight = qué
+ * tan seguido sale cada zona.
+ *
+ * El nombre va fijo en vez de geocodificar: el seeder no debería depender de
+ * una API externa, y para datos de demostración basta con que sea verosímil.
+ */
+const REVIEW_HOTSPOTS = [
+  { lat: 4.6766, lng: -74.0482, placeName: "Parque 93, Bogotá", weight: 4 },
+  { lat: 4.6667, lng: -74.0530, placeName: "Zona T, Bogotá", weight: 4 },
+  { lat: 4.6950, lng: -74.0300, placeName: "Usaquén, Bogotá", weight: 3 },
+  { lat: 4.7020, lng: -74.0410, placeName: "Unicentro, Bogotá", weight: 2 },
+  { lat: 4.5981, lng: -74.0760, placeName: "La Candelaria, Bogotá", weight: 2 },
+  { lat: 4.6510, lng: -74.1100, placeName: "Salitre, Bogotá", weight: 2 },
+  // Otras ciudades: al alejar del todo se ven como grupos aparte.
+  { lat: 6.2088, lng: -75.5670, placeName: "El Poblado, Medellín", weight: 2 },
+  { lat: 3.4570, lng: -76.5340, placeName: "Granada, Cali", weight: 1 },
+];
+
+/**
+ * Un punto exacto que se repite (como varias reseñas desde el mismo centro
+ * comercial). Ningún zoom lo separa: sirve para probar la lista del cluster.
+ */
+const SAME_SPOT = { lat: 4.6677, lng: -74.0526, placeName: "Centro Comercial Andino, Bogotá" };
+// Fijo y no al azar: así siempre hay varias en ese punto, aunque cambie la semilla.
+const SAME_SPOT_EVERY = 9;
+
+/** ~0.003 grados son unos 300 m: lo bastante cerca para agruparse, lejos para separarse al acercar. */
+const HOTSPOT_JITTER_DEGREES = 0.003;
+
+function randomReviewLocation(index) {
+  if (index % SAME_SPOT_EVERY === SAME_SPOT_EVERY / 3) {
+    return { ...SAME_SPOT };
+  }
+
+  const hotspot = faker.helpers.weightedArrayElement(
+    REVIEW_HOTSPOTS.map((spot) => ({ weight: spot.weight, value: spot }))
+  );
+  // Suma de dos uniformes: los puntos se cargan hacia el centro de la zona
+  // en vez de llenar un cuadrado parejo.
+  const jitter = () =>
+    (faker.number.float({ min: -1, max: 1 }) + faker.number.float({ min: -1, max: 1 })) / 2 *
+    HOTSPOT_JITTER_DEGREES;
+
+  return {
+    lat: Number((hotspot.lat + jitter()).toFixed(5)),
+    lng: Number((hotspot.lng + jitter()).toFixed(5)),
+    placeName: hotspot.placeName,
   };
 }
 
@@ -211,7 +282,12 @@ function buildData() {
       min: MIN_REVIEWS_PER_VEHICLE,
       max: MAX_REVIEWS_PER_VEHICLE,
     });
-    authors.forEach((author) => reviews.push(makeReview(reviews.length, author, vehicle)));
+    // La primera de cada vehículo siempre es reciente, para que el mapa nunca
+    // salga vacío; de las demás, la mayoría también.
+    authors.forEach((author, i) => {
+      const isRecent = i === 0 || faker.datatype.boolean({ probability: RECENT_REVIEW_PROBABILITY });
+      reviews.push(makeReview(reviews.length, author, vehicle, isRecent));
+    });
   });
 
   // Likes: cualquiera menos el propio autor.

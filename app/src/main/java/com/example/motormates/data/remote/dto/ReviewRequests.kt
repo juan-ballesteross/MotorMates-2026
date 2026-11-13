@@ -10,7 +10,15 @@ data class CreateReviewRequest(
     @SerializedName("userId") val userId: String,
     @SerializedName("vehicleId") val vehicleId: String,
     @SerializedName("rating") val rating: Int,
-    @SerializedName("comment") val comment: String?
+    @SerializedName("comment") val comment: String?,
+    /**
+     * Dónde se publicó. Nulables, y Gson omite los campos null: una reseña
+     * sin ubicación manda el mismo cuerpo que antes, así que el backend
+     * actual (que todavía no conoce estas columnas) no se entera.
+     */
+    @SerializedName("lat") val lat: Double? = null,
+    @SerializedName("lng") val lng: Double? = null,
+    @SerializedName("placeName") val placeName: String? = null
 )
 
 /**

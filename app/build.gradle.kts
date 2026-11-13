@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -5,6 +7,22 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
 }
+
+/**
+ * La API key de Google Maps vive en local.properties (que está en .gitignore),
+ * no en el repo: cada quien pone la suya. Si falta, el placeholder queda vacío,
+ * el build NO se rompe y el mapa se ve gris con un "Authorization failure" en
+ * logcat.
+ *
+ * No se usa el secrets-gradle-plugin que recomienda Google: sigue en 2.0.1
+ * (2023) y se configura con la Variant API vieja, que AGP 9 ya eliminó.
+ */
+val mapsApiKey: String = Properties().apply {
+    rootProject.file("local.properties")
+        .takeIf { it.exists() }
+        ?.inputStream()
+        ?.use { load(it) }
+}.getProperty("MAPS_API_KEY", "")
 
 android {
     namespace = "com.example.motormates"
@@ -22,6 +40,11 @@ android {
         testInstrumentationRunner = "com.example.motormates.e2e.EmulatorTestRunner"
         // Se agrego para que funcione en la tablet
         buildConfigField("boolean", "CONNECT_TO_FIREBASE_EMULATOR", "false")
+
+        // La llave de Maps entra al manifest como ${MAPS_API_KEY}. Se usa
+        // .put() y no la asignación con corchetes porque según la versión de
+        // AGP esto es un MapProperty y no un MutableMap.
+        manifestPlaceholders.put("MAPS_API_KEY", mapsApiKey)
     }
 
     buildTypes {
@@ -72,6 +95,10 @@ dependencies {
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.hilt.android)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.maps.compose)
+    implementation(libs.maps.compose.utils)
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
     implementation("androidx.compose.ui:ui-text-google-fonts:1.12.0")
     ksp(libs.hilt.android.compiler)
     testImplementation(libs.junit)

@@ -1,6 +1,7 @@
 package com.example.motormates.data.seed
 
 import com.example.motormates.data.dto.ReviewFirestoreDto
+import com.example.motormates.data.dto.ReviewLocationSnapshot
 import com.example.motormates.data.dto.ReviewUserSnapshot
 import com.example.motormates.data.dto.ReviewVehicleSnapshot
 import com.example.motormates.data.dto.VehicleFirestoreDto
@@ -51,9 +52,15 @@ class FirestoreSeeder @Inject constructor(
         SeedData.reviews.forEachIndexed { index, seed ->
             val author = usersById.getValue(seed.userId)
             val vehicle = vehiclesById.getValue(seed.vehicleId)
-            // Fechas escalonadas (una cada 5 h hacia atrás) para que el
+            // Fechas escalonadas (una cada 2 h hacia atrás) para que el
             // "hace X" de cada reseña no sea siempre el mismo.
-            val createdAt = now - index * FIVE_HOURS_MS
+            //
+            // El paso es de 2 h y no de 5 para que la mayoría caiga dentro de
+            // las últimas 24 h, que es la ventana del mapa: con 13 reseñas,
+            // las 12 primeras quedan dentro y la última afuera, así el filtro
+            // se puede demostrar y el mapa no sale vacío por haber sembrado
+            // unas horas antes.
+            val createdAt = now - index * TWO_HOURS_MS
             val review = ReviewFirestoreDto(
                 rating = seed.rating,
                 comment = seed.comment,
@@ -62,7 +69,14 @@ class FirestoreSeeder @Inject constructor(
                 createdAt = createdAt,
                 updatedAt = createdAt,
                 user = ReviewUserSnapshot(fullName = author.fullName, avatarUrl = author.avatarUrl),
-                vehicle = ReviewVehicleSnapshot(brand = vehicle.brand, model = vehicle.model)
+                vehicle = ReviewVehicleSnapshot(brand = vehicle.brand, model = vehicle.model),
+                // Sin ubicación las reseñas semilla no saldrían en el mapa y
+                // la pestaña arrancaría vacía.
+                location = ReviewLocationSnapshot(
+                    lat = seed.lat,
+                    lng = seed.lng,
+                    placeName = seed.placeName
+                )
             )
             batch.set(
                 firestore.collection(REVIEWS_COLLECTION).document("seed_review_${index + 1}"),
@@ -101,6 +115,6 @@ class FirestoreSeeder @Inject constructor(
     }
 
     private companion object {
-        const val FIVE_HOURS_MS = 5 * 60 * 60 * 1000L
+        const val TWO_HOURS_MS = 2 * 60 * 60 * 1000L
     }
 }
