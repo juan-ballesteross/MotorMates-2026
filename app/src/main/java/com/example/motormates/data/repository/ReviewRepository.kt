@@ -1,5 +1,6 @@
 package com.example.motormates.data.repository
 
+import android.net.Uri
 import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.model.NewReview
 import com.example.motormates.data.model.NotificationType
@@ -53,9 +54,16 @@ interface ReviewRepository {
         vehicleId: String,
         rating: Int,
         comment: String?,
-        location: ReviewLocation?
+        location: ReviewLocation?,
+        imageUris: List<Uri> = emptyList()
     ): Result<Review>
-    suspend fun updateReview(reviewId: String, rating: Int?, comment: String?): Result<Review>
+    suspend fun updateReview(
+        reviewId: String,
+        rating: Int?,
+        comment: String?,
+        keepImageUrls: List<String> = emptyList(),
+        newImageUris: List<Uri> = emptyList()
+    ): Result<Review>
     suspend fun deleteReview(reviewId: String): Result<Unit>
 }
 
@@ -141,7 +149,8 @@ class ReviewRepositoryImpl @Inject constructor(
         vehicleId: String,
         rating: Int,
         comment: String?,
-        location: ReviewLocation?
+        location: ReviewLocation?,
+        imageUris: List<Uri>
     ): Result<Review> {
         val currentUser = authDataSource.getCurrentUser()
             ?: return Result.failure(Exception("Debes iniciar sesión para publicar una reseña"))
@@ -168,7 +177,8 @@ class ReviewRepositoryImpl @Inject constructor(
                     authorAvatarUrl = profile?.avatarUrl ?: currentUser.photoUrl,
                     vehicleBrand = vehicle.brand,
                     vehicleModel = vehicle.model,
-                    location = location
+                    location = location,
+                    imageUris = imageUris
                 )
             ).toDomain()
         }
@@ -203,13 +213,15 @@ class ReviewRepositoryImpl @Inject constructor(
     override suspend fun updateReview(
         reviewId: String,
         rating: Int?,
-        comment: String?
+        comment: String?,
+        keepImageUrls: List<String>,
+        newImageUris: List<Uri>
     ): Result<Review> {
         if (rating != null && rating !in 0..5) {
             return Result.failure(Exception(INVALID_RATING))
         }
         return safeCall(notFound = REVIEW_NOT_FOUND, fallback = "No se pudo guardar la reseña") {
-            remoteDataSource.updateReview(reviewId, rating, comment).toDomain()
+            remoteDataSource.updateReview(reviewId, rating, comment, keepImageUrls, newImageUris).toDomain()
         }
     }
 

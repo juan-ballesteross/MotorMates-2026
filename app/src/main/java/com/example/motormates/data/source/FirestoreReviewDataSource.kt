@@ -1,5 +1,6 @@
 package com.example.motormates.data.source
 
+import android.net.Uri
 import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.dto.ReviewFirestoreDto
 import com.example.motormates.data.dto.ReviewLocationSnapshot
@@ -8,12 +9,18 @@ import com.example.motormates.data.dto.ReviewVehicleSnapshot
 import com.example.motormates.data.model.NewReview
 import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 
 
 class FirestoreReviewDataSource @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val storage: FirebaseStorage
 ) : ReviewRemoteDataSource {
 
     private val reviews get() = firestore.collection(REVIEWS_COLLECTION)
@@ -26,7 +33,13 @@ class FirestoreReviewDataSource @Inject constructor(
 
     override suspend fun createReview(review: NewReview): ReviewDtoGeneric {
         val now = System.currentTimeMillis()
+        // Se genera el id antes de guardar (como con las historias) para
+        // poder subir las fotos a "reviews/{id}/..." y guardar sus URLs ya
+        // resueltas en el mismo documento, en vez de hacer un update aparte.
+        val reviewId = reviews.document().id
+        val imageUrls = uploadImages(reviewId, review.imageUris)
         val dto = ReviewFirestoreDto(
+            id = reviewId,
             rating = review.rating,
             comment = review.comment,
             userId = review.userId,
@@ -45,11 +58,11 @@ class FirestoreReviewDataSource @Inject constructor(
             // reseña existe igual, solo que no sale en el mapa.
             location = review.location?.let {
                 ReviewLocationSnapshot(lat = it.lat, lng = it.lng, placeName = it.placeName)
-            }
+            },
+            imageUrls = imageUrls
         )
-        // add() deja que Firestore genere el id del documento.
-        val ref = reviews.add(dto).await()
-        return dto.copy(id = ref.id)
+        reviews.document(reviewId).set(dto).await()
+        return dto
     }
 
     /**
@@ -57,8 +70,18 @@ class FirestoreReviewDataSource @Inject constructor(
      * sobrevive intacta a una edición: editar el texto de una reseña no
      * cambia el lugar donde se publicó.
      */
-    override suspend fun updateReview(id: String, rating: Int?, comment: String?): ReviewDtoGeneric {
-        val changes = mutableMapOf<String, Any>("updatedAt" to System.currentTimeMillis())
+    override suspend fun updateReview(
+        id: String,
+        rating: Int?,
+        comment: String?,
+        keepImageUrls: List<String>,
+        newImageUris: List<Uri>
+    ): ReviewDtoGeneric {
+        val uploadedUrls = uploadImages(id, newImageUris)
+        val changes = mutableMapOf<String, Any>(
+            "updatedAt" to System.currentTimeMillis(),
+            "imageUrls" to keepImageUrls + uploadedUrls
+        )
         rating?.let { changes["rating"] = it }
         comment?.let { changes["comment"] = it }
 
@@ -71,6 +94,17 @@ class FirestoreReviewDataSource @Inject constructor(
 
     override suspend fun deleteReview(id: String) {
         reviews.document(id).delete().await()
+    }
+
+    /** Una subida por foto, en paralelo, igual que withCurrentAuthors en el repositorio. */
+    private suspend fun uploadImages(reviewId: String, imageUris: List<Uri>): List<String> = coroutineScope {
+        imageUris.map { uri ->
+            async {
+                val imageRef = storage.reference.child("reviews/$reviewId/${UUID.randomUUID()}.jpg")
+                imageRef.putFile(uri).await()
+                imageRef.downloadUrl.await().toString()
+            }
+        }.awaitAll()
     }
 
     /**

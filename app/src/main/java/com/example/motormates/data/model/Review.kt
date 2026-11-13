@@ -1,5 +1,7 @@
 package com.example.motormates.data.model
 
+import android.net.Uri
+
 /**
  * Modelo de dominio de una reseña. Los ids son String porque en Firestore
  * el id de un documento es un texto (y el userId es el uid de Firebase Auth).
@@ -21,7 +23,8 @@ data class Review(
      * opcional: si el usuario niega el permiso de ubicación la reseña se
      * publica igual, y las reseñas creadas antes de esta función no la tienen.
      */
-    val location: ReviewLocation? = null
+    val location: ReviewLocation? = null,
+    val imageUrls: List<String> = emptyList()
 )
 
 data class ReviewAuthor(val id: String, val fullName: String, val avatarUrl: String? = null)
@@ -64,5 +67,6 @@ data class NewReview(
     val vehicleBrand: String,
     val vehicleModel: String,
     /** Null si no se pudo o no se quiso capturar la ubicación. */
-    val location: ReviewLocation? = null
+    val location: ReviewLocation? = null,
+    val imageUris: List<Uri> = emptyList()
 )

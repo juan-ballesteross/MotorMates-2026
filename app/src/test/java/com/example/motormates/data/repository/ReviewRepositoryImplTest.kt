@@ -1,5 +1,6 @@
 package com.example.motormates.data.repository
 
+import android.net.Uri
 import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.dto.ReviewFirestoreDto
 import com.example.motormates.data.dto.ReviewUserSnapshot
@@ -206,8 +207,13 @@ private class FakeReviewDataSource : ReviewRemoteDataSource {
         )
     }
 
-    override suspend fun updateReview(id: String, rating: Int?, comment: String?): ReviewDtoGeneric =
-        throw NoSuchElementException(id)
+    override suspend fun updateReview(
+        id: String,
+        rating: Int?,
+        comment: String?,
+        keepImageUrls: List<String>,
+        newImageUris: List<Uri>
+    ): ReviewDtoGeneric = throw NoSuchElementException(id)
 
     override suspend fun deleteReview(id: String) = Unit
 }

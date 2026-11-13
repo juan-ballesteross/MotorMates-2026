@@ -17,5 +17,8 @@ data class Vehicle(
     val potencia: String?,
     val aceleracion: String?,
     val velocidadMaxima: String?,
-    val traccion: String?
+    val traccion: String?,
+    val ownerId: String? = null,
+    val ownerName: String? = null,
+    val ownerAvatarUrl: String? = null
 )

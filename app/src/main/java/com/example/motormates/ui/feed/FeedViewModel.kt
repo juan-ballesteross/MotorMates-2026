@@ -63,6 +63,7 @@ class FeedViewModel @Inject constructor(
             // antes de pedir los vehículos. Si falla (p. ej. reglas de
             // Firestore), igual se intenta cargar lo que haya.
             runCatching { firestoreSeeder.seedIfEmpty() }
+            runCatching { firestoreSeeder.backfillVehicleOwners() }
             loadVehicles()
         }
         observeFollowingReviews()

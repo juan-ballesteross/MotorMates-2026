@@ -25,7 +25,8 @@ data class ReviewFirestoreDto(
     val likesCount: Int = 0,
     val user: ReviewUserSnapshot? = null,
     val vehicle: ReviewVehicleSnapshot? = null,
-    val location: ReviewLocationSnapshot? = null
+    val location: ReviewLocationSnapshot? = null,
+    val imageUrls: List<String> = emptyList()
 ) : ReviewDtoGeneric {
 
     override fun toDomain(): Review = Review(
@@ -40,7 +41,8 @@ data class ReviewFirestoreDto(
         likesCount = likesCount,
         author = user?.let { ReviewAuthor(id = userId, fullName = it.fullName, avatarUrl = it.avatarUrl) },
         vehicle = vehicle?.let { ReviewVehicleRef(id = vehicleId, brand = it.brand, model = it.model) },
-        location = location?.toDomain()
+        location = location?.toDomain(),
+        imageUrls = imageUrls
     )
 }
 

@@ -4,6 +4,7 @@ import com.example.motormates.data.dto.ReviewFirestoreDto
 import com.example.motormates.data.dto.ReviewLocationSnapshot
 import com.example.motormates.data.dto.ReviewUserSnapshot
 import com.example.motormates.data.dto.ReviewVehicleSnapshot
+import com.example.motormates.data.dto.VehicleFirestoreDto
 import com.example.motormates.data.source.REVIEWS_COLLECTION
 import com.example.motormates.data.source.USERS_COLLECTION
 import com.example.motormates.data.source.VEHICLES_COLLECTION
@@ -42,7 +43,11 @@ class FirestoreSeeder @Inject constructor(
             batch.set(firestore.collection(USERS_COLLECTION).document(user.id), user)
         }
         SeedData.vehicles.forEach { vehicle ->
-            batch.set(firestore.collection(VEHICLES_COLLECTION).document(vehicle.id), vehicle)
+            val owner = usersById[vehicle.ownerId]
+            val vehicleWithOwner = vehicle.copy(
+                owner = owner?.let { ReviewUserSnapshot(fullName = it.fullName, avatarUrl = it.avatarUrl) }
+            )
+            batch.set(firestore.collection(VEHICLES_COLLECTION).document(vehicle.id), vehicleWithOwner)
         }
         SeedData.reviews.forEachIndexed { index, seed ->
             val author = usersById.getValue(seed.userId)
@@ -80,6 +85,33 @@ class FirestoreSeeder @Inject constructor(
         }
 
         batch.commit().await()
+    }
+
+    suspend fun backfillVehicleOwners() {
+        if (ACTIVE_BACKEND != DataBackend.FIREBASE) return
+
+        val usersById = SeedData.users.associateBy { it.id }
+        val vehiclesById = SeedData.vehicles.associateBy { it.id }
+        val snapshot = firestore.collection(VEHICLES_COLLECTION).get().await()
+        val batch = firestore.batch()
+        var hasUpdates = false
+
+        snapshot.documents.forEach { doc ->
+            val existing = doc.toObject(VehicleFirestoreDto::class.java) ?: return@forEach
+            if (existing.ownerId.isNotBlank()) return@forEach
+            val seedVehicle = vehiclesById[existing.id] ?: return@forEach
+            val owner = usersById[seedVehicle.ownerId] ?: return@forEach
+            batch.update(
+                doc.reference,
+                mapOf(
+                    "ownerId" to seedVehicle.ownerId,
+                    "owner" to mapOf("fullName" to owner.fullName, "avatarUrl" to owner.avatarUrl)
+                )
+            )
+            hasUpdates = true
+        }
+
+        if (hasUpdates) batch.commit().await()
     }
 
     private companion object {

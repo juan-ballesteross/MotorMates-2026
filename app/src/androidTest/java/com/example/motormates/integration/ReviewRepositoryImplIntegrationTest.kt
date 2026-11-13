@@ -40,7 +40,7 @@ class ReviewRepositoryImplIntegrationTest {
     private val authDataSource = FirebaseAuthDataSource(FirebaseEmulator.auth)
 
     private val repository = ReviewRepositoryImpl(
-        remoteDataSource = FirestoreReviewDataSource(firestore),
+        remoteDataSource = FirestoreReviewDataSource(firestore, FirebaseEmulator.storage),
         realtimeDataSource = FirestoreReviewRealtimeDataSource(firestore),
         vehicleDataSource = vehicleDataSource,
         userDataSource = userDataSource,

@@ -15,7 +15,10 @@ data class CarDetailUi(
     val potencia: String,
     val aceleracion: String,
     val velocidadMaxima: String,
-    val traccion: String
+    val traccion: String,
+    val ownerId: String? = null,
+    val ownerName: String? = null,
+    val ownerAvatarUrl: String? = null
 )
 
 /**
@@ -39,5 +42,6 @@ data class ReviewUi(
      * reseña no tiene ubicación o no se le pudo resolver el nombre: en ese
      * caso la pantalla no muestra lugar.
      */
-    val lugarTexto: String? = null
+    val lugarTexto: String? = null,
+    val imageUrls: List<String> = emptyList()
 )

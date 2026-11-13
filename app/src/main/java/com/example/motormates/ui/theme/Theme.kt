@@ -77,7 +77,7 @@ fun MotorMatesTheme(
     // (md3_light_*), y el "modo claro" del sistema muestra la paleta ya
     // construida en todas las pantallas (md3_dark_*, que usa los colores
     // de marca originales: MotorMatesBackground, MotorMatesRed, etc.).
-    val colorScheme = if (darkTheme) LightColorScheme else DarkColorScheme
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

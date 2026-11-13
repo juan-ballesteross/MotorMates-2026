@@ -28,7 +28,6 @@ import com.example.motormates.data.model.StoryUser
 import com.example.motormates.ui.feed.components.FollowingReviewCard
 import com.example.motormates.ui.feed.components.StoriesRow
 import com.example.motormates.ui.feed.components.VehicleFeedCard
-import com.example.motormates.ui.theme.MotorMatesBackground
 import com.example.motormates.ui.theme.Spacing
 
 @Composable
@@ -55,7 +54,7 @@ fun FeedScreenContent(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(MotorMatesBackground)
+            .background(MaterialTheme.colorScheme.background)
             .testTag("feedScreen"),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
         contentPadding = PaddingValues(top = Spacing.xxs, bottom = Spacing.gutter)
@@ -96,7 +95,8 @@ fun FeedScreenContent(
                     items(vehicles, key = { it.id }) { vehicle ->
                         VehicleFeedCard(
                             vehicle = vehicle,
-                            onClick = { onVehicleClick(vehicle.id) }
+                            onClick = { onVehicleClick(vehicle.id) },
+                            onAuthorClick = onAuthorClick
                         )
                     }
                 }

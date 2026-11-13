@@ -18,7 +18,9 @@ data class VehicleFirestoreDto(
     val potencia: String? = null,
     val aceleracion: String? = null,
     val velocidadMaxima: String? = null,
-    val traccion: String? = null
+    val traccion: String? = null,
+    val ownerId: String = "",
+    val owner: ReviewUserSnapshot? = null
 ) : VehicleDtoGeneric {
 
     override fun toDomain(): Vehicle = Vehicle(
@@ -31,6 +33,9 @@ data class VehicleFirestoreDto(
         potencia = potencia,
         aceleracion = aceleracion,
         velocidadMaxima = velocidadMaxima,
-        traccion = traccion
+        traccion = traccion,
+        ownerId = ownerId.ifBlank { null },
+        ownerName = owner?.fullName,
+        ownerAvatarUrl = owner?.avatarUrl
     )
 }

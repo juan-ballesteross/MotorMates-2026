@@ -91,6 +91,8 @@
     <string name="chat_list_back_cd">Volver</string>
     <string name="chat_list_empty">No tienes conversaciones todavía. Escríbele a alguien desde su perfil.</string>
     <string name="chat_list_no_messages">Inicia la conversación</string>
+    <string name="chat_list_search_placeholder">Buscar conversación</string>
+    <string name="chat_list_no_search_results">No encontramos conversaciones con ese nombre</string>
     <string name="chat_back_cd">Volver</string>
     <string name="chat_input_placeholder">Escribe un mensaje…</string>
     <string name="chat_send_cd">Enviar</string>
@@ -151,6 +153,11 @@
     <string name="review_aspect_performance">Rendimiento</string>
     <string name="review_photos_label">Agrega Fotos</string>
     <string name="review_add_photo_cd">Agregar foto</string>
+    <string name="review_remove_photo_cd">Quitar foto</string>
+    <string name="review_photo_source_title">Agregar foto</string>
+    <string name="review_photo_source_camera">Tomar foto</string>
+    <string name="review_photo_source_gallery">Elegir de galería</string>
+    <string name="review_photo_source_cancel">Cancelar</string>
     <string name="review_publish_button">Publicar reseña</string>
     <string name="car_detail_write_review">Escribir reseña</string>
     <string name="review_edit_top_bar_title">Editar reseña</string>

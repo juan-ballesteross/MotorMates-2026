@@ -25,7 +25,10 @@ data class VehicleDto(
     @SerializedName("velocidadMaxima") val velocidadMaxima: String?,
     @SerializedName("traccion") val traccion: String?,
     @SerializedName("createdAt") val createdAt: String?,
-    @SerializedName("updatedAt") val updatedAt: String?
+    @SerializedName("updatedAt") val updatedAt: String?,
+    @SerializedName("ownerId") val ownerId: String? = null,
+    @SerializedName("ownerName") val ownerName: String? = null,
+    @SerializedName("ownerAvatarUrl") val ownerAvatarUrl: String? = null
 ) : VehicleDtoGeneric {
     override fun toDomain(): Vehicle = mapToDomain()
 }

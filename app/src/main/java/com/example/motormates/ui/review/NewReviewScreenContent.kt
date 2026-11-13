@@ -1,5 +1,6 @@
 package com.example.motormates.ui.review
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,11 +26,11 @@ import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.data.model.ReviewAspect
 import com.example.motormates.data.model.ReviewCarSummary
-import com.example.motormates.ui.review.components.ReviewAddPhotoButton
 import com.example.motormates.ui.review.components.ReviewAspectChips
 import com.example.motormates.ui.review.components.ReviewCarCard
 import com.example.motormates.ui.review.components.ReviewExperienceField
 import com.example.motormates.ui.review.components.ReviewLocationRow
+import com.example.motormates.ui.review.components.ReviewPhotosRow
 import com.example.motormates.ui.review.components.ReviewStarRating
 
 /**
@@ -44,8 +45,11 @@ fun NewReviewScreenContent(
     onExperienceChange: (String) -> Unit,
     selectedAspects: Set<ReviewAspect>,
     onToggleAspect: (ReviewAspect) -> Unit,
-    photoCount: Int,
+    existingImageUrls: List<String>,
+    newPhotoUris: List<Uri>,
     onAddPhotoClick: () -> Unit,
+    onRemoveExistingPhoto: (String) -> Unit,
+    onRemoveNewPhoto: (Uri) -> Unit,
     canPublish: Boolean,
     onPublishClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -108,7 +112,13 @@ fun NewReviewScreenContent(
             fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(14.dp))
-        ReviewAddPhotoButton(photoCount = photoCount, onClick = onAddPhotoClick)
+        ReviewPhotosRow(
+            existingImageUrls = existingImageUrls,
+            newPhotoUris = newPhotoUris,
+            onAddClick = onAddPhotoClick,
+            onRemoveExisting = onRemoveExistingPhoto,
+            onRemoveNew = onRemoveNewPhoto
+        )
 
         // Solo al crear: editar una reseña no cambia dónde se publicó, así
         // que no hay nada que mostrar ni que decidir.

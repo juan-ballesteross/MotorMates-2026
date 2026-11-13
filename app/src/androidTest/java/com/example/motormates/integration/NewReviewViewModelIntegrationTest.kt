@@ -41,7 +41,7 @@ class NewReviewViewModelIntegrationTest {
     private val vehicleDataSource = FirestoreVehicleDataSource(firestore)
 
     private val reviewRepository = ReviewRepositoryImpl(
-        remoteDataSource = FirestoreReviewDataSource(firestore),
+        remoteDataSource = FirestoreReviewDataSource(firestore, FirebaseEmulator.storage),
         realtimeDataSource = FirestoreReviewRealtimeDataSource(firestore),
         vehicleDataSource = vehicleDataSource,
         userDataSource = userDataSource,
