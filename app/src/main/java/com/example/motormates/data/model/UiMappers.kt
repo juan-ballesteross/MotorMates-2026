@@ -16,7 +16,10 @@ fun Vehicle.toFeedVehicleUi(): FeedVehicleUi = FeedVehicleUi(
     model = model,
     year = year,
     category = category,
-    imageUrl = imageUrl
+    imageUrl = imageUrl,
+    ownerId = ownerId,
+    ownerName = if (ownerId != null) (ownerName?.ifBlank { null } ?: "Usuario") else null,
+    ownerAvatarUrl = ownerAvatarUrl
 )
 
 /**
@@ -36,7 +39,10 @@ fun Vehicle.toCarDetailUi(reviews: List<Review>): CarDetailUi = CarDetailUi(
     potencia = potencia ?: "—",
     aceleracion = aceleracion ?: "—",
     velocidadMaxima = velocidadMaxima ?: "—",
-    traccion = traccion ?: "—"
+    traccion = traccion ?: "—",
+    ownerId = ownerId,
+    ownerName = if (ownerId != null) (ownerName?.ifBlank { null } ?: "Usuario") else null,
+    ownerAvatarUrl = ownerAvatarUrl
 )
 
 fun Vehicle.toReviewCarSummary(): ReviewCarSummary = ReviewCarSummary(
@@ -60,7 +66,8 @@ fun Review.toReviewUi(currentUserId: String?, likedReviewIds: Set<String> = empt
     comentario = comment.orEmpty(),
     isMine = userId == currentUserId,
     likesCount = likesCount,
-    isLikedByMe = id in likedReviewIds
+    isLikedByMe = id in likedReviewIds,
+    imageUrls = imageUrls
 )
 
 /**

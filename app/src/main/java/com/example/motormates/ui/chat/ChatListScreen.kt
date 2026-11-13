@@ -37,7 +37,11 @@ fun ChatListScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        ChatListTopBar(onBackClick = onBackClick)
+        ChatListTopBar(
+            query = uiState.searchQuery,
+            onQueryChange = viewModel::updateSearchQuery,
+            onBackClick = onBackClick
+        )
 
         when {
             uiState.isLoading -> Box(
@@ -67,7 +71,11 @@ fun ChatListScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.chat_list_empty),
+                    text = if (uiState.searchQuery.isBlank()) {
+                        stringResource(R.string.chat_list_empty)
+                    } else {
+                        stringResource(R.string.chat_list_no_search_results)
+                    },
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )

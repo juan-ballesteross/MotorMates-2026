@@ -34,7 +34,10 @@ data class FeedVehicleUi(
     val model: String,
     val year: Int,
     val category: String,
-    val imageUrl: String?
+    val imageUrl: String?,
+    val ownerId: String? = null,
+    val ownerName: String? = null,
+    val ownerAvatarUrl: String? = null
 )
 
 /** Las dos vistas del Home: el catálogo de carros o lo que publica la gente que sigo. */

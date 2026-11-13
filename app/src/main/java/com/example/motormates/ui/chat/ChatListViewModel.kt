@@ -27,7 +27,9 @@ class ChatListViewModel @Inject constructor(
             chatRepository.observeChats().collect { result ->
                 result.fold(
                     onSuccess = { chats ->
-                        _uiState.update { it.copy(chats = chats, isLoading = false, errorMessage = null) }
+                        _uiState.update {
+                            it.copy(allChats = chats, isLoading = false, errorMessage = null).filterChats()
+                        }
                     },
                     onFailure = { error ->
                         _uiState.update {
@@ -40,5 +42,18 @@ class ChatListViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun updateSearchQuery(input: String) {
+        _uiState.update { it.copy(searchQuery = input).filterChats() }
+    }
+
+    private fun ChatListUiState.filterChats(): ChatListUiState {
+        val filtered = if (searchQuery.isBlank()) {
+            allChats
+        } else {
+            allChats.filter { chat -> chat.otherUserName.contains(searchQuery, ignoreCase = true) }
+        }
+        return copy(chats = filtered)
     }
 }

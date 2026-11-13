@@ -1,8 +1,10 @@
 package com.example.motormates.ui.vehicleDetail
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,25 +13,34 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.motormates.R
 import com.example.motormates.data.model.CarDetailUi
 import com.example.motormates.data.model.ReviewUi
+import com.example.motormates.data.seed.localAvatarResFor
 import com.example.motormates.ui.vehicleDetail.components.RatingRow
 import com.example.motormates.ui.vehicleDetail.components.ReviewItem
 import com.example.motormates.ui.vehicleDetail.components.SpecStatCard
@@ -120,6 +131,42 @@ fun VehicleDetailContent(
 
                 Spacer(modifier = Modifier.height(6.dp))
                 RatingRow(calificacion = car.calificacion, numeroResenas = car.numeroResenas)
+
+                if (car.ownerId != null) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.clickable { onAuthorClick(car.ownerId) },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val avatarModifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                        val localAvatarRes = localAvatarResFor(car.ownerId)
+                        when {
+                            car.ownerAvatarUrl != null -> AsyncImage(
+                                model = car.ownerAvatarUrl,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = avatarModifier
+                            )
+                            localAvatarRes != null -> Image(
+                                painter = painterResource(localAvatarRes),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = avatarModifier
+                            )
+                            else -> Box(
+                                modifier = avatarModifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = car.ownerName ?: "",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
             }

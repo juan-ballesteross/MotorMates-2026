@@ -15,7 +15,10 @@ data class CarDetailUi(
     val potencia: String,
     val aceleracion: String,
     val velocidadMaxima: String,
-    val traccion: String
+    val traccion: String,
+    val ownerId: String? = null,
+    val ownerName: String? = null,
+    val ownerAvatarUrl: String? = null
 )
 
 /**
@@ -33,5 +36,6 @@ data class ReviewUi(
     val comentario: String,
     val isMine: Boolean = false,
     val likesCount: Int = 0,
-    val isLikedByMe: Boolean = false
+    val isLikedByMe: Boolean = false,
+    val imageUrls: List<String> = emptyList()
 )

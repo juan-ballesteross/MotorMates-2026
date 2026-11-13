@@ -1,5 +1,6 @@
 package com.example.motormates.ui.review
 
+import android.net.Uri
 import com.example.motormates.data.model.ReviewAspect
 import com.example.motormates.data.model.ReviewCarSummary
 
@@ -18,7 +19,8 @@ data class NewReviewUiState(
     val rating: Int = 0,
     val experience: String = "",
     val selectedAspects: Set<ReviewAspect> = emptySet(),
-    val photoCount: Int = 0,
+    val existingImageUrls: List<String> = emptyList(),
+    val newPhotoUris: List<Uri> = emptyList(),
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
