@@ -1,6 +1,7 @@
 package com.example.motormates.e2e
 
 import com.example.motormates.data.dto.ReviewFirestoreDto
+import com.example.motormates.data.dto.ReviewLocationSnapshot
 import com.example.motormates.data.dto.ReviewUserSnapshot
 import com.example.motormates.data.dto.ReviewVehicleSnapshot
 import com.example.motormates.data.dto.UserDto
@@ -66,6 +67,14 @@ object E2ESeed {
 
     private const val REVIEWS_COLLECTION = "reviews"
     private const val ONE_HOUR_MS = 60 * 60 * 1000L
+
+    /** Punto de partida de las ubicaciones de prueba (centro de Bogotá). */
+    private const val MAP_LAT = 4.6280
+    private const val MAP_LNG = -74.0643
+    private const val MAP_OFFSET = 0.01
+
+    /** El lugar que las pruebas esperan ver junto al "hace X" de la reseña. */
+    const val REVIEW_PLACE_NAME = "Chapinero, Bogotá"
 
     private val users by lazy { FirestoreUserDataSource(FirebaseEmulator.firestore) }
 
@@ -154,7 +163,18 @@ object E2ESeed {
                 updatedAt = createdAt,
                 likesCount = 0,
                 user = ReviewUserSnapshot(fullName = AUTHOR_NAME),
-                vehicle = ReviewVehicleSnapshot(brand = BRAND, model = MODEL)
+                vehicle = ReviewVehicleSnapshot(brand = BRAND, model = MODEL),
+                // Todas con ubicación, y todas de hace menos de 24 h (una
+                // hora de diferencia entre cada una), así la pestaña del mapa
+                // tiene marcadores que mostrar. Se separan un poco entre sí
+                // para que no queden una encima de otra.
+                location = ReviewLocationSnapshot(
+                    lat = MAP_LAT + index * MAP_OFFSET,
+                    lng = MAP_LNG - index * MAP_OFFSET,
+                    // Quemado y no geocodificado: las pruebas no deben
+                    // depender de la red ni del servicio de Google.
+                    placeName = REVIEW_PLACE_NAME
+                )
             )
             FirebaseEmulator.firestore
                 .collection(REVIEWS_COLLECTION)

@@ -37,8 +37,35 @@ data class FeedVehicleUi(
     val imageUrl: String?
 )
 
-/** Las dos vistas del Home: el catálogo de carros o lo que publica la gente que sigo. */
-enum class FeedTab { EXPLORAR, SIGUIENDO }
+/**
+ * Las tres vistas del Home: el catálogo de carros, lo que publica la gente que
+ * sigo, o el mapa con las reseñas de las últimas 24 horas.
+ */
+enum class FeedTab { EXPLORAR, SIGUIENDO, MAPA }
+
+/**
+ * Una reseña lista para pintarse como marcador en el mapa. Vive junto a
+ * FeedTab porque el mapa es una de las pestañas del Home.
+ *
+ * lat/lng van como Double y no como el LatLng de Maps a propósito: este
+ * paquete lo consumen pruebas unitarias de JVM puro, y LatLng arrastraría el
+ * SDK de Android. La conversión ocurre en la capa de UI.
+ */
+data class ReviewMapMarkerUi(
+    val id: String,
+    val userId: String,
+    val vehicleId: String,
+    val lat: Double,
+    val lng: Double,
+    val nombreUsuario: String,
+    val avatarUrl: String? = null,
+    val vehicleName: String,
+    val tiempoTexto: String,
+    val calificacion: Int,
+    val comentario: String,
+    /** Dónde se publicó, ya legible. Null si no se le pudo resolver nombre. */
+    val lugarTexto: String? = null
+)
 
 /**
  * Una reseña lista para pintar en el feed de "Siguiendo". Es aparte de
@@ -58,5 +85,7 @@ data class FeedReviewUi(
     val calificacion: Int,
     val comentario: String,
     val likesCount: Int = 0,
-    val isLikedByMe: Boolean = false
+    val isLikedByMe: Boolean = false,
+    /** Dónde se publicó, ya legible. Null si no tiene ubicación o nombre. */
+    val lugarTexto: String? = null
 )

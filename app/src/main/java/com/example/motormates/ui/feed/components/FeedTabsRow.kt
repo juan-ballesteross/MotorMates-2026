@@ -11,12 +11,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.example.motormates.R
 import com.example.motormates.data.model.FeedTab
 import com.example.motormates.ui.theme.Spacing
 
 /**
- * El filtro del Home: "Explorar" muestra el catálogo de carros y
- * "Siguiendo" solo las reseñas de los usuarios que sigo.
+ * El filtro del Home: "Explorar" muestra el catálogo de carros, "Siguiendo"
+ * solo las reseñas de los usuarios que sigo y "Mapa" las reseñas de las
+ * últimas 24 horas sobre un mapa.
  */
 @Composable
 fun FeedTabsRow(
@@ -35,15 +38,16 @@ fun FeedTabsRow(
             FilterChip(
                 selected = tab == selectedTab,
                 onClick = { onTabClick(tab) },
-                label = { Text(text = tab.label) },
+                label = { Text(text = stringResource(tab.labelRes)) },
                 modifier = Modifier.testTag("feedTab_${tab.name.lowercase()}")
             )
         }
     }
 }
 
-private val FeedTab.label: String
+private val FeedTab.labelRes: Int
     get() = when (this) {
-        FeedTab.EXPLORAR -> "Explorar"
-        FeedTab.SIGUIENDO -> "Siguiendo"
+        FeedTab.EXPLORAR -> R.string.feed_tab_explore
+        FeedTab.SIGUIENDO -> R.string.feed_tab_following
+        FeedTab.MAPA -> R.string.feed_tab_map
     }

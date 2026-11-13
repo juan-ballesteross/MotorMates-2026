@@ -29,6 +29,18 @@ interface ReviewApiService {
     @GET("reviews")
     suspend fun getReviewsByUsers(@Query("userIds") userIds: String): List<ReviewDto>
 
+    /**
+     * Mapa de reseñas recientes: las publicadas desde `since` (epoch millis).
+     *
+     * OJO: el backend propio (Express + Postgres) vive en otro repositorio y
+     * todavía no tiene ni las columnas de ubicación ni este parámetro, así que
+     * hoy responde 404. Se declara igual para que las dos implementaciones de
+     * ReviewRealtimeDataSource cumplan el mismo contrato; con
+     * ACTIVE_BACKEND = FIREBASE (el valor actual) esto no se usa.
+     */
+    @GET("reviews")
+    suspend fun getRecentReviews(@Query("since") since: Long): List<ReviewDto>
+
     @POST("reviews")
     suspend fun createReview(@Body body: CreateReviewRequest): ReviewDto
 

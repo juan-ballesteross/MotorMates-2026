@@ -2,15 +2,18 @@ package com.example.motormates.integration
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.motormates.data.dto.UserDto
+import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.repository.NotificationRepositoryImpl
 import com.example.motormates.data.repository.ReviewRepositoryImpl
 import com.example.motormates.data.repository.VehicleRepositoryImpl
+import com.example.motormates.data.source.DeviceLocationDataSource
 import com.example.motormates.data.source.FirebaseAuthDataSource
 import com.example.motormates.data.source.FirestoreNotificationDataSource
 import com.example.motormates.data.source.FirestoreReviewDataSource
 import com.example.motormates.data.source.FirestoreReviewRealtimeDataSource
 import com.example.motormates.data.source.FirestoreUserDataSource
 import com.example.motormates.data.source.FirestoreVehicleDataSource
+import com.example.motormates.data.source.PlaceNameDataSource
 import com.example.motormates.ui.review.NewReviewUiState
 import com.example.motormates.ui.review.NewReviewViewModel
 import com.google.common.truth.Truth.assertThat
@@ -58,7 +61,15 @@ class NewReviewViewModelIntegrationTest {
         FirebaseEmulator.seedVehicle(id = "1", brand = "Porsche", model = "911 GT3")
         uid = FirebaseEmulator.signInAs(EMAIL)
         userDataSource.createUser(UserDto(id = uid, fullName = "Jose Perfil", email = EMAIL, username = "jose"))
-        viewModel = NewReviewViewModel(VehicleRepositoryImpl(vehicleDataSource), reviewRepository)
+        // La ubicación se stubea a null en vez de usar la real: el emulador
+        // no tiene GPS, y aquí lo que se prueba es que el ViewModel y
+        // Firestore encajen, no de dónde sale la coordenada.
+        viewModel = NewReviewViewModel(
+            VehicleRepositoryImpl(vehicleDataSource),
+            reviewRepository,
+            NoLocationDataSource,
+            NoPlaceNameDataSource
+        )
     }
 
     @After
@@ -116,4 +127,21 @@ class NewReviewViewModelIntegrationTest {
     private companion object {
         const val EMAIL = "jose@motormates.com"
     }
+}
+
+/**
+ * Fuente de ubicación que nunca tiene posición, que es justo lo que pasa en
+ * un emulador sin GPS configurado. Mantiene estas pruebas enfocadas en la
+ * reseña y no en la ubicación.
+ */
+private object NoLocationDataSource : DeviceLocationDataSource {
+    override suspend fun lastKnownLocation(): ReviewLocation? = null
+}
+
+/**
+ * El Geocoder necesita red y servicio de Google; estas pruebas corren contra
+ * el emulador de Firebase y no deberían depender de eso.
+ */
+private object NoPlaceNameDataSource : PlaceNameDataSource {
+    override suspend fun placeNameFor(location: ReviewLocation): String? = null
 }

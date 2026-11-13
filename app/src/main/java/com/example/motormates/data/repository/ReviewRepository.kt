@@ -5,6 +5,7 @@ import com.example.motormates.data.model.NewReview
 import com.example.motormates.data.model.NotificationType
 import com.example.motormates.data.model.Review
 import com.example.motormates.data.model.ReviewAuthor
+import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
 import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
 import com.example.motormates.data.source.AuthDataSource
@@ -32,8 +33,28 @@ interface ReviewRepository {
     fun observeReviewsByVehicle(vehicleId: String): Flow<Result<List<Review>>>
     fun observeReviewsByUsers(userIds: List<String>): Flow<Result<List<Review>>>
 
-    /** El autor es siempre el usuario autenticado: no se recibe por parámetro. */
-    suspend fun createReview(vehicleId: String, rating: Int, comment: String?): Result<Review>
+    /**
+     * Las reseñas publicadas desde sinceMillis (epoch en millis), de cualquier
+     * usuario y vehículo. Es la del mapa: quien la consuma decide la ventana
+     * de tiempo y descarta las que no tengan ubicación.
+     */
+    fun observeRecentReviews(sinceMillis: Long): Flow<Result<List<Review>>>
+
+    /**
+     * El autor es siempre el usuario autenticado: no se recibe por parámetro.
+     *
+     * location va sin valor por defecto a propósito, aunque casi siempre se
+     * pase null: con un default, Kotlin lo rellenaría también dentro de los
+     * `coEvery` de las pruebas, y el stub quedaría grabado para "sin
+     * ubicación" mientras la app llama con ubicación. Eso no falla al
+     * compilar, falla en ejecución. Obligatorio = cada llamada decide.
+     */
+    suspend fun createReview(
+        vehicleId: String,
+        rating: Int,
+        comment: String?,
+        location: ReviewLocation?
+    ): Result<Review>
     suspend fun updateReview(reviewId: String, rating: Int?, comment: String?): Result<Review>
     suspend fun deleteReview(reviewId: String): Result<Unit>
 }
@@ -70,13 +91,27 @@ class ReviewRepositoryImpl @Inject constructor(
         realtimeDataSource.observeReviewsByUsers(userIds).toDomainResults()
 
     /**
+     * Va con refreshAuthors = false: la tarjeta del mapa solo muestra nombre y
+     * foto, que es exactamente la copia desnormalizada que la reseña ya trae
+     * dentro. Refrescar aquí costaría una lectura de "users" por autor en cada
+     * emisión del listener, y el listener reemite con cada like de cualquier
+     * reseña reciente. Es un alfiler en un mapa, no un perfil.
+     */
+    override fun observeRecentReviews(sinceMillis: Long): Flow<Result<List<Review>>> =
+        realtimeDataSource.observeRecentReviews(sinceMillis).toDomainResults(refreshAuthors = false)
+
+    /**
      * safeCall no sirve aquí porque es suspend y envuelve una sola llamada:
      * un Flow puede fallar en cualquier emisión, así que el error se atrapa
      * con catch y se emite como Result.failure, igual que en el resto.
      */
-    private fun Flow<List<ReviewDtoGeneric>>.toDomainResults(): Flow<Result<List<Review>>> =
-        map { dtos -> Result.success(dtos.map { it.toDomain() }.withCurrentAuthors()) }
-            .catch { emit(Result.failure(Exception("No se pudieron cargar las reseñas"))) }
+    private fun Flow<List<ReviewDtoGeneric>>.toDomainResults(
+        refreshAuthors: Boolean = true
+    ): Flow<Result<List<Review>>> =
+        map { dtos ->
+            val reviews = dtos.map { it.toDomain() }
+            Result.success(if (refreshAuthors) reviews.withCurrentAuthors() else reviews)
+        }.catch { emit(Result.failure(Exception("No se pudieron cargar las reseñas"))) }
 
     /**
      * La reseña trae una copia del autor guardada al publicarla, que queda
@@ -105,7 +140,8 @@ class ReviewRepositoryImpl @Inject constructor(
     override suspend fun createReview(
         vehicleId: String,
         rating: Int,
-        comment: String?
+        comment: String?,
+        location: ReviewLocation?
     ): Result<Review> {
         val currentUser = authDataSource.getCurrentUser()
             ?: return Result.failure(Exception("Debes iniciar sesión para publicar una reseña"))
@@ -131,7 +167,8 @@ class ReviewRepositoryImpl @Inject constructor(
                         ?: "Usuario",
                     authorAvatarUrl = profile?.avatarUrl ?: currentUser.photoUrl,
                     vehicleBrand = vehicle.brand,
-                    vehicleModel = vehicle.model
+                    vehicleModel = vehicle.model,
+                    location = location
                 )
             ).toDomain()
         }

@@ -27,11 +27,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.motormates.R
 import com.example.motormates.data.model.FeedReviewUi
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
@@ -72,9 +74,14 @@ fun FollowingReviewCard(
                     fontSize = 14.sp
                 )
                 Text(
-                    text = review.tiempoTexto,
+                    // Con lugar queda "hace 2 h · Chapinero, Bogotá".
+                    text = review.lugarTexto?.let {
+                        stringResource(R.string.review_time_with_place, review.tiempoTexto, it)
+                    } ?: review.tiempoTexto,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

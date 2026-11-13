@@ -156,6 +156,29 @@
     <string name="review_edit_top_bar_title">Editar reseña</string>
     <string name="review_save_button">Guardar cambios</string>
 
+    <!-- Ubicación de la reseña -->
+    <string name="review_location_label">Ubicación</string>
+    <string name="review_location_loading">Obteniendo ubicación…</string>
+    <string name="review_location_unnamed">Ubicación guardada</string>
+    <string name="review_location_unavailable">Sin ubicación</string>
+    <string name="review_location_enable">Activar</string>
+    <string name="review_location_remove_cd">Quitar la ubicación</string>
+    <!-- "hace 2 h · Chapinero, Bogotá" -->
+    <string name="review_time_with_place">%1$s · %2$s</string>
+
+    <!-- Pestañas del Feed -->
+    <string name="feed_tab_explore">Explorar</string>
+    <string name="feed_tab_following">Siguiendo</string>
+    <string name="feed_tab_map">Mapa</string>
+
+    <!-- Mapa de reseñas recientes -->
+    <string name="reviews_map_empty">Nadie ha publicado reseñas con ubicación en las últimas 24 horas</string>
+    <string name="reviews_map_retry">Reintentar</string>
+    <string name="reviews_map_marker_cd">Reseña de %1$s en %2$s</string>
+    <string name="reviews_map_close_card_cd">Cerrar la reseña</string>
+    <string name="reviews_map_rating_cd">%1$d de 5 estrellas</string>
+    <string name="reviews_map_avatar_cd">Foto de %1$s</string>
+
     <!-- Notificaciones push (FCM) -->
     <string name="notification_channel_id">motormates_general</string>
     <string name="notification_channel_name">Actividad de MotorMates</string>

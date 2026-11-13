@@ -29,6 +29,7 @@ import com.example.motormates.ui.review.components.ReviewAddPhotoButton
 import com.example.motormates.ui.review.components.ReviewAspectChips
 import com.example.motormates.ui.review.components.ReviewCarCard
 import com.example.motormates.ui.review.components.ReviewExperienceField
+import com.example.motormates.ui.review.components.ReviewLocationRow
 import com.example.motormates.ui.review.components.ReviewStarRating
 
 /**
@@ -49,7 +50,13 @@ fun NewReviewScreenContent(
     onPublishClick: () -> Unit,
     modifier: Modifier = Modifier,
     isEditing: Boolean = false,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    locationPlaceName: String? = null,
+    hasLocation: Boolean = false,
+    isLocationLoading: Boolean = false,
+    isLocationUnavailable: Boolean = false,
+    onRetryLocationClick: () -> Unit = {},
+    onRemoveLocationClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -102,6 +109,26 @@ fun NewReviewScreenContent(
         )
         Spacer(modifier = Modifier.height(14.dp))
         ReviewAddPhotoButton(photoCount = photoCount, onClick = onAddPhotoClick)
+
+        // Solo al crear: editar una reseña no cambia dónde se publicó, así
+        // que no hay nada que mostrar ni que decidir.
+        if (!isEditing) {
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = stringResource(R.string.review_location_label),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            ReviewLocationRow(
+                placeName = locationPlaceName,
+                hasLocation = hasLocation,
+                isLoading = isLocationLoading,
+                isUnavailable = isLocationUnavailable,
+                onRetryClick = onRetryLocationClick,
+                onRemoveClick = onRemoveLocationClick
+            )
+        }
 
         if (errorMessage != null) {
             Spacer(modifier = Modifier.height(24.dp))

@@ -8,6 +8,7 @@ import com.example.motormates.data.dto.VehicleFirestoreDto
 import com.example.motormates.data.model.AuthUser
 import com.example.motormates.data.model.NewReview
 import com.example.motormates.data.model.NotificationType
+import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.remote.datasource.ReviewRemoteDataSource
 import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
 import com.example.motormates.data.source.AuthDataSource
@@ -156,7 +157,12 @@ class ReviewRepositoryImplMockTest {
         coEvery { remoteDataSource.getReviewsByVehicle("1") } returns emptyList()
 
         // Act
-        val result = repository.createReview(vehicleId = "1", rating = 5, comment = "Brutal")
+        val result = repository.createReview(
+            vehicleId = "1",
+            rating = 5,
+            comment = "Brutal",
+            location = ReviewLocation(lat = 4.6280, lng = -74.0643)
+        )
 
         // Assert
         assertThat(result.isSuccess).isTrue()
@@ -165,13 +171,14 @@ class ReviewRepositoryImplMockTest {
         assertThat(sent.captured.vehicleBrand).isEqualTo("Porsche")
         assertThat(sent.captured.vehicleModel).isEqualTo("911 GT3")
         assertThat(sent.captured.rating).isEqualTo(5)
+        assertThat(sent.captured.location).isEqualTo(ReviewLocation(lat = 4.6280, lng = -74.0643))
     }
 
     @Test
     fun `createReview con calificacion fuera de rango falla y no escribe`() = runTest {
         every { authDataSource.getCurrentUser() } returns AuthUser(id = "uid-jose", email = null, displayName = null)
 
-        val result = repository.createReview(vehicleId = "1", rating = 7, comment = null)
+        val result = repository.createReview(vehicleId = "1", rating = 7, comment = null, location = null)
 
         assertThat(result.exceptionOrNull()?.message).isEqualTo("La calificación debe ser un número entre 0 y 5")
         coVerify(exactly = 0) { remoteDataSource.createReview(any()) }
@@ -188,7 +195,7 @@ class ReviewRepositoryImplMockTest {
             reviewDto(id = "vieja", userId = "uid-otro")
         )
 
-        repository.createReview(vehicleId = "1", rating = 5, comment = null)
+        repository.createReview(vehicleId = "1", rating = 5, comment = null, location = null)
 
         coVerify(exactly = 1) {
             notificationRepository.notify("uid-otro", NotificationType.REVIEW, "uid-jose", "1", "nueva")

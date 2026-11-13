@@ -2,6 +2,7 @@ package com.example.motormates.data.source
 
 import com.example.motormates.data.dto.ReviewDtoGeneric
 import com.example.motormates.data.dto.ReviewFirestoreDto
+import com.example.motormates.data.dto.ReviewLocationSnapshot
 import com.example.motormates.data.dto.ReviewUserSnapshot
 import com.example.motormates.data.dto.ReviewVehicleSnapshot
 import com.example.motormates.data.model.NewReview
@@ -39,13 +40,23 @@ class FirestoreReviewDataSource @Inject constructor(
             vehicle = ReviewVehicleSnapshot(
                 brand = review.vehicleBrand,
                 model = review.vehicleModel
-            )
+            ),
+            // Si no hay ubicación el campo no se escribe (queda null): la
+            // reseña existe igual, solo que no sale en el mapa.
+            location = review.location?.let {
+                ReviewLocationSnapshot(lat = it.lat, lng = it.lng, placeName = it.placeName)
+            }
         )
         // add() deja que Firestore genere el id del documento.
         val ref = reviews.add(dto).await()
         return dto.copy(id = ref.id)
     }
 
+    /**
+     * Solo toca los campos que llegan, así que la ubicación original
+     * sobrevive intacta a una edición: editar el texto de una reseña no
+     * cambia el lugar donde se publicó.
+     */
     override suspend fun updateReview(id: String, rating: Int?, comment: String?): ReviewDtoGeneric {
         val changes = mutableMapOf<String, Any>("updatedAt" to System.currentTimeMillis())
         rating?.let { changes["rating"] = it }

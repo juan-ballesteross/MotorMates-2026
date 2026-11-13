@@ -172,14 +172,23 @@ function makeUser(index) {
   };
 }
 
-/** Factoría de reseña, con el autor y el vehículo desnormalizados dentro. */
-function makeReview(index, author, vehicle) {
+/**
+ * Factoría de reseña, con el autor y el vehículo desnormalizados dentro.
+ *
+ * isRecent lo manda quien llama para la primera reseña de cada vehículo: esa
+ * se fecha dentro de las últimas 24 h para que el mapa de reseñas recientes
+ * nunca salga vacío después de sembrar. Las demás se reparten en el último
+ * mes, así el feed sigue viéndose variado.
+ */
+function makeReview(index, author, vehicle, isRecent = false) {
   const rating = faker.number.int({ min: 3, max: 5 });
   // Una reseña de 5 no lleva queja; las de 3 y 4 sí.
   const gripe = rating === 5 ? "" : `, ${faker.helpers.arrayElement(COMMENT_GRIPE)}`;
   const comment = `${faker.helpers.arrayElement(COMMENT_OPENERS)} ` +
     `${faker.helpers.arrayElement(COMMENT_PRAISE)}${gripe}.`;
-  const createdAt = faker.date.recent({ days: 30 }).getTime();
+  const createdAt = isRecent
+    ? Date.now() - faker.number.int({ min: 1, max: 20 }) * 60 * 60 * 1000
+    : faker.date.recent({ days: 30 }).getTime();
 
   return {
     id: `seed_review_${index + 1}`,
@@ -192,6 +201,31 @@ function makeReview(index, author, vehicle) {
     likesCount: 0, // se ajusta al repartir los likes
     user: { fullName: author.fullName, avatarUrl: author.avatarUrl },
     vehicle: { brand: vehicle.brand, model: vehicle.model },
+    // Dónde se publicó, para el mapa de reseñas recientes. Se reparten por
+    // Bogotá con 1-3 km de separación para que los marcadores se distingan.
+    location: randomBogotaLocation(),
+  };
+}
+
+const BOGOTA_NEIGHBORHOODS = [
+  "Chapinero", "Usaquén", "Teusaquillo", "La Candelaria", "Suba",
+  "Kennedy", "Barrios Unidos", "Niza", "Cedritos", "Bosa",
+];
+
+/**
+ * Un punto al azar dentro de Bogotá, con su nombre. El rango va de 4.55 a
+ * 4.75 de latitud y de -74.15 a -74.03 de longitud, que es más o menos el
+ * área urbana.
+ *
+ * El nombre se escoge de una lista en vez de geocodificar: el seeder no
+ * debería depender de una API externa, y para datos de demostración basta con
+ * que el barrio sea verosímil.
+ */
+function randomBogotaLocation() {
+  return {
+    lat: Number(faker.number.float({ min: 4.55, max: 4.75, fractionDigits: 4 })),
+    lng: Number(faker.number.float({ min: -74.15, max: -74.03, fractionDigits: 4 })),
+    placeName: `${faker.helpers.arrayElement(BOGOTA_NEIGHBORHOODS)}, Bogotá`,
   };
 }
 
@@ -211,7 +245,10 @@ function buildData() {
       min: MIN_REVIEWS_PER_VEHICLE,
       max: MAX_REVIEWS_PER_VEHICLE,
     });
-    authors.forEach((author) => reviews.push(makeReview(reviews.length, author, vehicle)));
+    // La primera de cada vehículo se fecha dentro de las últimas 24 h, para
+    // que el mapa de reseñas recientes tenga siempre algo que mostrar.
+    authors.forEach((author, i) =>
+      reviews.push(makeReview(reviews.length, author, vehicle, i === 0)));
   });
 
   // Likes: cualquiera menos el propio autor.

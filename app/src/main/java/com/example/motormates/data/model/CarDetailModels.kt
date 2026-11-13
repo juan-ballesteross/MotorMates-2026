@@ -33,5 +33,11 @@ data class ReviewUi(
     val comentario: String,
     val isMine: Boolean = false,
     val likesCount: Int = 0,
-    val isLikedByMe: Boolean = false
+    val isLikedByMe: Boolean = false,
+    /**
+     * Dónde se publicó, ya legible ("Chapinero, Bogotá"). Null cuando la
+     * reseña no tiene ubicación o no se le pudo resolver el nombre: en ese
+     * caso la pantalla no muestra lugar.
+     */
+    val lugarTexto: String? = null
 )

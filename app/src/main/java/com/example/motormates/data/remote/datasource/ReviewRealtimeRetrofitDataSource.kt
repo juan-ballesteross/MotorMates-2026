@@ -25,4 +25,18 @@ class ReviewRealtimeRetrofitDataSource @Inject constructor(
         val ids = userIds.joinToString(",")
         return pollingFlow { service.getReviewsByUsers(ids) }
     }
+
+    /**
+     * Pendiente del lado del servidor: el backend propio todavía no guarda la
+     * ubicación de las reseñas ni acepta el parámetro `since`, así que esta
+     * llamada falla y el repositorio la convierte en Result.failure (el mapa
+     * mostraría su mensaje de error). Con ACTIVE_BACKEND = FIREBASE, que es
+     * el valor actual, este código no se ejecuta.
+     *
+     * Se implementa igual y no con un emptyList() silencioso: así, cuando el
+     * backend añada la columna y el parámetro, el mapa funciona sin tocar
+     * nada acá.
+     */
+    override fun observeRecentReviews(sinceMillis: Long): Flow<List<ReviewDtoGeneric>> =
+        pollingFlow { service.getRecentReviews(sinceMillis) }
 }

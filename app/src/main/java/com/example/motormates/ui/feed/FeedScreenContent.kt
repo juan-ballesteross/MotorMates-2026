@@ -102,6 +102,11 @@ fun FeedScreenContent(
                 }
             }
 
+            // El mapa no se pinta acá: un GoogleMap no cabe dentro de un
+            // LazyColumn (recibe alto infinito y se pelea el scroll), así que
+            // lo compone FeedScreen directamente, por fuera de esta lista.
+            FeedTab.MAPA -> Unit
+
             FeedTab.SIGUIENDO -> feedSection(
                 isLoading = isFollowingLoading,
                 errorMessage = followingErrorMessage,

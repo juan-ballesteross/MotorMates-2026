@@ -2,6 +2,7 @@ package com.example.motormates.data.remote.mapper
 
 import com.example.motormates.data.model.Review
 import com.example.motormates.data.model.ReviewAuthor
+import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.model.ReviewVehicleRef
 import com.example.motormates.data.model.Vehicle
 import com.example.motormates.data.remote.dto.ReviewDto
@@ -44,5 +45,11 @@ internal fun ReviewDto.mapToDomain(): Review = Review(
     createdAt = createdAt,
     likesCount = likesCount,
     author = user?.toDomain(),
-    vehicle = vehicle?.toDomain()
+    vehicle = vehicle?.toDomain(),
+    // Solo hay ubicación si llegan las dos coordenadas: una sola no ubica nada.
+    location = if (lat != null && lng != null) {
+        ReviewLocation(lat = lat, lng = lng, placeName = placeName?.ifBlank { null })
+    } else {
+        null
+    }
 )
