@@ -51,7 +51,7 @@ fun FeedScreen(
         // previews. Al vivir en la rama, el mapa solo se crea cuando la
         // pestaña está activa y se destruye al salir, liberando la MapView.
         if (uiState.selectedTab == FeedTab.MAPA) {
-            ReviewsMapScreen(onVehicleClick = onVehicleClick)
+            ReviewsMapScreen(onVehicleClick = onVehicleClick, onAuthorClick = onAuthorClick)
             return@Column
         }
 

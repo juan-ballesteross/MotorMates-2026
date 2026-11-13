@@ -6,6 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.motormates.ui.reviewsMap.components.LocationPermissionDialogs
+import com.example.motormates.ui.reviewsMap.components.rememberLocationPermissionHandler
 
 /**
  * El mapa con las reseñas publicadas en las últimas 24 horas.
@@ -17,6 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun ReviewsMapScreen(
     onVehicleClick: (String) -> Unit = {},
+    onAuthorClick: (String) -> Unit = {},
     viewModel: ReviewsMapViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -27,16 +30,28 @@ fun ReviewsMapScreen(
     // mantiene fresca.
     LaunchedEffect(Unit) { viewModel.start() }
 
+    // Permiso, ubicación del teléfono y Play Services. El mapa se ve igual
+    // sin permiso: esto solo habilita "Mi ubicación".
+    val locationHandler = rememberLocationPermissionHandler(
+        onAccessChanged = viewModel::onLocationAccessChanged,
+        onReady = viewModel::centerOnMyLocation
+    )
+    LocationPermissionDialogs(locationHandler)
+
     ReviewsMapContent(
-        markers = uiState.markers,
-        selectedMarker = uiState.selectedMarker,
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
-        isEmpty = uiState.isEmpty,
+        uiState = uiState,
         onMarkerClick = viewModel::onMarkerClick,
         onDismissSelection = viewModel::clearSelection,
+        onClusterClick = viewModel::onClusterClick,
+        onDismissCluster = viewModel::dismissClusterSelection,
         onVehicleClick = onVehicleClick,
+        onAuthorClick = onAuthorClick,
         onRetryClick = viewModel::retry,
+        onCameraFitted = viewModel::onCameraFitted,
+        onCameraIdle = viewModel::onCameraIdle,
+        onMyLocationClick = locationHandler::request,
+        onMyLocationTargetConsumed = viewModel::consumeMyLocationTarget,
+        onLocationMessageShown = viewModel::clearLocationMessage,
         modifier = modifier
     )
 }

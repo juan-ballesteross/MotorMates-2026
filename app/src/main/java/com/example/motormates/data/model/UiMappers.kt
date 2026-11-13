@@ -94,8 +94,12 @@ fun Review.toFeedReviewUi(
  * Es el único mapper que devuelve null, y es a propósito: la regla "sin
  * ubicación no hay marcador" queda en un solo lugar y se puede probar
  * directamente, en vez de repartida en filtros por la UI.
+ *
+ * vehicleImageUrl llega por parámetro por la misma razón que en
+ * toUserReviewUi: la reseña no trae la foto del carro, la resuelve el
+ * ViewModel con el catálogo.
  */
-fun Review.toReviewMapMarkerUi(): ReviewMapMarkerUi? {
+fun Review.toReviewMapMarkerUi(vehicleImageUrl: String? = null): ReviewMapMarkerUi? {
     val location = location ?: return null
     return ReviewMapMarkerUi(
         id = id,
@@ -111,7 +115,9 @@ fun Review.toReviewMapMarkerUi(): ReviewMapMarkerUi? {
         tiempoTexto = createdAt.toRelativeTimeEs(),
         calificacion = rating.coerceIn(0, 5),
         comentario = comment.orEmpty(),
-        lugarTexto = location.placeName
+        lugarTexto = location.placeName,
+        vehicleImageUrl = vehicleImageUrl?.ifBlank { null },
+        likesCount = likesCount.coerceAtLeast(0)
     )
 }
 

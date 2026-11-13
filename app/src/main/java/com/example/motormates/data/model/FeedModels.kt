@@ -64,7 +64,10 @@ data class ReviewMapMarkerUi(
     val calificacion: Int,
     val comentario: String,
     /** Dónde se publicó, ya legible. Null si no se le pudo resolver nombre. */
-    val lugarTexto: String? = null
+    val lugarTexto: String? = null,
+    /** Foto del carro (catálogo). Es la imagen del marcador; null = ícono de respaldo. */
+    val vehicleImageUrl: String? = null,
+    val likesCount: Int = 0
 )
 
 /**

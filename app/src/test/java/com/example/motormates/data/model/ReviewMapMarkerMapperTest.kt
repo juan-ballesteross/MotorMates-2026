@@ -74,6 +74,22 @@ class ReviewMapMarkerMapperTest {
         assertThat(review(location = bogota, comment = null).toReviewMapMarkerUi()?.comentario).isEmpty()
     }
 
+    @Test
+    fun `la foto del carro y los likes pasan al marcador`() {
+        val marker = review(location = bogota).copy(likesCount = 7)
+            .toReviewMapMarkerUi(vehicleImageUrl = "https://porsche.jpg")
+
+        assertThat(marker?.vehicleImageUrl).isEqualTo("https://porsche.jpg")
+        assertThat(marker?.likesCount).isEqualTo(7)
+    }
+
+    @Test
+    fun `una foto en blanco queda null para usar el icono de respaldo`() {
+        val marker = review(location = bogota).toReviewMapMarkerUi(vehicleImageUrl = "  ")
+
+        assertThat(marker?.vehicleImageUrl).isNull()
+    }
+
     // ---------- toEpochMillisOrNull ----------
     // Es lo que permite recortar la ventana de 24 h en memoria: el dominio ya
     // perdió los millis y guarda la fecha como texto ISO.

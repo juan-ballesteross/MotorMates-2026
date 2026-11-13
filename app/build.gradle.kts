@@ -96,6 +96,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.maps.compose)
+    implementation(libs.maps.compose.utils)
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
     implementation("androidx.compose.ui:ui-text-google-fonts:1.12.0")

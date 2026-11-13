@@ -178,6 +178,30 @@
     <string name="reviews_map_close_card_cd">Cerrar la reseña</string>
     <string name="reviews_map_rating_cd">%1$d de 5 estrellas</string>
     <string name="reviews_map_avatar_cd">Foto de %1$s</string>
+    <string name="reviews_map_my_location_cd">Centrar en mi ubicación</string>
+    <string name="reviews_map_fit_all_cd">Ver todas las reseñas</string>
+    <string name="reviews_map_view_profile">Ver perfil</string>
+    <string name="reviews_map_view_vehicle">Ver vehículo</string>
+    <string name="reviews_map_vehicle_photo_cd">Foto del %1$s</string>
+    <string name="reviews_map_location_rationale_title">Usar tu ubicación</string>
+    <string name="reviews_map_location_rationale_body">Con tu ubicación podemos centrar el mapa donde estás para que veas las reseñas cercanas. Solo se usa en tu teléfono y no se comparte.</string>
+    <string name="reviews_map_location_allow">Permitir</string>
+    <string name="reviews_map_location_not_now">Ahora no</string>
+    <string name="reviews_map_location_settings_title">Ubicación desactivada para MotorMates</string>
+    <string name="reviews_map_location_settings_body">Negaste el permiso de ubicación y Android ya no nos deja volver a pedirlo. Puedes activarlo en Ajustes → Permisos → Ubicación.</string>
+    <string name="reviews_map_location_open_settings">Abrir Ajustes</string>
+    <plurals name="reviews_map_count">
+        <item quantity="one">%1$d reseña · últimas 24 h</item>
+        <item quantity="other">%1$d reseñas · últimas 24 h</item>
+    </plurals>
+    <plurals name="reviews_map_new_chip">
+        <item quantity="one">%1$d reseña nueva</item>
+        <item quantity="other">%1$d reseñas nuevas</item>
+    </plurals>
+    <plurals name="reviews_map_cluster_title">
+        <item quantity="one">%1$d reseña en este lugar</item>
+        <item quantity="other">%1$d reseñas en este lugar</item>
+    </plurals>
 
     <!-- Notificaciones push (FCM) -->
     <string name="notification_channel_id">motormates_general</string>

@@ -2,6 +2,7 @@ package com.example.motormates.ui.reviewsMap.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
@@ -22,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +35,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,9 +60,10 @@ fun ReviewMarkerCard(
     marker: ReviewMapMarkerUi,
     modifier: Modifier = Modifier,
     onCardClick: (String) -> Unit = {},
+    onAuthorClick: (String) -> Unit = {},
     onCloseClick: () -> Unit = {}
 ) {
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .testTag("reviewMarkerCard")
@@ -65,75 +71,145 @@ fun ReviewMarkerCard(
             .background(MaterialTheme.colorScheme.surface)
             // Al tocar la tarjeta se va al detalle del vehículo reseñado.
             .clickable { onCardClick(marker.vehicleId) }
-            .padding(Spacing.sm),
-        verticalAlignment = Alignment.Top
+            .padding(Spacing.sm)
     ) {
-        AuthorAvatar(avatarUrl = marker.avatarUrl, name = marker.nombreUsuario)
+        Row(verticalAlignment = Alignment.Top) {
+            // La foto del carro, la misma del marcador: así se reconoce cuál se tocó.
+            VehiclePhoto(imageUrl = marker.vehicleImageUrl, name = marker.vehicleName)
 
-        Spacer(modifier = Modifier.width(Spacing.sm))
+            Spacer(modifier = Modifier.width(Spacing.sm))
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = marker.vehicleName,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 15.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "${marker.nombreUsuario} · ${marker.tiempoTexto}",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 12.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            // El lugar va en su propia línea y no pegado al tiempo: en esta
-            // tarjeta la columna es angosta y "Jose · hace 2 h · Chapinero,
-            // Bogotá" se cortaría casi siempre.
-            if (marker.lugarTexto != null) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = marker.vehicleName,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.LocationOn,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(12.dp)
-                    )
+                    AuthorAvatar(avatarUrl = marker.avatarUrl, name = marker.nombreUsuario)
                     Spacer(modifier = Modifier.width(Spacing.xxs))
                     Text(
-                        text = marker.lugarTexto,
+                        text = "${marker.nombreUsuario} · ${marker.tiempoTexto}",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+                // El lugar va en su propia línea y no pegado al tiempo: en esta
+                // tarjeta la columna es angosta y "Jose · hace 2 h · Chapinero,
+                // Bogotá" se cortaría casi siempre.
+                if (marker.lugarTexto != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.LocationOn,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(Spacing.xxs))
+                        Text(
+                            text = marker.lugarTexto,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 12.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(Spacing.xxs))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RatingStars(rating = marker.calificacion)
+                    if (marker.likesCount > 0) {
+                        Spacer(modifier = Modifier.width(Spacing.xs))
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = marker.likesCount.toString(),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 12.sp,
+                            modifier = Modifier.semantics {
+                                contentDescription = "${marker.likesCount} me gusta"
+                            }
+                        )
+                    }
+                }
+
+                if (marker.comentario.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(Spacing.xs))
+                    Text(
+                        text = marker.comentario,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 13.sp,
+                        lineHeight = 18.sp,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.xxs))
-            RatingStars(rating = marker.calificacion)
-
-            if (marker.comentario.isNotBlank()) {
-                Spacer(modifier = Modifier.height(Spacing.xs))
-                Text(
-                    text = marker.comentario,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 13.sp,
-                    lineHeight = 18.sp,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+            IconButton(
+                onClick = onCloseClick,
+                modifier = Modifier.testTag("reviewMarkerCardClose")
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.reviews_map_close_card_cd),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
 
-        IconButton(
-            onClick = onCloseClick,
-            modifier = Modifier.testTag("reviewMarkerCardClose")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
         ) {
+            TextButton(
+                onClick = { onAuthorClick(marker.userId) },
+                modifier = Modifier.testTag("reviewMarkerCardAuthor")
+            ) {
+                Text(stringResource(R.string.reviews_map_view_profile))
+            }
+            TextButton(
+                onClick = { onCardClick(marker.vehicleId) },
+                modifier = Modifier.testTag("reviewMarkerCardVehicle")
+            ) {
+                Text(stringResource(R.string.reviews_map_view_vehicle))
+            }
+        }
+    }
+}
+
+@Composable
+private fun VehiclePhoto(imageUrl: String?, name: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(64.dp)
+            .clip(RoundedCornerShape(Radius.md))
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center
+    ) {
+        if (imageUrl.isNullOrBlank()) {
             Icon(
-                imageVector = Icons.Filled.Close,
-                contentDescription = stringResource(R.string.reviews_map_close_card_cd),
+                imageVector = Icons.Filled.DirectionsCar,
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = stringResource(R.string.reviews_map_vehicle_photo_cd, name),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(64.dp)
             )
         }
     }
@@ -166,7 +242,7 @@ private fun AuthorAvatar(avatarUrl: String?, name: String, modifier: Modifier = 
     val shape = CircleShape
     Box(
         modifier = modifier
-            .size(40.dp)
+            .size(20.dp)
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center
@@ -182,7 +258,7 @@ private fun AuthorAvatar(avatarUrl: String?, name: String, modifier: Modifier = 
                 model = avatarUrl,
                 contentDescription = stringResource(R.string.reviews_map_avatar_cd, name),
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(20.dp)
             )
         }
     }
@@ -205,7 +281,8 @@ private fun ReviewMarkerCardPreview() {
                 tiempoTexto = "hace 2 h",
                 calificacion = 4,
                 comentario = "El sonido del motor es otro nivel. Se siente pegado al piso.",
-                lugarTexto = "Chapinero, Bogotá"
+                lugarTexto = "Chapinero, Bogotá",
+                likesCount = 12
             )
         )
     }
