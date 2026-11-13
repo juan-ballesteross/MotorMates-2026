@@ -35,9 +35,12 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
+import com.example.motormates.ui.reviewsMap.components.MapControls
 
 /**
  * El mapa de reseñas recientes, sin estado propio: recibe los marcadores ya
@@ -62,6 +65,51 @@ fun ReviewsMapContent(
     onVehicleClick: (String) -> Unit = {},
     onRetryClick: () -> Unit = {}
 ) {
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(DEFAULT_CENTER, DEFAULT_ZOOM)
+    }
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
+
+    // Función para re-encuadrar los marcadores
+    val fitMarkers = {
+        coroutineScope.launch {
+            if (markers.isEmpty()) {
+                try {
+                    cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(DEFAULT_CENTER, DEFAULT_ZOOM))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    // Ignorar si el mapa no está listo
+                }
+                return@launch
+            }
+
+            val update = if (markers.size == 1) {
+                val only = markers.first()
+                CameraUpdateFactory.newLatLngZoom(LatLng(only.lat, only.lng), SINGLE_MARKER_ZOOM)
+            } else {
+                val bounds = LatLngBounds.builder()
+                    .apply { markers.forEach { include(LatLng(it.lat, it.lng)) } }
+                    .build()
+                CameraUpdateFactory.newLatLngBounds(bounds, BOUNDS_PADDING_PX)
+            }
+
+            try {
+                cameraPositionState.animate(update)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // El mapa aún no estaba listo
+            }
+        }
+    }
+
+    // Efecto inicial para encuadrar al cargar los marcadores
+    val markerIds = markers.map { it.id }
+    LaunchedEffect(markerIds) {
+        fitMarkers()
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -70,8 +118,27 @@ fun ReviewsMapContent(
     ) {
         ReviewsMapLayer(
             markers = markers,
+            cameraPositionState = cameraPositionState,
             onMarkerClick = onMarkerClick,
             onMapClick = onDismissSelection
+        )
+
+        // Controles del mapa superpuestos
+        MapControls(
+            onZoomIn = {
+                coroutineScope.launch {
+                    cameraPositionState.animate(CameraUpdateFactory.zoomIn())
+                }
+            },
+            onZoomOut = {
+                coroutineScope.launch {
+                    cameraPositionState.animate(CameraUpdateFactory.zoomOut())
+                }
+            },
+            onCenter = { fitMarkers() },
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = Spacing.md)
         )
 
         when {
@@ -119,57 +186,11 @@ fun ReviewsMapContent(
 @Composable
 private fun ReviewsMapLayer(
     markers: List<ReviewMapMarkerUi>,
+    cameraPositionState: com.google.maps.android.compose.CameraPositionState,
     modifier: Modifier = Modifier,
     onMarkerClick: (String) -> Unit = {},
     onMapClick: () -> Unit = {}
 ) {
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(DEFAULT_CENTER, DEFAULT_ZOOM)
-    }
-
-    /**
-     * Encuadra la cámara sobre las reseñas que haya, en vez de abrir siempre
-     * sobre Bogotá. Sin esto, una reseña publicada fuera de la ciudad (por
-     * ejemplo en un emulador, cuya posición por defecto es la sede de Google
-     * en California) quedaba fuera de pantalla y parecía que no se había
-     * guardado.
-     *
-     * Se hace una sola vez por lista de marcadores (la llave es el conjunto
-     * de ids): el listener reemite con cada like, y reencuadrar en cada
-     * emisión le quitaría el mapa de las manos al usuario mientras lo mueve.
-     */
-    val markerIds = markers.map { it.id }
-    LaunchedEffect(markerIds) {
-        if (markers.isEmpty()) return@LaunchedEffect
-
-        // Con un solo marcador no se usa newLatLngBounds: el recuadro de un
-        // único punto tiene tamaño cero y el mapa se iría al zoom máximo.
-        val update = if (markers.size == 1) {
-            val only = markers.first()
-            CameraUpdateFactory.newLatLngZoom(LatLng(only.lat, only.lng), SINGLE_MARKER_ZOOM)
-        } else {
-            val bounds = LatLngBounds.builder()
-                .apply { markers.forEach { include(LatLng(it.lat, it.lng)) } }
-                .build()
-            CameraUpdateFactory.newLatLngBounds(bounds, BOUNDS_PADDING_PX)
-        }
-
-        // newLatLngBounds falla si el mapa todavía no tiene tamaño medido
-        // (pasa en la primera composición de la pestaña). No es un error que
-        // valga la pena mostrar: la cámara se queda donde estaba.
-        //
-        // La CancellationException se relanza en vez de tragarse: la lanza
-        // animate() cuando otro movimiento la interrumpe o cuando se sale de
-        // la pestaña, y atraparla rompería la cancelación de la corrutina.
-        try {
-            cameraPositionState.animate(update)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            // El mapa aún no estaba listo para encuadrar.
-        }
-    }
-
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
