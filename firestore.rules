@@ -124,6 +124,62 @@ service cloud.firestore {
       }
     }
 
+    match /events/{eventId} {
+      allow read: if signedIn();
+
+      // Se publica a nombre propio, con tipo y fechas válidas y sin
+      // participantes. El estado inicial siempre es programado: cancelar es
+      // una edición posterior, no una forma de crear.
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.type in ['CAR_MEET', 'PIQUE']
+        && request.resource.data.status == 'SCHEDULED'
+        && request.resource.data.startAt is int
+        && (request.resource.data.get('endAt', null) == null
+          || request.resource.data.endAt > request.resource.data.startAt)
+        && request.resource.data.get('interestedCount', 0) == 0
+        && request.resource.data.get('goingCount', 0) == 0;
+
+      // El organizador edita o cancela su evento (sin cambiar de dueño).
+      // Cualquier otro usuario solo puede mover los contadores de
+      // participación en ±1, que es lo que hace la transacción de participar:
+      // misma forma que las reglas de reviews con likesCount.
+      //
+      // stepsByOne también aplica a la rama del organizador: así, al editar,
+      // no puede poner los contadores en cero.
+      allow update: if (signedIn()
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.type in ['CAR_MEET', 'PIQUE']
+          && request.resource.data.status in ['SCHEDULED', 'CANCELLED']
+          && request.resource.data.startAt is int
+          && (request.resource.data.get('endAt', null) == null
+            || request.resource.data.endAt > request.resource.data.startAt)
+          && stepsByOne('interestedCount')
+          && stepsByOne('goingCount'))
+        || (signedIn()
+          // Los dos contadores, no uno: pasar de "me interesa" a "voy" mueve
+          // ambos en la misma escritura.
+          && onlyChanges(['interestedCount', 'goingCount'])
+          && stepsByOne('interestedCount')
+          && stepsByOne('goingCount'));
+
+      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+
+      // events/{id}/participants/{uid}: cada quien pone o quita solo su
+      // propia participación, y solo con uno de los dos estados. Se permite
+      // update y no solo create porque pasar de "me interesa" a "voy"
+      // reescribe el mismo documento (igual que al refrescar un fcmToken).
+      match /participants/{participantUid} {
+        allow read: if signedIn();
+        allow create, update: if isUser(participantUid)
+          && request.resource.data.status in ['INTERESTED', 'GOING'];
+        allow delete: if isUser(participantUid);
+      }
+    }
+
     match /chats/{chatId} {
       allow read: if signedIn() && request.auth.uid in resource.data.participants;
       allow create: if signedIn()

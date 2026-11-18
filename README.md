@@ -106,6 +106,31 @@ MAPS_API_KEY=TU_LLAVE_AQUI
 > de Firebase) para que el seeder vuelva a correr con fechas frescas. Al publicar una reseña
 > desde el emulador, fija primero una ubicación en *Extended controls → Location*.
 
+### API key de Places (capas de estaciones)
+
+Los filtros **Gasolineras** y **Carga eléctrica** del mapa consultan la **Places API (New)**,
+que es un producto aparte del Maps SDK: habilitar uno no habilita el otro. Las dos capas usan
+la misma llave, así que se habilitan juntas.
+
+1. En [Google Cloud Console](https://console.cloud.google.com/), habilita **Places API (New)**.
+   Puedes hacerlo sobre la misma key que ya usas para el mapa.
+2. Si vas a usar una key distinta, agrégala a `local.properties`:
+
+```properties
+PLACES_API_KEY=TU_LLAVE_AQUI
+```
+
+Si no defines `PLACES_API_KEY`, se usa `MAPS_API_KEY`. Y si ninguna de las dos está, el
+proyecto **compila igual**: los chips "Gasolineras" y "Carga eléctrica" simplemente no
+aparecen en el mapa, en vez de aparecer y fallar al tocarlos.
+
+> Ojo con el costo: cada consulta se cobra, y **cada capa consulta por separado**, así que
+> con las dos chips prendidas el gasto se duplica. Cada capa trae cuatro frenos para que un
+> rato mirando el mapa no se convierta en cientos de llamadas — espera a que sueltes el mapa
+> (600 ms), no consulta por debajo de zoom 13, ignora los movimientos de menos del 30 % de
+> lo que abarca la pantalla, y reutiliza la misma zona durante 5 minutos. Los valores están
+> en el `companion object` de `ReviewsMapViewModel` (el piso de zoom, en `ReviewsMapState`).
+
 ```bash
 # Compilar el proyecto
 ./gradlew build

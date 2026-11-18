@@ -18,11 +18,20 @@ const BATCH_LIMIT = 500;
 /**
  * Integridad de datos desnormalizados.
  *
- * Cada reseña guarda una copia del autor (user.fullName y user.avatarUrl)
- * para pintarse sin leer el perfil. Cuando el usuario cambia su nombre o
- * su foto en users/{userId}, esta función actualiza esa copia en todas sus
- * reseñas, así las viejas no se quedan con los datos anteriores.
+ * Cada reseña y cada evento guardan una copia del autor (user.fullName y
+ * user.avatarUrl) para pintarse sin leer el perfil. Cuando el usuario cambia
+ * su nombre o su foto en users/{userId}, esta función actualiza esa copia en
+ * todos sus documentos, así los viejos no se quedan con los datos anteriores.
+ *
+ * Las dos colecciones se recorren en el MISMO trigger y no en funciones
+ * separadas: dos triggers sobre users/{userId} duplicarían las invocaciones.
+ * Los nombres de campo (userId, user.fullName, user.avatarUrl) son iguales en
+ * "reviews" y en "events" justamente para poder compartir este código.
+ *
+ * El nombre se conserva aunque ya cubra más que las reseñas: renombrar una
+ * función desplegada equivale a borrarla y crear otra.
  */
+const DENORMALIZED_USER_COLLECTIONS = ["reviews", "events"];
 exports.updateUserInfoInReviews = onDocumentUpdated(
   { document: "users/{userId}", database: DATABASE_ID },
   async (event) => {
@@ -39,28 +48,32 @@ exports.updateUserInfoInReviews = onDocumentUpdated(
       return;
     }
 
-    const reviewsSnapshot = await db.collection("reviews")
-      .where("userId", "==", userId)
-      .get();
-
-    if (reviewsSnapshot.empty) {
-      logger.log(`El usuario ${userId} no tiene reseñas publicadas.`);
-      return;
-    }
-
     const changes = {};
     if (nameChanged) changes["user.fullName"] = after.fullName ?? "";
     if (avatarChanged) changes["user.avatarUrl"] = after.avatarUrl ?? null;
 
-    // Se reparte en lotes de 500: cada batch es atómico por sí solo.
-    const docs = reviewsSnapshot.docs;
-    for (let start = 0; start < docs.length; start += BATCH_LIMIT) {
-      const batch = db.batch();
-      docs.slice(start, start + BATCH_LIMIT).forEach((doc) => batch.update(doc.ref, changes));
-      await batch.commit();
-    }
+    for (const collection of DENORMALIZED_USER_COLLECTIONS) {
+      const snapshot = await db.collection(collection)
+        .where("userId", "==", userId)
+        .get();
 
-    logger.log(`Datos del autor actualizados en ${docs.length} reseñas del usuario ${userId}.`);
+      if (snapshot.empty) {
+        logger.log(`El usuario ${userId} no tiene documentos en ${collection}.`);
+        continue;
+      }
+
+      // Se reparte en lotes de 500: cada batch es atómico por sí solo.
+      const docs = snapshot.docs;
+      for (let start = 0; start < docs.length; start += BATCH_LIMIT) {
+        const batch = db.batch();
+        docs.slice(start, start + BATCH_LIMIT).forEach((doc) => batch.update(doc.ref, changes));
+        await batch.commit();
+      }
+
+      logger.log(
+        `Datos del autor actualizados en ${docs.length} documentos de ${collection} del usuario ${userId}.`
+      );
+    }
   }
 );
 

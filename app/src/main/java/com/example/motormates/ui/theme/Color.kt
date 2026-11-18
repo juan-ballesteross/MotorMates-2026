@@ -9,6 +9,34 @@ val MotorMatesRed = Color(0xFFB3282D)
 val MotorMatesRedLight = Color(0xFFE05257)
 val MotorMatesTextSecondary = Color(0xFF9B9B9B)
 
+/*
+ * Colores de categoría de los marcadores del mapa.
+ *
+ * No son roles del tema y no cambian entre paleta clara y oscura: un marcador
+ * se dibuja sobre el mapa, no sobre una superficie de la app, y lo que tiene
+ * que hacer es distinguirse de las otras capas de un vistazo. La paleta de
+ * marca es toda roja y ámbar (las reseñas usan el rojo primario y la
+ * selección usa el ámbar terciario), así que hacen falta dos tonos que no se
+ * confundan con ninguno de los dos.
+ */
+val MotorMatesCarMeetBlue = Color(0xFF3D7BD6)
+val MotorMatesPiqueGreen = Color(0xFF36A85D)
+
+/**
+ * Las gasolineras. Un surtidor pide naranja, pero el ámbar terciario ya marca
+ * la selección en el mapa y los dos se confundirían, así que queda el morado:
+ * es el único tono que no choca con el rojo de las reseñas, el azul de los
+ * Car Meets ni el verde de los piques. El significado lo carga el ícono.
+ */
+val MotorMatesFuelPurple = Color(0xFF8C5BD6)
+
+/**
+ * Los puntos de carga. Tiene que distinguirse del morado de las gasolineras
+ * de un vistazo, porque las dos capas se pueden ver a la vez y los íconos
+ * (surtidor y enchufe) son demasiado parecidos a tamaño de marcador.
+ */
+val MotorMatesChargingTeal = Color(0xFF14A6A6)
+
 // ===== Paleta MD3 — DARK =====
 val md3_dark_primary = MotorMatesRed
 val md3_dark_onPrimary = Color(0xFFFFFFFF)
