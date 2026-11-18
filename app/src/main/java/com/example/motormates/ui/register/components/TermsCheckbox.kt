@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 import com.example.motormates.R
 
 @Composable
@@ -40,7 +41,8 @@ fun TermsCheckbox(
                 checkedColor = MaterialTheme.colorScheme.primary,
                 uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 checkmarkColor = MaterialTheme.colorScheme.onPrimary
-            )
+            ),
+            modifier = Modifier.testTag("cbTerms")
         )
         Text(
             text = termsText,

@@ -19,6 +19,8 @@ interface AuthRepository {
     val authState: Flow<AuthUser?>
 
     suspend fun signIn(email: String, password: String): Result<AuthUser>
+    
+    suspend fun signInWithGoogle(idToken: String): Result<AuthUser>
 
     suspend fun signUp(fullName: String, email: String, password: String): Result<AuthUser>
 
@@ -125,6 +127,25 @@ class AuthRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             runCatching { authDataSource.deleteCurrentUser() }
             throw e
+        }
+    }
+    
+    override suspend fun signInWithGoogle(idToken: String): Result<AuthUser> {
+        return try {
+            val user = authDataSource.signInWithGoogle(idToken)
+            // Cuando inician sesión con Google verificamos si tienen perfil; si no, lo creamos.
+            val hasProfile = runCatching { userDataSource.getUser(user.id) != null }.getOrDefault(true)
+            if (!hasProfile) {
+                // Usar nombre de Google o dejarlo sin nombre hasta que lo edite
+                val fullName = user.displayName ?: "Usuario de Google"
+                val email = user.email ?: ""
+                saveUserProfile(user, fullName, email)
+            }
+            Result.success(user)
+        } catch (e: FirebaseNetworkException) {
+            Result.failure(Exception("Sin conexión a internet, verifica tu red"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Error al iniciar sesión con Google"))
         }
     }
 }
