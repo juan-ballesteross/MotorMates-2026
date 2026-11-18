@@ -214,4 +214,6 @@
     <string name="notification_channel_id">motormates_general</string>
     <string name="notification_channel_name">Actividad de MotorMates</string>
     <string name="notification_channel_description">Avisos cuando alguien te sigue o interactúa con tus reseñas</string>
+    <!-- Strings agregados para Google Sign In (Web Client ID configurado en Firebase) -->
+    <string name="default_web_client_id" translatable="false">629428696389-mk4kffu0kguc5n0j24gk1ba0oevknhp0.apps.googleusercontent.com</string>
 </resources>

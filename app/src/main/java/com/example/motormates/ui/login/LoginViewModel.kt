@@ -89,6 +89,46 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun onGoogleSignInResult(idToken: String?) {
+        if (idToken == null) {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    // Dejamos en null para no ensuciar la pantalla si el usuario simplemente cerró
+                    // el bottom sheet de Google dándole tap afuera (cancelar).
+                    errorMessage = null
+                )
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null, isLoggedIn = false) }
+
+            val result = authRepository.signInWithGoogle(idToken)
+
+            _uiState.update {
+                if (result.isSuccess) {
+                    it.copy(isLoading = false, errorMessage = null, isLoggedIn = true)
+                } else {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = result.exceptionOrNull()?.message ?: "Error al iniciar sesión con Google",
+                        isLoggedIn = false
+                    )
+                }
+            }
+        }
+    }
+
+    fun onGoogleSignInError(message: String?) {
+        if (message != null) {
+            _uiState.update { it.copy(errorMessage = message, isLoading = false) }
+        } else {
+            _uiState.update { it.copy(isLoading = false) }
+        }
+    }
+
     private companion object {
         const val ACCOUNT_WITHOUT_PROFILE =
             "Esta cuenta es de una versión anterior de la app y ya no tiene perfil. " +

@@ -45,6 +45,7 @@ fun LoginScreenContent(
     isLoading: Boolean,
     errorMessage: String?,
     onLoginClick: () -> Unit,
+    onGoogleSignInClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -151,7 +152,7 @@ fun LoginScreenContent(
         LoginDivider()
         Spacer(modifier = Modifier.height(20.dp))
 
-        GoogleSignInButton(onClick = {})
+        GoogleSignInButton(onClick = onGoogleSignInClick)
         Spacer(modifier = Modifier.height(28.dp))
 
         Row(
