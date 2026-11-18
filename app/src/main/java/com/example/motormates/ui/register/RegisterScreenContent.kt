@@ -39,6 +39,10 @@ fun RegisterScreenContent(
     onPasswordChange: (String) -> Unit,
     confirmPassword: String,
     onConfirmPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onTogglePasswordVisibility: () -> Unit,
+    confirmPasswordVisible: Boolean,
+    onToggleConfirmPasswordVisibility: () -> Unit,
     passwordsMatch: Boolean,
     termsAccepted: Boolean,
     onTermsAcceptedChange: (Boolean) -> Unit,
@@ -101,6 +105,8 @@ fun RegisterScreenContent(
             onValueChange = onPasswordChange,
             placeholder = stringResource(R.string.register_password_placeholder),
             isPassword = true,
+            passwordVisible = passwordVisible,
+            onTogglePasswordVisibility = onTogglePasswordVisibility,
             testTag = "registerPassword"
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -111,6 +117,8 @@ fun RegisterScreenContent(
             onValueChange = onConfirmPasswordChange,
             placeholder = stringResource(R.string.register_password_placeholder),
             isPassword = true,
+            passwordVisible = confirmPasswordVisible,
+            onTogglePasswordVisibility = onToggleConfirmPasswordVisibility,
             isError = !passwordsMatch,
             testTag = "registerConfirmPassword"
         )

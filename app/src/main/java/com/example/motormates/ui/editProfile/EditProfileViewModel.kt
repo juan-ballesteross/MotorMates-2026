@@ -134,6 +134,35 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
+    fun askDeleteAccount() {
+        _uiState.update { it.copy(isPendingDeleteAccount = true) }
+    }
+
+    fun dismissDeleteAccount() {
+        _uiState.update { it.copy(isPendingDeleteAccount = false, deleteAccountError = null) }
+    }
+
+    fun confirmDeleteAccount(onDeleted: () -> Unit) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isDeletingAccount = true, deleteAccountError = null) }
+
+            authRepository.deleteAccount().fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isDeletingAccount = false, isPendingDeleteAccount = false) }
+                    onDeleted()
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            isDeletingAccount = false,
+                            deleteAccountError = error.message ?: "No se pudo eliminar la cuenta"
+                        )
+                    }
+                }
+            )
+        }
+    }
+
     fun uploadProfileImage(uri: Uri) {
         if (_uiState.value.isImageUploading) return
 

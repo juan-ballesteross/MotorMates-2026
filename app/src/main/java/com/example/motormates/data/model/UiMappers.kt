@@ -56,7 +56,11 @@ fun Vehicle.toReviewCarSummary(): ReviewCarSummary = ReviewCarSummary(
  * currentUserId es el uid de Firebase Auth de quien usa la app (null si no
  * hay sesión): con él se decide si la reseña es mía y se puede editar.
  */
-fun Review.toReviewUi(currentUserId: String?, likedReviewIds: Set<String> = emptySet()): ReviewUi = ReviewUi(
+fun Review.toReviewUi(
+    currentUserId: String?,
+    likedReviewIds: Set<String> = emptySet(),
+    isVehicleOwner: Boolean = false
+): ReviewUi = ReviewUi(
     id = id,
     userId = userId,
     nombreUsuario = author?.fullName?.ifBlank { null } ?: "Usuario",
@@ -65,6 +69,7 @@ fun Review.toReviewUi(currentUserId: String?, likedReviewIds: Set<String> = empt
     calificacion = rating.coerceIn(0, 5),
     comentario = comment.orEmpty(),
     isMine = userId == currentUserId,
+    canDeleteAsOwner = isVehicleOwner,
     likesCount = likesCount,
     isLikedByMe = id in likedReviewIds,
     lugarTexto = location?.placeName,

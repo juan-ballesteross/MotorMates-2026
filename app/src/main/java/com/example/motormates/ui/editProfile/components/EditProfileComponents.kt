@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
@@ -663,6 +664,30 @@ fun EditProfileLogoutButton(onClick: () -> Unit, modifier: Modifier = Modifier) 
         Spacer(modifier = Modifier.width(Spacing.xs))
         Text(
             text = stringResource(R.string.edit_profile_logout_button),
+            color = MaterialTheme.colorScheme.error,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+fun EditProfileDeleteAccountButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    TextButton(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("editProfileDeleteAccount")
+    ) {
+        Icon(
+            imageVector = Icons.Filled.DeleteForever,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(Spacing.xs))
+        Text(
+            text = stringResource(R.string.edit_profile_delete_account_button),
             color = MaterialTheme.colorScheme.error,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium

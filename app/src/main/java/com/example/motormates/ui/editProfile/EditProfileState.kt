@@ -17,5 +17,8 @@ data class EditProfileUiState(
     val isCoverUploading: Boolean = false,
     val coverUploadError: String? = null,
     val isSaving: Boolean = false,
-    val saveError: String? = null
+    val saveError: String? = null,
+    val isPendingDeleteAccount: Boolean = false,
+    val isDeletingAccount: Boolean = false,
+    val deleteAccountError: String? = null
 )

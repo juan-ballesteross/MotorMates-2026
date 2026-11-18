@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.motormates.data.model.GarageVehicleUi
 import com.example.motormates.ui.editProfile.components.EditProfileError
+import com.example.motormates.ui.editProfile.components.EditProfileDeleteAccountButton
 import com.example.motormates.ui.editProfile.components.EditProfileGarageCard
 import com.example.motormates.ui.editProfile.components.EditProfileHeader
 import com.example.motormates.ui.editProfile.components.EditProfileInfoCard
@@ -54,6 +55,7 @@ fun EditProfileScreenContent(
     onAddVehicleClick: () -> Unit,
     onEditVehicleClick: (vehicleId: String) -> Unit,
     onLogoutClick: () -> Unit,
+    onDeleteAccountClick: () -> Unit,
     modifier: Modifier = Modifier,
     isGarageLoading: Boolean = false
 ) {
@@ -118,6 +120,7 @@ fun EditProfileScreenContent(
             }
 
             item { EditProfileLogoutButton(onClick = onLogoutClick) }
+            item { EditProfileDeleteAccountButton(onClick = onDeleteAccountClick) }
         }
     }
 }
@@ -153,7 +156,8 @@ private fun EditProfileScreenContentPreview() {
             onSaveClick = {},
             onAddVehicleClick = {},
             onEditVehicleClick = {},
-            onLogoutClick = {}
+            onLogoutClick = {},
+            onDeleteAccountClick = {}
         )
     }
 }

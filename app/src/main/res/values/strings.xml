@@ -120,6 +120,11 @@
     <string name="edit_profile_add_vehicle_button">+ Agregar vehículo</string>
     <string name="edit_profile_edit_vehicle_cd">Editar vehículo</string>
     <string name="edit_profile_logout_button">Cerrar sesión</string>
+    <string name="edit_profile_delete_account_button">Eliminar cuenta</string>
+    <string name="edit_profile_delete_account_dialog_title">Eliminar cuenta</string>
+    <string name="edit_profile_delete_account_dialog_message">Se borrará tu perfil, tus reseñas, tus carros publicados, tus historias y tus seguidores. Esta acción no se puede deshacer.</string>
+    <string name="edit_profile_delete_account_confirm">Eliminar</string>
+    <string name="edit_profile_delete_account_cancel">Cancelar</string>
 
     <string-array name="search_categories">
         <item>Todos</item>

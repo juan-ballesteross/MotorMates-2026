@@ -34,6 +34,14 @@ class RegisterViewModel @Inject constructor(
         _uiState.update { it.copy(confirmPassword = input, errorMessage = null) }
     }
 
+    fun togglePasswordVisibility() {
+        _uiState.update { it.copy(passwordVisible = !it.passwordVisible) }
+    }
+
+    fun toggleConfirmPasswordVisibility() {
+        _uiState.update { it.copy(confirmPasswordVisible = !it.confirmPasswordVisible) }
+    }
+
     fun updateTermsAccepted(accepted: Boolean) {
         _uiState.update { it.copy(termsAccepted = accepted) }
     }

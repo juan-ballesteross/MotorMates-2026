@@ -51,7 +51,7 @@ fun VehicleDetailScreen(
         AlertDialog(
             onDismissRequest = viewModel::dismissDeleteReview,
             title = { Text(text = "Eliminar reseña") },
-            text = { Text(text = "¿Seguro que quieres eliminar tu reseña? Esta acción no se puede deshacer.") },
+            text = { Text(text = "¿Seguro que quieres eliminar esta reseña? Esta acción no se puede deshacer.") },
             confirmButton = {
                 TextButton(onClick = { viewModel.confirmDeleteReview() }) {
                     Text(text = "Eliminar", color = MaterialTheme.colorScheme.error)

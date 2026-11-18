@@ -6,6 +6,7 @@ import com.example.motormates.data.model.toReviewUi
 import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.LikeRepository
 import com.example.motormates.data.repository.ReviewRepository
+import com.example.motormates.data.repository.VehicleRepository
 import com.example.motormates.ui.common.LikedReviewsState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -27,6 +28,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class CommentsViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
+    private val vehicleRepository: VehicleRepository,
     private val authRepository: AuthRepository,
     private val likeRepository: LikeRepository
 ) : ViewModel() {
@@ -52,6 +54,9 @@ class CommentsViewModel @Inject constructor(
         reviewsJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+            val vehicleOwnerId = vehicleRepository.getVehicleById(vehicleId).getOrNull()?.ownerId
+            val isVehicleOwner = currentUserId != null && currentUserId == vehicleOwnerId
+
             val reviewsFlow = reviewRepository.observeReviewsByVehicle(vehicleId)
                 .shareIn(this, SharingStarted.Eagerly, replay = 1)
             val likedFlow = likedReviews.observe(
@@ -68,7 +73,7 @@ class CommentsViewModel @Inject constructor(
                                     isLoading = false,
                                     errorMessage = null,
                                     reviews = reviews.map { review ->
-                                        review.toReviewUi(currentUserId, liked)
+                                        review.toReviewUi(currentUserId, liked, isVehicleOwner)
                                     }
                                 )
                             }
