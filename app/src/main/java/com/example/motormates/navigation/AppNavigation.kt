@@ -17,6 +17,7 @@ import com.example.motormates.ui.alerts.AlertsScreen
 import com.example.motormates.ui.chat.ChatListScreen
 import com.example.motormates.ui.chat.ChatScreen
 import com.example.motormates.ui.comments.CommentsScreen
+import com.example.motormates.ui.compare.CompareScreen
 import com.example.motormates.ui.editProfile.EditProfileScreen
 import com.example.motormates.ui.feed.FeedScreen
 import com.example.motormates.ui.followlist.FollowListScreen
@@ -109,9 +110,10 @@ fun AppNavigation(
         composable(ScreenRoute.Post.route) {
             PostScreen(
                 onCancelClick = { navController.popBackStack() },
-                onPublishClick = { _ ->
-                    navController.navigate(ScreenRoute.Feed.route) {
-                        popUpTo(ScreenRoute.Feed.route) { inclusive = true }
+                // Recién publicado se abre su detalle; "atrás" ya no vuelve al formulario.
+                onPublished = { vehicleId ->
+                    navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId)) {
+                        popUpTo(ScreenRoute.Post.route) { inclusive = true }
                     }
                 }
             )
@@ -147,6 +149,8 @@ fun AppNavigation(
                         popUpTo(0) { inclusive = true }
                     }
                 },
+                onPublishVehicleClick = { navController.navigate(ScreenRoute.Post.route) },
+                onUserClick = ::openAuthor,
                 reloadSignal = reviewsChanged || profileChanged,
                 onReloadHandled = {
                     entry.clearReviewsChanged()
@@ -157,8 +161,14 @@ fun AppNavigation(
         composable(ScreenRoute.Alerts.route) {
             AlertsScreen(
                 onNotificationClick = { notification ->
-                    if (notification.type == NotificationType.MESSAGE) {
-                        navController.navigate(ScreenRoute.Chat.createRoute(notification.actorId))
+                    val vehicleId = notification.vehicleId
+                    when {
+                        notification.type == NotificationType.MESSAGE ->
+                            navController.navigate(ScreenRoute.Chat.createRoute(notification.actorId))
+                        // Reseñas y likes: se abre el carro del que se trata.
+                        vehicleId != null ->
+                            navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
+                        notification.type == NotificationType.FOLLOW -> openAuthor(notification.actorId)
                     }
                 }
             )
@@ -166,6 +176,10 @@ fun AppNavigation(
         composable(ScreenRoute.EditProfile.route) {
             EditProfileScreen(
                 onCloseClick = { navController.popBackStack() },
+                onAddVehicleClick = { navController.navigate(ScreenRoute.Post.route) },
+                onEditVehicleClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.EditVehicle.createRoute(vehicleId))
+                },
                 onSaveClick = {
                     navController.previousBackStackEntry
                         ?.savedStateHandle
@@ -177,6 +191,22 @@ fun AppNavigation(
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+        composable(
+            route = ScreenRoute.EditVehicle.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.EditVehicle.ARG_VEHICLE_ID) { type = NavType.StringType }
+            )
+        ) { entry ->
+            val vehicleId = entry.arguments?.getString(ScreenRoute.EditVehicle.ARG_VEHICLE_ID).orEmpty()
+            // Guardar o eliminar vuelve a la pantalla anterior (Editar perfil),
+            // que recarga el garaje al volver a primer plano.
+            PostScreen(
+                vehicleId = vehicleId,
+                onCancelClick = { navController.popBackStack() },
+                onPublished = { navController.popBackStack() },
+                onDeleted = { navController.popBackStack() }
             )
         }
         composable(
@@ -201,8 +231,40 @@ fun AppNavigation(
                 onEditReviewClick = { reviewId ->
                     navController.navigate(ScreenRoute.NewReview.createRoute(vehicleId, reviewId))
                 },
+                onCompareClick = {
+                    navController.navigate(ScreenRoute.Compare.createRoute(vehicleId))
+                },
                 reloadSignal = reviewsChanged,
                 onReloadHandled = { entry.clearReviewsChanged() }
+            )
+        }
+        composable(
+            route = ScreenRoute.Compare.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.Compare.ARG_LEFT_ID) { type = NavType.StringType },
+                navArgument(ScreenRoute.Compare.ARG_RIGHT_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(ScreenRoute.Compare.ARG_MINE) {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) { entry ->
+            val leftId = entry.arguments?.getString(ScreenRoute.Compare.ARG_LEFT_ID).orEmpty()
+            val rightId = entry.arguments?.getString(ScreenRoute.Compare.ARG_RIGHT_ID)
+            val compareWithMine = entry.arguments?.getBoolean(ScreenRoute.Compare.ARG_MINE) ?: false
+
+            CompareScreen(
+                leftVehicleId = leftId,
+                rightVehicleId = rightId,
+                compareWithMine = compareWithMine,
+                onBackClick = { navController.popBackStack() },
+                onVehicleClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
+                }
             )
         }
         composable(
@@ -291,6 +353,9 @@ fun AppNavigation(
                 },
                 onMessageClick = { otherUid ->
                     navController.navigate(ScreenRoute.Chat.createRoute(otherUid))
+                },
+                onCompareWithMineClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.Compare.createRoute(vehicleId, compareWithMine = true))
                 }
             )
         }

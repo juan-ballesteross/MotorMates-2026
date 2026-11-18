@@ -25,6 +25,25 @@ sealed class ScreenRoute(val route: String) {
     }
 
     /**
+     * Comparador de dos vehículos. rightId es opcional: desde el detalle solo
+     * se conoce el primero y la pantalla abre el selector para el segundo.
+     * mine = true ("Comparar con el mío", desde un perfil): la pantalla busca
+     * por su cuenta cuál es el carro del usuario para ponerlo a la derecha.
+     */
+    object Compare : ScreenRoute("compare/{leftId}?rightId={rightId}&mine={mine}") {
+        const val ARG_LEFT_ID = "leftId"
+        const val ARG_RIGHT_ID = "rightId"
+        const val ARG_MINE = "mine"
+        fun createRoute(leftId: String, rightId: String? = null, compareWithMine: Boolean = false): String {
+            val params = buildList {
+                rightId?.let { add("rightId=$it") }
+                if (compareWithMine) add("mine=true")
+            }
+            return if (params.isEmpty()) "compare/$leftId" else "compare/$leftId?" + params.joinToString("&")
+        }
+    }
+
+    /**
      * Sirve para crear y para editar. reviewId viaja como query param
      * opcional: si no viene (null) significa "nueva reseña".
      * Solo viaja el id, no el texto: el ViewModel vuelve a consultar las
@@ -36,6 +55,12 @@ sealed class ScreenRoute(val route: String) {
         const val ARG_REVIEW_ID = "reviewId"
         fun createRoute(vehicleId: String, reviewId: String? = null) =
             if (reviewId == null) "newReview/$vehicleId" else "newReview/$vehicleId?reviewId=$reviewId"
+    }
+
+    /** El mismo formulario de Publicar, prellenado con un vehículo propio. */
+    object EditVehicle : ScreenRoute("editVehicle/{vehicleId}") {
+        const val ARG_VEHICLE_ID = "vehicleId"
+        fun createRoute(vehicleId: String) = "editVehicle/$vehicleId"
     }
 
     object Story : ScreenRoute("story/{storyIndex}") {

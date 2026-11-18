@@ -293,6 +293,34 @@ class ReviewsMapViewModelTest {
         assertThat(vm.uiState.value.clusterSelection).isEmpty()
     }
 
+    @Test
+    fun `un grupo de resenias a menos de 30 metros abre la lista`() = runTest {
+        // ~20 m al norte de la primera: misma cuadra, puntos distintos.
+        val vm = viewModelWith(
+            review(id = "r1", location = bogota),
+            review(id = "r2", location = bogota.copy(lat = bogota.lat + 20.0 / 111_320.0))
+        )
+        vm.start()
+        advanceUntilIdle()
+
+        val openedList = vm.onClusterClick(listOf("r1", "r2"))
+
+        assertThat(openedList).isTrue()
+        assertThat(vm.uiState.value.clusterSelection.map { it.id }).containsExactly("r1", "r2")
+    }
+
+    @Test
+    fun `un grupo de resenias a mas de 30 metros deja que la pantalla acerque`() = runTest {
+        val vm = viewModelWith(
+            review(id = "r1", location = bogota),
+            review(id = "r2", location = bogota.copy(lat = bogota.lat + 50.0 / 111_320.0))
+        )
+        vm.start()
+        advanceUntilIdle()
+
+        assertThat(vm.onClusterClick(listOf("r1", "r2"))).isFalse()
+    }
+
     // ---------- Cámara ----------
 
     @Test

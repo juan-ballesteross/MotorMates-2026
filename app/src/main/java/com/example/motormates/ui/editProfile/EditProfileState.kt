@@ -1,13 +1,15 @@
 package com.example.motormates.ui.editProfile
 
-import com.example.motormates.data.model.GarageCar
+import com.example.motormates.data.model.GarageVehicleUi
 
 data class EditProfileUiState(
     val fullName: String = "",
     val username: String = "",
     val location: String = "",
     val bio: String = "",
-    val cars: List<GarageCar> = emptyList(),
+    /** Mis vehículos publicados (ownerId = mi uid). */
+    val cars: List<GarageVehicleUi> = emptyList(),
+    val isGarageLoading: Boolean = false,
     val profileImageUrl: String? = null,
     val isImageUploading: Boolean = false,
     val imageUploadError: String? = null,

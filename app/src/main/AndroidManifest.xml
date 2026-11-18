@@ -10,10 +10,11 @@
     <!-- Para guardar dónde se publicó una reseña y poder pintarla en el mapa.
          Es opcional: si el usuario lo niega, la reseña se publica sin ubicación
          y simplemente no aparece en el mapa.
-         Solo COARSE: al mapa le basta el barrio, y así alcanza con un
-         RequestPermission sencillo (declarar también FINE obligaría a pedir los
-         dos juntos desde API 31). -->
+         FINE y COARSE se piden juntos (obligatorio desde API 31). Con solo
+         COARSE Android mueve la posición hasta ~2 km y la reseña aparece en
+         otro barrio; si el usuario elige "aproximada" se publica igual. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- La app funciona sin GPS: sin él las reseñas se publican sin ubicación -->
     <uses-feature
         android:name="android.hardware.location"

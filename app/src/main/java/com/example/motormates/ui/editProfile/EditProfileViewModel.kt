@@ -3,11 +3,12 @@ package com.example.motormates.ui.editProfile
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.motormates.data.mock.UserMocks
+import com.example.motormates.data.model.garageOf
 import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.CoverImageRepository
 import com.example.motormates.data.repository.ProfileImageRepository
 import com.example.motormates.data.repository.UserRepository
+import com.example.motormates.data.repository.VehicleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,23 +21,39 @@ class EditProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val profileImageRepository: ProfileImageRepository,
     private val coverImageRepository: CoverImageRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val vehicleRepository: VehicleRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditProfileUiState())
     val uiState: StateFlow<EditProfileUiState> = _uiState
 
     init {
-        // El garaje se queda con datos locales: el backend no lo modela.
-        _uiState.update { it.copy(cars = UserMocks.sampleUserCars) }
-
         viewModelScope.launch {
             profileImageRepository.profileImageUrl.collect { photoUrl ->
                 _uiState.update { it.copy(profileImageUrl = photoUrl) }
             }
         }
 
+        // El garaje no se carga aquí: lo pide la pantalla en ON_RESUME, que
+        // también corre al abrirla. Así no se consulta dos veces al entrar.
         loadProfile()
+    }
+
+    /**
+     * Mis vehículos publicados. La pantalla la vuelve a llamar al regresar de
+     * editar o publicar uno, para que la lista no quede vieja. Si falla se
+     * deja lo que ya había.
+     */
+    fun loadGarage() {
+        val uid = authRepository.getCurrentUser()?.id ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isGarageLoading = it.cars.isEmpty()) }
+            vehicleRepository.getVehicles().onSuccess { vehicles ->
+                _uiState.update { it.copy(cars = vehicles.garageOf(uid)) }
+            }
+            _uiState.update { it.copy(isGarageLoading = false) }
+        }
     }
 
     private fun loadProfile() {

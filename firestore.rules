@@ -28,10 +28,33 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
     }
 
-    // Catálogo de vehículos: solo lectura desde la app.
+    // Vehículos: los del catálogo semilla y los que publican los usuarios.
     match /vehicles/{vehicleId} {
       allow read: if signedIn();
-      allow update: if signedIn() && onlyChanges(['ownerId', 'owner']);
+
+      // Publicar (pestaña Publicar): solo a nombre propio y con los datos
+      // mínimos bien formados. La app ya lo valida; esto lo hace cumplir.
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.brand is string
+        && request.resource.data.brand.size() > 0
+        && request.resource.data.brand.size() <= 40
+        && request.resource.data.model is string
+        && request.resource.data.model.size() > 0
+        && request.resource.data.model.size() <= 40
+        && request.resource.data.year is int
+        && request.resource.data.category is string;
+
+      // Antes cualquiera podía cambiarle el dueño a cualquier vehículo.
+      // Ahora: el dueño edita el suyo sin poder regalarlo, y el
+      // backfillVehicleOwners del seeder solo puede asignar dueño a los
+      // vehículos semilla que todavía no tienen uno.
+      allow update: if signedIn() && (
+        (isUser(resource.data.get('ownerId', '')) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['ownerId']))
+        || (resource.data.get('ownerId', '') == '' && onlyChanges(['ownerId', 'owner']))
+      );
+
+      allow delete: if isUser(resource.data.get('ownerId', ''));
     }
 
     match /users/{userId} {
@@ -122,6 +145,13 @@ service cloud.firestore {
         allow read: if signedIn();
         allow create, delete: if isUser(likeUserId);
       }
+    }
+
+    // Pestaña Actividad: "los likes que yo di" es una consulta de grupo sobre
+    // todas las subcolecciones "likes". Cada quien solo puede leer los suyos
+    // (la consulta filtra por userId, así que la regla se puede verificar).
+    match /{path=**}/likes/{likeUserId} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
     }
 
     match /chats/{chatId} {

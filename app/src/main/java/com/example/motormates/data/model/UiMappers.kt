@@ -169,6 +169,8 @@ fun Notification.toNotificationUi(): NotificationUi {
             if (vehicleName != null) "le dio like a tu reseña del $vehicleName" else "le dio like a tu reseña"
         NotificationType.REVIEW ->
             if (vehicleName != null) "también dejó una reseña en el $vehicleName" else "también dejó una reseña en un carro que reseñaste"
+        NotificationType.REVIEW_ON_MY_CAR ->
+            if (vehicleName != null) "dejó una reseña de tu $vehicleName" else "dejó una reseña de tu carro"
         NotificationType.FOLLOW -> "empezó a seguirte"
         NotificationType.LIKE_STORY -> "le dio like a tu historia"
         NotificationType.MESSAGE -> "te envió un mensaje"
@@ -197,7 +199,8 @@ fun Notification.toNotificationUi(): NotificationUi {
         message = message,
         timeAgo = createdAt.toRelativeTimeEs(),
         section = section,
-        thumbnailUrl = vehicleImageUrl
+        thumbnailUrl = vehicleImageUrl,
+        vehicleId = vehicleId
     )
 }
 

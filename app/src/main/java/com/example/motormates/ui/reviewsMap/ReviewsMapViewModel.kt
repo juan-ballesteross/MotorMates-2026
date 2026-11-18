@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.model.Review
 import com.example.motormates.data.model.ReviewMapMarkerUi
+import com.example.motormates.data.model.areNearbyGroup
 import com.example.motormates.data.model.toReviewMapMarkerUi
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.VehicleRepository
@@ -12,7 +13,6 @@ import com.example.motormates.data.util.TimeSource
 import com.example.motormates.data.util.toEpochMillisOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.math.abs
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -117,25 +117,20 @@ class ReviewsMapViewModel @Inject constructor(
     }
 
     /**
-     * Un grupo que se puede separar se abre con zoom (lo hace la pantalla).
-     * Uno cuyas reseñas están todas en el mismo punto, por ejemplo un
-     * centro comercial, no se separa con ningún zoom: ese abre la lista.
-     *
-     * @return true si se abrió la lista; false si la pantalla debe acercar.
+     * Tocar un grupo. Si todas sus reseñas están a 30 m o menos entre sí
+     * (groupNearby), se abre la lista: acercar la cámara no las separaría lo
+     * suficiente para tocarlas una por una. Si están más lejos, devuelve false
+     * y la pantalla acerca la cámara para separarlas.
      */
     fun onClusterClick(markerIds: List<String>): Boolean {
         val members = _uiState.value.markers.filter { it.id in markerIds }
-        val first = members.firstOrNull() ?: return false
-        val samePoint = members.all {
-            abs(it.lat - first.lat) < SAME_POINT_DEGREES && abs(it.lng - first.lng) < SAME_POINT_DEGREES
-        }
-        if (!samePoint) return false
+        if (!members.areNearbyGroup()) return false
 
         _uiState.update { it.copy(clusterSelectionIds = members.map { m -> m.id }, selectedMarkerId = null) }
         return true
     }
 
-    fun dismissClusterSelection() {
+        fun dismissClusterSelection() {
         _uiState.update { it.copy(clusterSelectionIds = emptyList()) }
     }
 
@@ -229,9 +224,6 @@ class ReviewsMapViewModel @Inject constructor(
 
         /** Una vez por minuto: es la resolución del "hace N min". */
         const val TICK_MS = 60_000L
-
-        /** ~1 m: por debajo de esto dos reseñas son "el mismo sitio" para el zoom máximo. */
-        const val SAME_POINT_DEGREES = 0.00001
 
         /** Zoom de barrio, igual que el de una sola reseña. */
         const val MY_LOCATION_ZOOM = 14f

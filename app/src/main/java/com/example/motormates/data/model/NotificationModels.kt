@@ -3,7 +3,11 @@ package com.example.motormates.data.model
 import com.example.motormates.data.mock.VehicleImages
 
 /** Tipo de evento que generó la notificación — determina el ícono mostrado. */
-enum class NotificationType { LIKE, COMMENT, FOLLOW, RATING, REVIEW, LIKE_STORY, MESSAGE }
+/**
+ * REVIEW: alguien reseñó un carro que yo también reseñé.
+ * REVIEW_ON_MY_CAR: alguien reseñó un carro que es mío (lo publiqué yo).
+ */
+enum class NotificationType { LIKE, COMMENT, FOLLOW, RATING, REVIEW, REVIEW_ON_MY_CAR, LIKE_STORY, MESSAGE }
 
 data class NotificationUi(
     val id: String,
@@ -15,7 +19,9 @@ data class NotificationUi(
     val timeAgo: String,
     val section: String, // ej. "HOY", "ESTA SEMANA" — agrupa la lista
     val thumbnailResId: Int? = null, // null = sin miniatura; 0 = con miniatura pero foto pendiente; id real = foto ya puesta
-    val thumbnailUrl: String? = null
+    val thumbnailUrl: String? = null,
+    /** Carro al que se refiere (reseñas y likes): tocarla abre su detalle. */
+    val vehicleId: String? = null
 )
 
 // ===== Datos locales quemados =====

@@ -5,24 +5,26 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.motormates.data.model.GarageCar
-import com.example.motormates.ui.theme.MotorMatesTheme
 
 @Composable
 fun EditProfileScreen(
     onCloseClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
     onAddVehicleClick: () -> Unit = {},
-    onEditVehicleClick: (GarageCar) -> Unit = {},
+    onEditVehicleClick: (vehicleId: String) -> Unit = {},
     onLoggedOut: () -> Unit = {},
     viewModel: EditProfileViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Al volver de editar o publicar un carro, el garaje se recarga.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.loadGarage() }
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -67,39 +69,7 @@ fun EditProfileScreen(
         onAddVehicleClick = onAddVehicleClick,
         onEditVehicleClick = onEditVehicleClick,
         onLogoutClick = { viewModel.logOut(onLoggedOut) },
-        modifier = modifier
+        modifier = modifier,
+        isGarageLoading = uiState.isGarageLoading
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun EditProfileScreenPreview() {
-    MotorMatesTheme {
-        EditProfileScreenContent(
-            fullName = "Rodrigo Salinas",
-            onFullNameChange = {},
-            username = "rodrigo",
-            onUsernameChange = {},
-            location = "Bogotá",
-            onLocationChange = {},
-            bio = "Amante de los autos clasicos",
-            onBioChange = {},
-            cars = emptyList(),
-            profileImageUrl = null,
-            isImageUploading = false,
-            imageUploadError = null,
-            coverImageUrl = null,
-            isCoverUploading = false,
-            coverUploadError = null,
-            isSaving = false,
-            saveError = null,
-            onChangePhotoClick = {},
-            onChangeCoverClick = {},
-            onCloseClick = {},
-            onSaveClick = {},
-            onAddVehicleClick = {},
-            onEditVehicleClick = {},
-            onLogoutClick = {}
-        )
-    }
 }

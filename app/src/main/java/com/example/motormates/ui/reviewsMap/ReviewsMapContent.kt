@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.motormates.R
 import com.example.motormates.data.model.ReviewMapMarkerUi
+import com.example.motormates.data.model.groupNearby
 import com.example.motormates.ui.reviewsMap.components.ClusterReviewsSheet
 import com.example.motormates.ui.reviewsMap.components.MapControls
 import com.example.motormates.ui.reviewsMap.components.MarkerPalette
@@ -275,14 +276,17 @@ private fun ReviewsMapLayer(
     // rasteriza aparte y no conviene que dependa de MaterialTheme.
     val palette = remember(colorScheme) { MarkerPalette.from(colorScheme) }
 
+    // Primero se juntan las reseñas a 30 m o menos (groupNearby): cada grupo
+    // es un solo punto, con cualquier zoom. Después la librería agrupa esos
+    // puntos por distancia en pantalla cuando se aleja la cámara.
     // Cambiar la selección, que llegue una foto o que cambie la paleta cambia
     // el ítem (es data class), y eso es lo que hace que Clustering lo redibuje.
     val items = remember(markers, selectedMarkerId, photos.keys, isDarkPalette) {
-        markers.map { marker ->
+        groupNearby(markers).map { group ->
             ReviewClusterItem(
-                marker = marker,
-                isSelected = marker.id == selectedMarkerId,
-                hasPhoto = marker.vehicleImageUrl in photos,
+                markers = group,
+                isSelected = group.any { it.id == selectedMarkerId },
+                loadedPhotos = group.count { it.vehicleImageUrl in photos },
                 isDarkMap = isDarkPalette
             )
         }
@@ -308,29 +312,44 @@ private fun ReviewsMapLayer(
         Clustering(
             items = items,
             onClusterClick = { cluster ->
-                onClusterClick(cluster.items.map { it.marker.id }, cluster.items.map { it.position })
+                val members = cluster.items.flatMap { it.markers }
+                onClusterClick(members.map { it.id }, members.map { LatLng(it.lat, it.lng) })
                 // true = "ya lo manejé": evita que la librería haga su propio zoom.
                 true
             },
             onClusterItemClick = { item ->
-                onMarkerClick(item.marker.id)
+                if (item.size == 1) {
+                    onMarkerClick(item.marker.id)
+                } else {
+                    // Un grupo cercano siempre abre la lista: acercar no lo separaría.
+                    onClusterClick(item.ids, item.markers.map { LatLng(it.lat, it.lng) })
+                }
                 // true: si no, el SDK además abre su burbuja blanca encima de la tarjeta.
                 true
             },
             clusterContent = { cluster ->
+                val members = cluster.items.flatMap { it.markers }
                 ReviewClusterBubble(
-                    count = cluster.size,
-                    photos = cluster.items.take(3).map { item -> item.marker.vehicleImageUrl?.let(photos::get) },
+                    count = members.size,
+                    photos = members.take(3).map { it.vehicleImageUrl?.let(photos::get) },
                     palette = palette
                 )
             },
             clusterItemContent = { item ->
-                ReviewPhotoMarker(
-                    photo = item.marker.vehicleImageUrl?.let(photos::get),
-                    rating = item.marker.calificacion,
-                    isSelected = item.isSelected,
-                    palette = palette
-                )
+                if (item.size == 1) {
+                    ReviewPhotoMarker(
+                        photo = item.marker.vehicleImageUrl?.let(photos::get),
+                        rating = item.marker.calificacion,
+                        isSelected = item.isSelected,
+                        palette = palette
+                    )
+                } else {
+                    ReviewClusterBubble(
+                        count = item.size,
+                        photos = item.markers.take(3).map { it.vehicleImageUrl?.let(photos::get) },
+                        palette = palette
+                    )
+                }
             }
         )
     }
