@@ -98,9 +98,11 @@ fun Review.toFeedReviewUi(
 /**
  * La reseña como marcador del mapa, o null si no tiene ubicación.
  *
- * Es el único mapper que devuelve null, y es a propósito: la regla "sin
- * ubicación no hay marcador" queda en un solo lugar y se puede probar
- * directamente, en vez de repartida en filtros por la UI.
+ * Es el único mapper de este archivo que devuelve null, y es a propósito: la
+ * regla "sin ubicación no hay marcador" queda en un solo lugar y se puede
+ * probar directamente, en vez de repartida en filtros por la UI. (El otro
+ * mapper nulable del proyecto es EventFirestoreDto.toDomain, que descarta
+ * documentos mal formados por el mismo criterio.)
  *
  * vehicleImageUrl llega por parámetro por la misma razón que en
  * toUserReviewUi: la reseña no trae la foto del carro, la resuelve el
@@ -127,6 +129,68 @@ fun Review.toReviewMapMarkerUi(vehicleImageUrl: String? = null): ReviewMapMarker
         likesCount = likesCount.coerceAtLeast(0)
     )
 }
+
+/**
+ * Evento -> marcador del mapa.
+ *
+ * No devuelve null: un [Event] ya tiene ubicación obligatoria, porque los
+ * documentos sin lugar se descartaron antes, al mapear el DTO.
+ *
+ * currentUserId y nowMillis llegan por parámetro y no se leen aquí dentro:
+ * la propiedad ("es mío") y el paso del tiempo ("ya terminó") son estado del
+ * mundo, y pasarlos es lo que deja este mapper puro y probable en la JVM. Es
+ * la misma razón por la que toReviewUi recibe el currentUserId.
+ */
+fun Event.toEventMapMarkerUi(
+    currentUserId: String?,
+    nowMillis: Long,
+    fechaTexto: String,
+    horarioTexto: String? = null
+): EventMapMarkerUi = EventMapMarkerUi(
+    id = id,
+    type = type,
+    lat = location.lat,
+    lng = location.lng,
+    title = title,
+    descripcion = description,
+    imageUrl = imageUrl,
+    organizerId = organizerId,
+    // Mismo respaldo que las reseñas: la copia del organizador puede venir vacía.
+    nombreOrganizador = organizer?.fullName?.ifBlank { null } ?: "Usuario",
+    avatarUrl = organizer?.avatarUrl,
+    // Lo que escribió el organizador manda sobre el barrio que resolvió el
+    // geocodificador: "Parque de la 93" dice más que "Chapinero, Bogotá".
+    lugarTexto = venueName ?: address ?: location.placeName,
+    fechaTexto = fechaTexto,
+    horarioTexto = horarioTexto,
+    // Orden estable, para que la lista no baile entre emisiones del listener.
+    features = features.sortedBy { it.ordinal },
+    interestedCount = interestedCount.coerceAtLeast(0),
+    goingCount = goingCount.coerceAtLeast(0),
+    isMine = currentUserId != null && organizerId == currentUserId,
+    isCancelled = status == EventStatus.CANCELLED,
+    hasFinished = (endAt ?: startAt) < nowMillis
+)
+
+/**
+ * Una estación lista para pintarse en el mapa.
+ *
+ * El respaldo del nombre se pone acá y no en la tarjeta, por la misma
+ * convención que `nombreOrganizador`: la pantalla recibe textos ya resueltos.
+ * El tipo entra por parámetro porque no viaja en la respuesta de Places: lo
+ * sabe quien hizo la consulta, que pidió un `includedTypes` concreto.
+ */
+fun Station.toStationMapMarkerUi(kind: StationKind): StationMapMarkerUi = StationMapMarkerUi(
+    id = id,
+    kind = kind,
+    lat = location.lat,
+    lng = location.lng,
+    nombre = name?.ifBlank { null } ?: when (kind) {
+        StationKind.FUEL -> "Gasolinera"
+        StationKind.CHARGING -> "Estación de carga"
+    },
+    direccion = address?.ifBlank { null }
+)
 
 /**
  * vehicleImageUrl no viaja dentro de la reseña (las ya guardadas en
@@ -172,6 +236,10 @@ fun Notification.toNotificationUi(): NotificationUi {
         NotificationType.FOLLOW -> "empezó a seguirte"
         NotificationType.LIKE_STORY -> "le dio like a tu historia"
         NotificationType.MESSAGE -> "te envió un mensaje"
+        NotificationType.EVENT_INTERESTED ->
+            if (!eventTitle.isNullOrBlank()) "le interesa tu evento $eventTitle" else "le interesa tu evento"
+        NotificationType.EVENT_GOING ->
+            if (!eventTitle.isNullOrBlank()) "va a ir a tu evento $eventTitle" else "va a ir a tu evento"
         NotificationType.COMMENT, NotificationType.RATING -> ""
     }
 
@@ -197,7 +265,8 @@ fun Notification.toNotificationUi(): NotificationUi {
         message = message,
         timeAgo = createdAt.toRelativeTimeEs(),
         section = section,
-        thumbnailUrl = vehicleImageUrl
+        thumbnailUrl = vehicleImageUrl,
+        eventId = eventId
     )
 }
 

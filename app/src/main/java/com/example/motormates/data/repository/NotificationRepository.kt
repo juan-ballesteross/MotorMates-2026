@@ -4,6 +4,7 @@ import com.example.motormates.data.dto.NotificationDto
 import com.example.motormates.data.model.Notification
 import com.example.motormates.data.model.NotificationType
 import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
+import com.example.motormates.data.source.EventDataSource
 import com.example.motormates.data.source.NotificationDataSource
 import com.example.motormates.data.source.UserDataSource
 import java.time.Instant
@@ -20,7 +21,8 @@ interface NotificationRepository {
         type: NotificationType,
         actorId: String,
         vehicleId: String? = null,
-        reviewId: String? = null
+        reviewId: String? = null,
+        eventId: String? = null
     )
 
     suspend fun getNotifications(uid: String): Result<List<Notification>>
@@ -35,7 +37,13 @@ interface NotificationRepository {
 class NotificationRepositoryImpl @Inject constructor(
     private val notificationDataSource: NotificationDataSource,
     private val userDataSource: UserDataSource,
-    private val vehicleDataSource: VehicleRemoteDataSource
+    private val vehicleDataSource: VehicleRemoteDataSource,
+    /**
+     * La fuente de datos y no EventRepository: ese depende de este repositorio
+     * para avisarle al organizador de un evento, y pedirle aquí lo contrario
+     * cerraría un ciclo que Dagger rechaza.
+     */
+    private val eventDataSource: EventDataSource
 ) : NotificationRepository {
 
     override suspend fun notify(
@@ -43,10 +51,13 @@ class NotificationRepositoryImpl @Inject constructor(
         type: NotificationType,
         actorId: String,
         vehicleId: String?,
-        reviewId: String?
+        reviewId: String?,
+        eventId: String?
     ) {
         runCatching {
-            notificationDataSource.createNotification(recipientUid, type.name, actorId, vehicleId, reviewId)
+            notificationDataSource.createNotification(
+                recipientUid, type.name, actorId, vehicleId, reviewId, eventId
+            )
         }
     }
 
@@ -64,14 +75,22 @@ class NotificationRepositoryImpl @Inject constructor(
             .catch { emit(Result.failure(Exception(LOAD_ERROR))) }
 
     /**
-     * Se resuelven el actor y el vehículo de cada notificación en paralelo
-     * (una lectura por id, igual que getFollowers/getFollowing), no con un
-     * whereIn: así no hace falta crear índices compuestos. Lo comparten la
-     * consulta puntual y la que escucha en tiempo real.
+     * Se resuelven el actor, el vehículo y el título del evento de cada
+     * notificación en paralelo (una lectura por id, igual que
+     * getFollowers/getFollowing), no con un whereIn: así no hace falta crear
+     * índices compuestos. Lo comparten la consulta puntual y la que escucha
+     * en tiempo real.
+     *
+     * El título del evento se lee en vez de guardarse desnormalizado en el
+     * documento de la notificación, al contrario que la copia del perfil en
+     * "reviews" y "events": esa la repara la Cloud Function
+     * updateUserInfoInReviews cuando el usuario se renombra, y no hay nada
+     * equivalente que repare títulos, así que una copia quedaría congelada.
      */
     private suspend fun List<NotificationDto>.toDomain(): List<Notification> = coroutineScope {
         val actorIds = map { it.actorId }.distinct()
         val vehicleIds = mapNotNull { it.vehicleId }.distinct()
+        val eventIds = mapNotNull { it.eventId }.distinct()
 
         val actorsById = actorIds
             .map { id -> async { id to runCatching { userDataSource.getUser(id) }.getOrNull() } }
@@ -80,6 +99,16 @@ class NotificationRepositoryImpl @Inject constructor(
 
         val vehiclesById = vehicleIds
             .map { id -> async { id to runCatching { vehicleDataSource.getVehicleById(id).toDomain() }.getOrNull() } }
+            .map { it.await() }
+            .toMap()
+
+        // getEventById lanza si el evento ya no existe (lo pudo cancelar y
+        // borrar el organizador): la notificación se conserva sin título, no
+        // se descarta la fila.
+        val eventTitlesById = eventIds
+            .map { id ->
+                async { id to runCatching { eventDataSource.getEventById(id).title.ifBlank { null } }.getOrNull() }
+            }
             .map { it.await() }
             .toMap()
 
@@ -100,6 +129,8 @@ class NotificationRepositoryImpl @Inject constructor(
                 vehicleModel = vehicle?.model,
                 vehicleImageUrl = vehicle?.imageUrl,
                 reviewId = dto.reviewId,
+                eventId = dto.eventId,
+                eventTitle = dto.eventId?.let { eventTitlesById[it] },
                 createdAt = if (dto.createdAt > 0) Instant.ofEpochMilli(dto.createdAt).toString() else null
             )
         }

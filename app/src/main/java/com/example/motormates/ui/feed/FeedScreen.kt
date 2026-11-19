@@ -33,6 +33,9 @@ fun FeedScreen(
     onStoryClick: (Int) -> Unit = {},
     onAuthorClick: (String) -> Unit = {},
     onAlertsClick: () -> Unit = {},
+    /** Los dos siguientes solo los usa la pestaña del mapa. */
+    onEventDetailClick: (String) -> Unit = {},
+    onCreateEventClick: () -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -95,7 +98,12 @@ fun FeedScreen(
         // previews. Al vivir en la rama, el mapa solo se crea cuando la
         // pestaña está activa y se destruye al salir, liberando la MapView.
         if (uiState.selectedTab == FeedTab.MAPA) {
-            ReviewsMapScreen(onVehicleClick = onVehicleClick, onAuthorClick = onAuthorClick)
+            ReviewsMapScreen(
+                onVehicleClick = onVehicleClick,
+                onAuthorClick = onAuthorClick,
+                onEventDetailClick = onEventDetailClick,
+                onCreateEventClick = onCreateEventClick
+            )
             return@Column
         }
 

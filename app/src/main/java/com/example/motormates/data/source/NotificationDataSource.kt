@@ -14,7 +14,8 @@ interface NotificationDataSource {
         type: String,
         actorId: String,
         vehicleId: String?,
-        reviewId: String?
+        reviewId: String?,
+        eventId: String?
     )
 
     suspend fun getNotifications(uid: String): List<NotificationDto>
@@ -35,7 +36,8 @@ class FirestoreNotificationDataSource @Inject constructor(
         type: String,
         actorId: String,
         vehicleId: String?,
-        reviewId: String?
+        reviewId: String?,
+        eventId: String?
     ) {
         if (recipientUid == actorId) return
 
@@ -45,6 +47,7 @@ class FirestoreNotificationDataSource @Inject constructor(
                 actorId = actorId,
                 vehicleId = vehicleId,
                 reviewId = reviewId,
+                eventId = eventId,
                 createdAt = System.currentTimeMillis()
             )
         ).await()

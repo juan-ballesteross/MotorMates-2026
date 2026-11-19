@@ -271,6 +271,131 @@ function randomReviewLocation(index) {
  * (likesCount, followersCount, followingCount) salen cuadrados con los
  * documentos de las subcolecciones, sin necesidad de transacciones.
  */
+/**
+ * Car Meets y piques de ejemplo.
+ *
+ * Se siembran a propósito con variedad: uno de cada tipo, uno cancelado, uno
+ * en curso y dos en el mismo punto exacto. Así la capa de eventos del mapa se
+ * puede comprobar entera (colores por tipo, estilo de cancelado, la hoja del
+ * grupo que ningún zoom separa) sin tener que crearlos a mano.
+ *
+ * Los campos son los de EventFirestoreDto: userId/user como en las reseñas, y
+ * el tipo y las características como texto, no como enum.
+ */
+function buildEvents(users) {
+  const hora = 60 * 60 * 1000;
+  const dia = 24 * hora;
+  const ahora = Date.now();
+
+  const plantillas = [
+    {
+      id: "seed_event_1",
+      type: "CAR_MEET",
+      title: "Encuentro de clásicos en el Parque 93",
+      description: "Traigan sus clásicos. Hay zona de fotos y food trucks.",
+      venueName: "Parque 93",
+      address: "Calle 93 #13-50, Bogotá",
+      location: { lat: 4.6766, lng: -74.0482, placeName: "Parque 93, Bogotá" },
+      startAt: ahora + 2 * dia + 19 * hora,
+      endAt: ahora + 2 * dia + 23 * hora,
+      status: "SCHEDULED",
+      features: ["EXHIBICION", "ZONA_FOTOS", "FOOD_TRUCKS", "ENTRADA_LIBRE"],
+    },
+    {
+      id: "seed_event_2",
+      type: "PIQUE",
+      title: "Pique cronometrado en Tocancipá",
+      description: "Pista cerrada. Inscripción previa obligatoria.",
+      venueName: "Autódromo de Tocancipá",
+      address: "Km 35 Autopista Norte",
+      location: { lat: 4.9667, lng: -73.9122, placeName: "Tocancipá, Cundinamarca" },
+      startAt: ahora + 5 * dia + 9 * hora,
+      endAt: ahora + 5 * dia + 17 * hora,
+      status: "SCHEDULED",
+      features: [
+        "CRONOMETRAJE",
+        "PISTA_CERRADA",
+        "CASCO_OBLIGATORIO",
+        "EXTINTOR_ABORDO",
+        "AMBULANCIA_EN_SITIO",
+        "INSCRIPCION_PREVIA",
+      ],
+    },
+    {
+      // En curso: empezó hace un rato y aún no termina, así que el mapa lo
+      // tiene que seguir mostrando (ver la ventana de la capa de eventos).
+      id: "seed_event_3",
+      type: "CAR_MEET",
+      title: "Café y carros en Usaquén",
+      description: "Nos tomamos algo y miramos carros, sin más.",
+      venueName: "Usaquén",
+      address: "Carrera 6 #119-30, Bogotá",
+      location: { lat: 4.695, lng: -74.03, placeName: "Usaquén, Bogotá" },
+      startAt: ahora - hora,
+      endAt: ahora + 2 * hora,
+      status: "SCHEDULED",
+      features: ["APTO_FAMILIAS", "PARQUEADERO"],
+    },
+    {
+      // Cancelado: sigue visible para que quien dijo que iba se entere.
+      id: "seed_event_4",
+      type: "CAR_MEET",
+      title: "Exhibición en Salitre (cancelada)",
+      description: "Se cancela por el clima. Reprogramamos pronto.",
+      venueName: "Salitre",
+      address: "Avenida 68, Bogotá",
+      location: { lat: 4.651, lng: -74.11, placeName: "Salitre, Bogotá" },
+      startAt: ahora + 3 * dia + 15 * hora,
+      endAt: null,
+      status: "CANCELLED",
+      features: ["EXHIBICION", "PREMIACION"],
+    },
+    {
+      // Los dos siguientes comparten el punto EXACTO del centro comercial,
+      // igual que SAME_SPOT en las reseñas: ningún zoom los separa, así que
+      // sirven para probar la hoja del grupo de eventos.
+      id: "seed_event_5",
+      type: "CAR_MEET",
+      title: "Meet matutino en el Andino",
+      description: null,
+      venueName: "Centro Comercial Andino",
+      address: "Carrera 11 #82-71, Bogotá",
+      location: { ...SAME_SPOT },
+      startAt: ahora + dia + 8 * hora,
+      endAt: null,
+      status: "SCHEDULED",
+      features: ["PARQUEADERO"],
+    },
+    {
+      id: "seed_event_6",
+      type: "CAR_MEET",
+      title: "Meet nocturno en el Andino",
+      description: null,
+      venueName: "Centro Comercial Andino",
+      address: "Carrera 11 #82-71, Bogotá",
+      location: { ...SAME_SPOT },
+      startAt: ahora + dia + 20 * hora,
+      endAt: ahora + dia + 23 * hora,
+      status: "SCHEDULED",
+      features: ["MUSICA", "PARQUEADERO"],
+    },
+  ];
+
+  return plantillas.map((plantilla, index) => {
+    const organizador = users[index % users.length];
+    return {
+      ...plantilla,
+      userId: organizador.id,
+      // Copia desnormalizada, igual que en las reseñas.
+      user: { fullName: organizador.fullName, avatarUrl: organizador.avatarUrl },
+      interestedCount: 0,
+      goingCount: 0,
+      createdAt: ahora,
+      updatedAt: ahora,
+    };
+  });
+}
+
 function buildData() {
   const users = Array.from({ length: USERS_COUNT }, (_, i) => makeUser(i));
 
@@ -326,7 +451,9 @@ function buildData() {
     target.followersCount += 1;
   });
 
-  return { users, reviews, likes, follows };
+  const events = buildEvents(users);
+
+  return { users, reviews, likes, follows, events };
 }
 
 /** Escribe en lotes de 500: cada batch es atómico por sí solo. */
@@ -339,7 +466,7 @@ async function commitInBatches(writes) {
 }
 
 async function main() {
-  const { users, reviews, likes, follows } = buildData();
+  const { users, reviews, likes, follows, events } = buildData();
   const writes = [];
 
   // El id va en la ruta del documento, no dentro de él: en la app lo
@@ -354,6 +481,10 @@ async function main() {
 
   reviews.forEach(({ id, ...data }) => {
     writes.push({ ref: db.collection("reviews").doc(id), data });
+  });
+
+  events.forEach(({ id, ...data }) => {
+    writes.push({ ref: db.collection("events").doc(id), data });
   });
 
   likes.forEach(({ reviewId, userId, createdAt }) => {
@@ -382,7 +513,8 @@ async function main() {
     : `proyecto ${serviceAccount.project_id}`;
   console.log(
     `Listo en ${destino}: ${VEHICLES.length} vehículos, ${users.length} usuarios, ` +
-    `${reviews.length} reseñas, ${likes.length} likes y ${follows.length} seguimientos.`
+    `${reviews.length} reseñas, ${events.length} eventos, ${likes.length} likes ` +
+    `y ${follows.length} seguimientos.`
   );
 }
 

@@ -2,8 +2,23 @@ package com.example.motormates.data.model
 
 import com.example.motormates.data.mock.VehicleImages
 
-/** Tipo de evento que generó la notificación — determina el ícono mostrado. */
-enum class NotificationType { LIKE, COMMENT, FOLLOW, RATING, REVIEW, LIKE_STORY, MESSAGE }
+/**
+ * Tipo de evento que generó la notificación — determina el ícono mostrado.
+ *
+ * La participación en eventos son DOS valores (EVENT_INTERESTED y EVENT_GOING)
+ * y no uno solo con un campo de estado al lado. El motivo es el compilador:
+ * hay dos `when` exhaustivos sin `else` sobre este enum (el del mensaje en
+ * UiMappers.kt y el del ícono en AlertsComponents.kt), así que agregar una
+ * constante obliga a pasar por los dos. Con un campo aparte los dos `when`
+ * seguirían compilando y el mensaje saldría incompleto en silencio.
+ *
+ * Agregar constantes es seguro para las versiones viejas de la app: un tipo
+ * que no se reconoce descarta esa fila al mapear (ver el mapNotNull de
+ * NotificationRepositoryImpl.toDomain), no tumba la lista.
+ */
+enum class NotificationType {
+    LIKE, COMMENT, FOLLOW, RATING, REVIEW, LIKE_STORY, MESSAGE, EVENT_INTERESTED, EVENT_GOING
+}
 
 data class NotificationUi(
     val id: String,
@@ -15,7 +30,9 @@ data class NotificationUi(
     val timeAgo: String,
     val section: String, // ej. "HOY", "ESTA SEMANA" — agrupa la lista
     val thumbnailResId: Int? = null, // null = sin miniatura; 0 = con miniatura pero foto pendiente; id real = foto ya puesta
-    val thumbnailUrl: String? = null
+    val thumbnailUrl: String? = null,
+    /** Con qué evento navegar al detalle. Null en los tipos que no son de evento. */
+    val eventId: String? = null
 )
 
 // ===== Datos locales quemados =====

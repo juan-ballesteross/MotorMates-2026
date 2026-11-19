@@ -6,6 +6,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,6 +22,7 @@ import com.example.motormates.navigation.ScreenRoute
 import com.example.motormates.ui.chat.ChatBadgeViewModel
 import com.example.motormates.ui.common.components.MainBottomDestination
 import com.example.motormates.ui.common.components.MainBottomNavBar
+import com.example.motormates.ui.common.components.PublishSheet
 import com.example.motormates.ui.notifications.PushTokenViewModel
 
 /**
@@ -48,6 +52,9 @@ fun MotorMatesApp(modifier: Modifier = Modifier) {
     )
     val isNewReview = currentRoute == ScreenRoute.NewReview.route
 
+    // El "+" ya no va directo a publicar: primero pregunta qué se publica.
+    var showPublishSheet by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier,
         containerColor = if (isNewReview) Color.Black else MaterialTheme.colorScheme.background,
@@ -57,7 +64,7 @@ fun MotorMatesApp(modifier: Modifier = Modifier) {
                     selected = currentRoute.toMainBottomDestination(),
                     onFeedClick = { navController.navigateToBottomTab(ScreenRoute.Feed.route) },
                     onExploreClick = { navController.navigateToBottomTab(ScreenRoute.Explore.route) },
-                    onPublishClick = { navController.navigateToBottomTab(ScreenRoute.Post.route) },
+                    onPublishClick = { showPublishSheet = true },
                     onMessagesClick = { navController.navigateToBottomTab(ScreenRoute.ChatList.route) },
                     onProfileClick = { navController.navigateToBottomTab(ScreenRoute.Profile.route) },
                     hasUnreadMessages = hasUnreadMessages
@@ -75,6 +82,20 @@ fun MotorMatesApp(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding)
+        )
+    }
+
+    if (showPublishSheet) {
+        PublishSheet(
+            onPostClick = {
+                showPublishSheet = false
+                navController.navigateToBottomTab(ScreenRoute.Post.route)
+            },
+            onEventClick = {
+                showPublishSheet = false
+                navController.navigate(ScreenRoute.NewEvent.createRoute())
+            },
+            onDismiss = { showPublishSheet = false }
         )
     }
 }

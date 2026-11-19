@@ -38,6 +38,35 @@ sealed class ScreenRoute(val route: String) {
             if (reviewId == null) "newReview/$vehicleId" else "newReview/$vehicleId?reviewId=$reviewId"
     }
 
+    /** Crear y editar un evento en la misma pantalla: eventId null = crear. */
+    object NewEvent : ScreenRoute("newEvent?eventId={eventId}") {
+        const val ARG_EVENT_ID = "eventId"
+        fun createRoute(eventId: String? = null) =
+            if (eventId == null) "newEvent" else "newEvent?eventId=$eventId"
+    }
+
+    object EventDetail : ScreenRoute("event/{eventId}") {
+        const val ARG_EVENT_ID = "eventId"
+        fun createRoute(eventId: String) = "event/$eventId"
+    }
+
+    /**
+     * Elegir en el mapa dónde será un evento.
+     *
+     * lat y lng sí pueden viajar por la ruta, al contrario que el resto de
+     * los datos del formulario: son números y no texto escrito por el
+     * usuario, y sirven para abrir el mapa donde ya estaba el punto al
+     * editar. Van como texto y no como Float porque NavType.FloatType
+     * pierde precisión. El resultado vuelve por el savedStateHandle
+     * (ver RESULT_PICKED_LAT).
+     */
+    object PickLocation : ScreenRoute("pickLocation?lat={lat}&lng={lng}") {
+        const val ARG_LAT = "lat"
+        const val ARG_LNG = "lng"
+        fun createRoute(lat: Double? = null, lng: Double? = null) =
+            if (lat == null || lng == null) "pickLocation" else "pickLocation?lat=$lat&lng=$lng"
+    }
+
     object Story : ScreenRoute("story/{storyIndex}") {
         const val ARG_STORY_INDEX = "storyIndex"
         fun createRoute(storyIndex: Int) = "story/$storyIndex"

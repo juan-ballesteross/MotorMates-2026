@@ -2,6 +2,8 @@ package com.example.motormates.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -18,9 +20,13 @@ import com.example.motormates.ui.chat.ChatListScreen
 import com.example.motormates.ui.chat.ChatScreen
 import com.example.motormates.ui.comments.CommentsScreen
 import com.example.motormates.ui.editProfile.EditProfileScreen
+import com.example.motormates.ui.eventDetail.EventDetailScreen
 import com.example.motormates.ui.feed.FeedScreen
 import com.example.motormates.ui.followlist.FollowListScreen
+import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.ui.login.LoginScreen
+import com.example.motormates.ui.newEvent.NewEventScreen
+import com.example.motormates.ui.pickLocation.PickLocationScreen
 import com.example.motormates.ui.post.PostScreen
 import com.example.motormates.ui.publicProfile.PublicProfileScreen
 import com.example.motormates.ui.register.RegisterScreen
@@ -93,7 +99,13 @@ fun AppNavigation(
                     navController.navigate(ScreenRoute.Story.createRoute(index))
                 },
                 onAuthorClick = ::openAuthor,
-                onAlertsClick = { navController.navigate(ScreenRoute.Alerts.route) }
+                onAlertsClick = { navController.navigate(ScreenRoute.Alerts.route) },
+                onEventDetailClick = { eventId ->
+                    navController.navigate(ScreenRoute.EventDetail.createRoute(eventId))
+                },
+                onCreateEventClick = {
+                    navController.navigate(ScreenRoute.NewEvent.createRoute())
+                }
             )
         }
         composable(ScreenRoute.Explore.route) {
@@ -156,9 +168,17 @@ fun AppNavigation(
         }
         composable(ScreenRoute.Alerts.route) {
             AlertsScreen(
+                // else y no un when exhaustivo: la mitad de los tipos no lleva
+                // a ninguna parte, y listarlos sería siete ramas vacías.
                 onNotificationClick = { notification ->
-                    if (notification.type == NotificationType.MESSAGE) {
-                        navController.navigate(ScreenRoute.Chat.createRoute(notification.actorId))
+                    when (notification.type) {
+                        NotificationType.MESSAGE ->
+                            navController.navigate(ScreenRoute.Chat.createRoute(notification.actorId))
+                        NotificationType.EVENT_INTERESTED, NotificationType.EVENT_GOING ->
+                            notification.eventId?.let {
+                                navController.navigate(ScreenRoute.EventDetail.createRoute(it))
+                            }
+                        else -> Unit
                     }
                 }
             )
@@ -249,6 +269,91 @@ fun AppNavigation(
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set(RESULT_REVIEWS_CHANGED, true)
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(
+            route = ScreenRoute.NewEvent.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.NewEvent.ARG_EVENT_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { entry ->
+            val eventId = entry.arguments?.getString(ScreenRoute.NewEvent.ARG_EVENT_ID)
+            // El punto lo deja aquí la pantalla del mapa antes de cerrarse.
+            val pickedLocation by entry.pickedLocationState()
+
+            NewEventScreen(
+                eventId = eventId,
+                onCloseClick = { navController.popBackStack() },
+                onSaved = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(RESULT_EVENTS_CHANGED, true)
+                    navController.popBackStack()
+                },
+                onPickLocationClick = { lat, lng ->
+                    navController.navigate(ScreenRoute.PickLocation.createRoute(lat, lng))
+                },
+                pickedLocation = pickedLocation,
+                onPickedLocationHandled = { entry.clearPickedLocation() }
+            )
+        }
+        composable(
+            route = ScreenRoute.EventDetail.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.EventDetail.ARG_EVENT_ID) { type = NavType.StringType }
+            )
+        ) { entry ->
+            val eventId = entry.arguments?.getString(ScreenRoute.EventDetail.ARG_EVENT_ID).orEmpty()
+            // Al volver de editar, el formulario deja esta bandera aquí.
+            val eventsChanged by entry.eventsChangedState()
+
+            EventDetailScreen(
+                eventId = eventId,
+                onBackClick = { navController.popBackStack() },
+                onEditClick = { id ->
+                    navController.navigate(ScreenRoute.NewEvent.createRoute(id))
+                },
+                onOrganizerClick = ::openAuthor,
+                reloadSignal = eventsChanged,
+                onReloadHandled = { entry.clearEventsChanged() }
+            )
+        }
+        composable(
+            route = ScreenRoute.PickLocation.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.PickLocation.ARG_LAT) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(ScreenRoute.PickLocation.ARG_LNG) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { entry ->
+            // Texto y luego toDoubleOrNull: NavType.FloatType perdería
+            // precisión en una coordenada.
+            val lat = entry.arguments?.getString(ScreenRoute.PickLocation.ARG_LAT)?.toDoubleOrNull()
+            val lng = entry.arguments?.getString(ScreenRoute.PickLocation.ARG_LNG)?.toDoubleOrNull()
+
+            PickLocationScreen(
+                initialLat = lat,
+                initialLng = lng,
+                onBackClick = { navController.popBackStack() },
+                onPicked = { location ->
+                    navController.previousBackStackEntry?.savedStateHandle?.apply {
+                        set(RESULT_PICKED_LAT, location.lat)
+                        set(RESULT_PICKED_LNG, location.lng)
+                        set(RESULT_PICKED_PLACE_NAME, location.placeName)
+                    }
                     navController.popBackStack()
                 }
             )
@@ -353,4 +458,45 @@ private fun NavBackStackEntry.profileChangedState(): State<Boolean> =
 
 private fun NavBackStackEntry.clearProfileChanged() {
     savedStateHandle[RESULT_PROFILE_CHANGED] = false
+}
+
+/**
+ * El punto que dejó la pantalla de elegir en el mapa.
+ *
+ * Se lee como estado y se limpia tras consumirlo (ver
+ * [clearPickedLocation]): si no, volver a entrar al formulario reaplicaría un
+ * punto viejo sobre el que el usuario pudo haber cambiado.
+ */
+@Composable
+private fun NavBackStackEntry.pickedLocationState(): State<ReviewLocation?> {
+    val lat by savedStateHandle.getStateFlow<Double?>(RESULT_PICKED_LAT, null)
+        .collectAsStateWithLifecycle()
+    val lng by savedStateHandle.getStateFlow<Double?>(RESULT_PICKED_LNG, null)
+        .collectAsStateWithLifecycle()
+    val placeName by savedStateHandle.getStateFlow<String?>(RESULT_PICKED_PLACE_NAME, null)
+        .collectAsStateWithLifecycle()
+
+    return remember(lat, lng, placeName) {
+        derivedStateOf {
+            if (lat != null && lng != null) {
+                ReviewLocation(lat = lat!!, lng = lng!!, placeName = placeName)
+            } else {
+                null
+            }
+        }
+    }
+}
+
+private fun NavBackStackEntry.clearPickedLocation() {
+    savedStateHandle[RESULT_PICKED_LAT] = null
+    savedStateHandle[RESULT_PICKED_LNG] = null
+    savedStateHandle[RESULT_PICKED_PLACE_NAME] = null
+}
+
+@Composable
+private fun NavBackStackEntry.eventsChangedState(): State<Boolean> =
+    savedStateHandle.getStateFlow(RESULT_EVENTS_CHANGED, false).collectAsStateWithLifecycle()
+
+private fun NavBackStackEntry.clearEventsChanged() {
+    savedStateHandle[RESULT_EVENTS_CHANGED] = false
 }

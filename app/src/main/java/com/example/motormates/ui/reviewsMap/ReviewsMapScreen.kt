@@ -4,8 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.motormates.R
+import com.example.motormates.ui.common.openPointInMapsApp
 import com.example.motormates.ui.reviewsMap.components.LocationPermissionDialogs
 import com.example.motormates.ui.reviewsMap.components.rememberLocationPermissionHandler
 
@@ -20,6 +24,8 @@ import com.example.motormates.ui.reviewsMap.components.rememberLocationPermissio
 fun ReviewsMapScreen(
     onVehicleClick: (String) -> Unit = {},
     onAuthorClick: (String) -> Unit = {},
+    onEventDetailClick: (String) -> Unit = {},
+    onCreateEventClick: () -> Unit = {},
     viewModel: ReviewsMapViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -38,12 +44,36 @@ fun ReviewsMapScreen(
     )
     LocationPermissionDialogs(locationHandler)
 
+    // Abrir la estación en otra app es cosa de la pantalla y no del ViewModel:
+    // necesita el Context de Android, que allá no debe entrar.
+    val context = LocalContext.current
+    val noMapsAppMessage = stringResource(R.string.station_no_maps_app)
+
     ReviewsMapContent(
         uiState = uiState,
+        onToggleLayer = viewModel::toggleLayer,
         onMarkerClick = viewModel::onMarkerClick,
         onDismissSelection = viewModel::clearSelection,
         onClusterClick = viewModel::onClusterClick,
         onDismissCluster = viewModel::dismissClusterSelection,
+        onEventMarkerClick = viewModel::onEventMarkerClick,
+        onEventClusterClick = viewModel::onEventClusterClick,
+        onDismissEventCluster = viewModel::dismissEventClusterSelection,
+        onStationMarkerClick = viewModel::onStationMarkerClick,
+        onStationOpenInMaps = { station ->
+            val opened = openPointInMapsApp(
+                context = context,
+                lat = station.lat,
+                lng = station.lng,
+                label = station.nombre
+            )
+            // Si no hay ninguna app que atienda geo:, se avisa por el mismo
+            // snackbar que usan los fallos de la capa.
+            if (!opened) viewModel.showStationsMessage(noMapsAppMessage)
+        },
+        onStationsMessageShown = viewModel::onStationsMessageShown,
+        onEventDetailClick = onEventDetailClick,
+        onCreateEventClick = onCreateEventClick,
         onVehicleClick = onVehicleClick,
         onAuthorClick = onAuthorClick,
         onRetryClick = viewModel::retry,

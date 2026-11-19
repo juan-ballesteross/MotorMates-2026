@@ -8,5 +8,6 @@ data class NotificationDto(
     val actorId: String = "",
     val vehicleId: String? = null,
     val reviewId: String? = null,
+    val eventId: String? = null,
     val createdAt: Long = 0L
 )
