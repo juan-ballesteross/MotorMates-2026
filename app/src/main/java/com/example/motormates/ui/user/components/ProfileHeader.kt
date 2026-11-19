@@ -2,7 +2,6 @@ package com.example.motormates.ui.user.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -26,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import coil.compose.AsyncImage
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
+import com.example.motormates.ui.theme.pressScaleClickable
 
 /**
  * Portada + avatar superpuesto + botón "Editar perfil", replicando el
@@ -56,6 +60,17 @@ fun ProfileHeader(
                 .height(COVER_HEIGHT)
                 .clip(RoundedCornerShape(Radius.xl))
         )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(COVER_HEIGHT)
+                .clip(RoundedCornerShape(Radius.xl))
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, MaterialTheme.colorScheme.primary.copy(alpha = 0.28f))
+                    )
+                )
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -65,6 +80,7 @@ fun ProfileHeader(
             Box(
                 modifier = Modifier
                     .size(84.dp)
+                    .shadow(elevation = Elevation.md, shape = RoundedCornerShape(Radius.lg))
                     .clip(RoundedCornerShape(Radius.lg))
                     .border(3.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(Radius.lg))
             ) {
@@ -85,7 +101,7 @@ fun ProfileHeader(
                 modifier = Modifier
                     .clip(RoundedCornerShape(Radius.sm))
                     .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(Radius.sm))
-                    .clickable(onClick = onEditProfileClick)
+                    .pressScaleClickable(onClick = onEditProfileClick)
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
                 Text(

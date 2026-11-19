@@ -4,8 +4,12 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.platform.testTag
+import com.example.motormates.ui.theme.rememberHapticClick
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
@@ -48,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -189,6 +194,7 @@ fun StoryBottomBar(
     onReplyFocusChange: (Boolean) -> Unit = {},
     onSendReply: () -> Unit = {}
 ) {
+    val vibrate = rememberHapticClick()
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -215,13 +221,19 @@ fun StoryBottomBar(
         ) {
             if (isOwnStory) {
                 // En la propia no se responde: se ve quién le dio like.
+                val ownLikeScale by animateFloatAsState(
+                    targetValue = if (isLiked) 1.15f else 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                    label = "storyLikeScale"
+                )
                 Icon(
                     imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                     contentDescription = stringResource(R.string.story_like_cd),
                     tint = if (isLiked) MaterialTheme.colorScheme.primary else Color.White,
                     modifier = Modifier
                         .size(26.dp)
-                        .clickable(onClick = onLikeClick)
+                        .scale(ownLikeScale)
+                        .clickable { vibrate(); onLikeClick() }
                 )
                 Text(
                     text = "$likesCount Me gusta",
@@ -238,13 +250,19 @@ fun StoryBottomBar(
                     onSend = onSendReply,
                     modifier = Modifier.weight(1f)
                 )
+                val replyLikeScale by animateFloatAsState(
+                    targetValue = if (isLiked) 1.15f else 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                    label = "storyLikeScale"
+                )
                 Icon(
                     imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                     contentDescription = stringResource(R.string.story_like_cd),
                     tint = if (isLiked) MaterialTheme.colorScheme.primary else Color.White,
                     modifier = Modifier
                         .size(26.dp)
-                        .clickable(onClick = onLikeClick)
+                        .scale(replyLikeScale)
+                        .clickable { vibrate(); onLikeClick() }
                 )
                 if (isSendingReply) {
                     CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(22.dp))

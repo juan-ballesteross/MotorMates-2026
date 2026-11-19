@@ -1,7 +1,6 @@
 package com.example.motormates.ui.compare.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,6 +50,7 @@ import com.example.motormates.ui.compare.VehiclePickerItem
 import com.example.motormates.ui.compare.VehiclePickerState
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.pressScaleClickable
 
 /**
  * Hoja para elegir con qué carro comparar, en dos pasos: primero la persona
@@ -191,7 +191,7 @@ private fun OwnersList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(Radius.sm))
-                    .clickable { onOwnerSelected(owner.key) }
+                    .pressScaleClickable { onOwnerSelected(owner.key) }
                     .padding(vertical = Spacing.xs)
                     .testTag("comparePickerOwner_${owner.key}"),
                 verticalAlignment = Alignment.CenterVertically,
@@ -300,7 +300,7 @@ private fun PickerRow(item: VehiclePickerItem, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(Radius.sm))
-            .clickable(onClick = onClick)
+            .pressScaleClickable(onClick = onClick)
             .padding(vertical = Spacing.xs)
             .testTag("comparePickerItem_${item.id}"),
         verticalAlignment = Alignment.CenterVertically,

@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -49,6 +50,9 @@ import coil.compose.AsyncImage
 import com.example.motormates.R
 import com.example.motormates.data.model.ReviewAspect
 import com.example.motormates.data.model.ReviewCarSummary
+import com.example.motormates.ui.common.components.ShimmerAsyncImage
+import com.example.motormates.ui.theme.Elevation
+import com.example.motormates.ui.theme.Radius
 
 @Composable
 fun NewReviewTopBar(
@@ -94,8 +98,10 @@ fun ReviewCarCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .shadow(elevation = Elevation.sm, shape = RoundedCornerShape(Radius.lg))
+            .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.lg))
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -103,15 +109,14 @@ fun ReviewCarCard(
             modifier = Modifier
                 .width(72.dp)
                 .height(52.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(Radius.sm))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             if (car.imageUrl != null) {
-                AsyncImage(
+                ShimmerAsyncImage(
                     model = car.imageUrl,
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
@@ -182,8 +187,9 @@ fun ReviewExperienceField(
         modifier = modifier
             .fillMaxWidth()
             .height(128.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.lg))
             .padding(16.dp)
     ) {
         if (value.isEmpty()) {

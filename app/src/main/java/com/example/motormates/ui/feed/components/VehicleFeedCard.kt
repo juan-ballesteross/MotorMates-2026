@@ -2,6 +2,7 @@ package com.example.motormates.ui.feed.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,16 +24,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.motormates.ui.common.components.ShimmerAsyncImage
 import com.example.motormates.data.model.FeedVehicleUi
 import com.example.motormates.data.seed.localAvatarResFor
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.pressScaleClickable
 
 @Composable
 fun VehicleFeedCard(
@@ -45,9 +50,11 @@ fun VehicleFeedCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = Spacing.gutter)
+            .shadow(elevation = Elevation.sm, shape = RoundedCornerShape(Radius.lg))
             .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.lg))
+            .pressScaleClickable(onClick = onClick)
     ) {
         if (vehicle.ownerId != null) {
             Row(
@@ -69,10 +76,9 @@ fun VehicleFeedCard(
         }
 
         if (vehicle.imageUrl != null) {
-            AsyncImage(
+            ShimmerAsyncImage(
                 model = vehicle.imageUrl,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)

@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
+import com.example.motormates.ui.theme.Radius
 
 /**
  * Campo de texto con la etiqueta arriba y fondo de superficie, siguiendo
@@ -74,7 +75,7 @@ fun RegisterTextField(
             isError = isError,
             visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else keyboardType),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(Radius.md),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,

@@ -1,10 +1,13 @@
 package com.example.motormates.data.source
 
+import android.net.Uri
 import com.example.motormates.data.model.StoryReplyRef
 import com.example.motormates.data.dto.ChatFirestoreDto
 import com.example.motormates.data.dto.MessageFirestoreDto
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.storage.FirebaseStorage
+import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -16,12 +19,14 @@ interface ChatDataSource {
     fun observeChats(uid: String): Flow<List<ChatFirestoreDto>>
     fun observeMessages(chatId: String): Flow<List<MessageFirestoreDto>>
     /** storyReply: si el mensaje es una respuesta a una historia. */
-    suspend fun sendMessage(chatId: String, senderId: String, text: String, storyReply: StoryReplyRef? = null)
+    suspend fun sendMessage(chatId: String, senderId: String, text: String, storyReply: StoryReplyRef? = null, imageUrl: String? = null)
+    suspend fun uploadChatImage(chatId: String, imageUri: Uri): String
     suspend fun markAsRead(chatId: String, uid: String)
 }
 
 class FirestoreChatDataSource @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val storage: FirebaseStorage
 ) : ChatDataSource {
 
     private fun chatIdFor(uidA: String, uidB: String) =
@@ -69,7 +74,7 @@ class FirestoreChatDataSource @Inject constructor(
         awaitClose { registration.remove() }
     }
 
-    override suspend fun sendMessage(chatId: String, senderId: String, text: String, storyReply: StoryReplyRef?) {
+    override suspend fun sendMessage(chatId: String, senderId: String, text: String, storyReply: StoryReplyRef?, imageUrl: String?) {
         val now = System.currentTimeMillis()
         val messageRef = chatRef(chatId).collection(MESSAGES_COLLECTION).document()
 
@@ -81,6 +86,7 @@ class FirestoreChatDataSource @Inject constructor(
                     senderId = senderId,
                     text = text,
                     createdAt = now,
+                    imageUrl = imageUrl,
                     storyId = storyReply?.storyId,
                     storyImageUrl = storyReply?.imageUrl
                 )
@@ -89,12 +95,22 @@ class FirestoreChatDataSource @Inject constructor(
                 chatRef(chatId),
                 mapOf(
                     // En la lista de chats se nota que fue a una historia.
-                    "lastMessageText" to if (storyReply != null) "Respondió a una historia: $text" else text,
+                    "lastMessageText" to when {
+                        storyReply != null -> "Respondió a una historia: $text"
+                        imageUrl != null && text.isBlank() -> "\uD83D\uDCF7 Foto"
+                        else -> text
+                    },
                     "lastMessageSenderId" to senderId,
                     "lastMessageAt" to now
                 )
             )
         }.await()
+    }
+
+    override suspend fun uploadChatImage(chatId: String, imageUri: Uri): String {
+        val imageRef = storage.reference.child("chats/$chatId/${UUID.randomUUID()}.jpg")
+        imageRef.putFile(imageUri).await()
+        return imageRef.downloadUrl.await().toString()
     }
 
     override suspend fun markAsRead(chatId: String, uid: String) {

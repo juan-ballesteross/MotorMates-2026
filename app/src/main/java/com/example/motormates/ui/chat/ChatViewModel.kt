@@ -1,5 +1,6 @@
 package com.example.motormates.ui.chat
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.repository.ChatRepository
@@ -60,20 +61,33 @@ class ChatViewModel @Inject constructor(
         _uiState.update { it.copy(draft = text) }
     }
 
+    fun pickImage(uri: Uri) {
+        _uiState.update { it.copy(pickedImageUri = uri) }
+    }
+
+    fun clearPickedImage() {
+        _uiState.update { it.copy(pickedImageUri = null) }
+    }
+
     fun sendMessage() {
         val state = _uiState.value
         val chatId = state.chatId ?: return
         val text = state.draft
-        if (text.isBlank() || state.isSending) return
+        val imageUri = state.pickedImageUri
+        if ((text.isBlank() && imageUri == null) || state.isSending) return
 
-        _uiState.update { it.copy(draft = "", isSending = true) }
+        _uiState.update { it.copy(draft = "", pickedImageUri = null, isSending = true) }
 
         viewModelScope.launch {
-            val result = chatRepository.sendMessage(chatId, state.otherUserId, text)
+            val result = if (imageUri != null) {
+                chatRepository.sendImage(chatId, state.otherUserId, imageUri, text)
+            } else {
+                chatRepository.sendMessage(chatId, state.otherUserId, text)
+            }
             result.fold(
                 onSuccess = { _uiState.update { it.copy(isSending = false) } },
                 onFailure = { error ->
-                    _uiState.update { it.copy(isSending = false, draft = text, errorMessage = error.message) }
+                    _uiState.update { it.copy(isSending = false, draft = text, pickedImageUri = imageUri, errorMessage = error.message) }
                 }
             )
         }

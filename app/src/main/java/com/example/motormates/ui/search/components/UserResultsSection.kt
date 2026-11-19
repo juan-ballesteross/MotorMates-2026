@@ -1,7 +1,6 @@
 package com.example.motormates.ui.search.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.motormates.data.model.UserSearchResult
+import com.example.motormates.ui.theme.pressScaleClickable
 
 @Composable
 fun UserResultsSection(
@@ -33,7 +33,7 @@ fun UserResultsSection(
         Text(
             text = "Usuarios",
             color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 16.sp,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -53,7 +53,7 @@ private fun UserResultRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .pressScaleClickable(onClick = onClick)
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)

@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import coil.compose.AsyncImage
+import com.example.motormates.ui.common.components.ShimmerAsyncImage
 import com.example.motormates.data.model.StoryUser
 import com.example.motormates.ui.story.components.StoryBottomBar
 import com.example.motormates.ui.story.components.StoryTopBar
@@ -47,7 +47,7 @@ fun StoryScreenContent(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        AsyncImage(
+        ShimmerAsyncImage(
             model = imageUrl,
             contentDescription = caption,
             contentScale = ContentScale.Fit,

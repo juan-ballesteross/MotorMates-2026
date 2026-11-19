@@ -1,7 +1,7 @@
 package com.example.motormates.ui.common.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -19,20 +21,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.example.motormates.data.model.GarageVehicleUi
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.pressScaleClickable
+import com.example.motormates.ui.theme.rememberPressScale
 
 /**
  * Un carro del garaje, en la grilla de dos columnas del perfil. En el perfil
@@ -48,9 +54,11 @@ fun GarageVehicleCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(elevation = Elevation.sm, shape = RoundedCornerShape(Radius.lg))
             .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.lg))
+            .pressScaleClickable(onClick = onClick)
             .testTag("garageCar_${car.id}")
     ) {
         val imageModifier = Modifier
@@ -58,10 +66,9 @@ fun GarageVehicleCard(
             .height(100.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant)
         if (car.imageUrl != null) {
-            AsyncImage(
+            ShimmerAsyncImage(
                 model = car.imageUrl,
                 contentDescription = car.title,
-                contentScale = ContentScale.Crop,
                 modifier = imageModifier
             )
         } else {
@@ -120,25 +127,38 @@ fun GarageEmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Filled.Garage,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(40.dp)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Garage,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(Spacing.sm))
         Text(
             text = message,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 13.sp,
+            style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )
         if (onPublishClick != null) {
             Spacer(modifier = Modifier.height(Spacing.sm))
+            val publishInteractionSource = remember { MutableInteractionSource() }
+            val publishScale = rememberPressScale(publishInteractionSource)
             Button(
                 onClick = onPublishClick,
+                interactionSource = publishInteractionSource,
                 shape = RoundedCornerShape(Radius.md),
-                modifier = Modifier.testTag("garagePublishButton")
+                modifier = Modifier
+                    .scale(publishScale)
+                    .testTag("garagePublishButton")
             ) {
                 Text(text = "Publicar mi vehículo")
             }

@@ -1,7 +1,7 @@
 package com.example.motormates.ui.search.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -37,7 +38,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import com.example.motormates.R
 import com.example.motormates.data.model.CarListing
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
+import com.example.motormates.ui.theme.pressScaleClickable
 
 @Composable
 fun CarResultsGrid(
@@ -67,9 +70,11 @@ private fun CarResultCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(elevation = Elevation.sm, shape = RoundedCornerShape(Radius.lg))
             .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.lg))
+            .pressScaleClickable(onClick = onClick)
     ) {
         Image(
             painter = painterResource(id = car.imageResId),

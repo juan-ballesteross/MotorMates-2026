@@ -210,13 +210,6 @@ fun ReviewsMapContent(
                 isError = true,
                 onRetryClick = onRetryClick
             )
-
-            // Sin esto, un mapa sin marcadores se lee como si la función
-            // estuviera rota en vez de como "todavía no hay nada".
-            uiState.isEmpty -> OverlayMessage(
-                message = stringResource(R.string.reviews_map_empty),
-                tag = "reviewsMapEmpty"
-            )
         }
 
         uiState.selectedMarker?.let { selected ->

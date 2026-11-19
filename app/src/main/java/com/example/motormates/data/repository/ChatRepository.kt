@@ -1,5 +1,6 @@
 package com.example.motormates.data.repository
 
+import android.net.Uri
 import com.example.motormates.data.model.StoryReplyRef
 import com.example.motormates.data.dto.ChatFirestoreDto
 import com.example.motormates.data.model.ChatMessage
@@ -25,6 +26,7 @@ interface ChatRepository {
     fun observeChats(): Flow<Result<List<ChatPreview>>>
     fun observeMessages(chatId: String): Flow<List<ChatMessage>>
     suspend fun sendMessage(chatId: String, otherUserId: String, text: String): Result<Unit>
+    suspend fun sendImage(chatId: String, otherUserId: String, imageUri: Uri, caption: String): Result<Unit>
 
     /**
      * Responder una historia: el texto le llega al dueño como mensaje
@@ -76,6 +78,7 @@ class ChatRepositoryImpl @Inject constructor(
                         text = dto.text,
                         createdAt = if (dto.createdAt > 0) Instant.ofEpochMilli(dto.createdAt).toString() else null,
                         isMine = dto.senderId == currentUserId,
+                        imageUrl = dto.imageUrl,
                         storyReply = dto.storyId?.let { StoryReplyRef(storyId = it, imageUrl = dto.storyImageUrl) }
                     )
                 }
@@ -94,7 +97,16 @@ class ChatRepositoryImpl @Inject constructor(
             .catch { emit(false) }
 
     override suspend fun sendMessage(chatId: String, otherUserId: String, text: String): Result<Unit> =
-        send(chatId, otherUserId, text, storyReply = null)
+        send(chatId, otherUserId, text, storyReply = null, imageUrl = null)
+
+    override suspend fun sendImage(chatId: String, otherUserId: String, imageUri: Uri, caption: String): Result<Unit> {
+        val imageUrl = try {
+            chatDataSource.uploadChatImage(chatId, imageUri)
+        } catch (e: Exception) {
+            return Result.failure(Exception("No se pudo enviar la imagen"))
+        }
+        return send(chatId, otherUserId, caption, storyReply = null, imageUrl = imageUrl)
+    }
 
     override suspend fun replyToStory(
         storyOwnerId: String,
@@ -111,17 +123,23 @@ class ChatRepositoryImpl @Inject constructor(
 
         // El chat se crea si todavía no habían hablado.
         val chatId = openChatWith(storyOwnerId).getOrElse { return Result.failure(it) }
-        return send(chatId, storyOwnerId, text, StoryReplyRef(storyId = storyId, imageUrl = storyImageUrl))
+        return send(chatId, storyOwnerId, text, StoryReplyRef(storyId = storyId, imageUrl = storyImageUrl), imageUrl = null)
     }
 
-    private suspend fun send(chatId: String, otherUserId: String, text: String, storyReply: StoryReplyRef?): Result<Unit> {
+    private suspend fun send(
+        chatId: String,
+        otherUserId: String,
+        text: String,
+        storyReply: StoryReplyRef?,
+        imageUrl: String?
+    ): Result<Unit> {
         val currentUserId = authDataSource.getCurrentUser()?.id
             ?: return Result.failure(Exception("Debes iniciar sesión para enviar mensajes"))
         val trimmed = text.trim()
-        if (trimmed.isEmpty()) return Result.failure(Exception("El mensaje no puede estar vacío"))
+        if (trimmed.isEmpty() && imageUrl == null) return Result.failure(Exception("El mensaje no puede estar vacío"))
 
         return try {
-            chatDataSource.sendMessage(chatId, currentUserId, trimmed, storyReply)
+            chatDataSource.sendMessage(chatId, currentUserId, trimmed, storyReply, imageUrl)
             notificationRepository.notify(
                 recipientUid = otherUserId,
                 type = NotificationType.MESSAGE,

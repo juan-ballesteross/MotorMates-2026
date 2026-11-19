@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 
 @Composable
@@ -39,8 +38,7 @@ fun FeedTopBar(
         Text(
             text = stringResource(R.string.feed_top_bar_title),
             color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.weight(1f)
         )
         Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.feed_search_cd), tint = MaterialTheme.colorScheme.onBackground)

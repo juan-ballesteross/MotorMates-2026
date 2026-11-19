@@ -16,6 +16,7 @@ data class MessageFirestoreDto(
     val senderId: String = "",
     val text: String = "",
     val createdAt: Long = 0L,
+    val imageUrl: String? = null,
     /** Si el mensaje responde a una historia: cuál y su foto (la historia dura 24 h, la foto queda). */
     val storyId: String? = null,
     val storyImageUrl: String? = null

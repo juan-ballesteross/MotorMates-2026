@@ -1,6 +1,7 @@
 package com.example.motormates.ui.compare.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.example.motormates.data.model.CompareCarUi
 import com.example.motormates.data.model.SpecWinner
 import com.example.motormates.data.model.VehicleComparison
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
 
@@ -67,7 +70,7 @@ fun CompareSectionTitle(text: String, modifier: Modifier = Modifier) {
         text = text,
         color = MaterialTheme.colorScheme.onBackground,
         fontWeight = FontWeight.Bold,
-        fontSize = 16.sp,
+        style = MaterialTheme.typography.titleMedium,
         modifier = modifier.padding(top = Spacing.lg, bottom = Spacing.xxs)
     )
 }
@@ -86,8 +89,10 @@ fun VerdictCard(comparison: VehicleComparison, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(elevation = Elevation.sm, shape = RoundedCornerShape(Radius.md))
             .clip(RoundedCornerShape(Radius.md))
             .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.md))
             .padding(Spacing.md)
             .testTag("compareVerdict"),
         verticalAlignment = Alignment.CenterVertically

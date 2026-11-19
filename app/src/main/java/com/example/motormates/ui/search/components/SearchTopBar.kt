@@ -18,9 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.ui.theme.Radius
 
@@ -40,8 +38,7 @@ fun SearchTopBar(
         Text(
             text = stringResource(R.string.search_top_bar_title),
             color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.headlineSmall
         )
         Spacer(modifier = Modifier.height(12.dp))
         OutlinedTextField(

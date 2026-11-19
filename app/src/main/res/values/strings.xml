@@ -96,6 +96,9 @@
     <string name="chat_back_cd">Volver</string>
     <string name="chat_input_placeholder">Escribe un mensaje…</string>
     <string name="chat_send_cd">Enviar</string>
+    <string name="chat_attach_image_cd">Adjuntar imagen</string>
+    <string name="chat_remove_image_cd">Quitar imagen</string>
+    <string name="chat_image_cd">Imagen</string>
 
     <!-- Edit profile -->
     <string name="edit_profile_title">Editar perfil</string>
@@ -184,7 +187,6 @@
     <string name="feed_tab_map">Mapa</string>
 
     <!-- Mapa de reseñas recientes -->
-    <string name="reviews_map_empty">Nadie ha publicado reseñas con ubicación en las últimas 24 horas</string>
     <string name="reviews_map_retry">Reintentar</string>
     <string name="reviews_map_marker_cd">Reseña de %1$s en %2$s</string>
     <string name="reviews_map_close_card_cd">Cerrar la reseña</string>

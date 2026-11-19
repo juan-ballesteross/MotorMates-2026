@@ -24,3 +24,11 @@ object Radius {
     val lg = 16.dp
     val xl = 20.dp
 }
+
+object Elevation {
+    val none = 0.dp
+    val xs = 1.dp
+    val sm = 3.dp
+    val md = 6.dp
+    val lg = 10.dp
+}

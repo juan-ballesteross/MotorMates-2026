@@ -1,6 +1,7 @@
 package com.example.motormates.ui.post
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,13 +20,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -42,9 +46,12 @@ import com.example.motormates.ui.post.components.ChoiceChipsRow
 import com.example.motormates.ui.post.components.PostSectionTitle
 import com.example.motormates.ui.post.components.PostTextField
 import com.example.motormates.ui.post.components.VehiclePhotoPicker
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.MotorMatesTheme
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.rememberHapticClick
+import com.example.motormates.ui.theme.rememberPressScale
 
 /** Stateless: el formulario completo llega del ViewModel (state hoisting). */
 @Composable
@@ -71,6 +78,7 @@ fun PostScreenContent(
     isDeleting: Boolean = false,
     onDeleteClick: () -> Unit = {}
 ) {
+    val vibrate = rememberHapticClick()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -195,13 +203,21 @@ fun PostScreenContent(
         }
 
         Spacer(modifier = Modifier.height(Spacing.lg))
+        val publishInteractionSource = remember { MutableInteractionSource() }
+        val publishButtonScale = rememberPressScale(publishInteractionSource)
         Button(
-            onClick = onPublishClick,
+            onClick = { vibrate(); onPublishClick() },
             enabled = canPublish,
             shape = RoundedCornerShape(Radius.md),
+            interactionSource = publishInteractionSource,
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = Elevation.sm,
+                pressedElevation = Elevation.xs
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
+                .scale(publishButtonScale)
                 .testTag("postPublishButton")
         ) {
             if (isPublishing) {

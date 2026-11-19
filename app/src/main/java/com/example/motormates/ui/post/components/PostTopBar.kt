@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
+import com.example.motormates.ui.theme.pressScaleClickable
 
 /**
  * Barra superior de "Nueva publicación": "Cancelar" a la izquierda, título
@@ -45,7 +46,7 @@ fun PostTopBar(
             fontSize = 15.sp,
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .clickable(onClick = onCancelClick)
+                .pressScaleClickable(onClick = onCancelClick)
         )
         Text(
             text = title,

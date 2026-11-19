@@ -2,7 +2,6 @@ package com.example.motormates.ui.compare.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -35,8 +35,10 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.motormates.data.model.CompareCarUi
 import com.example.motormates.data.model.CompareSide
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.pressScaleClickable
 
 /**
  * Las dos tarjetas enfrentadas con un "VS" en el medio. La izquierda es el
@@ -121,9 +123,11 @@ private fun CompareCarCard(
 ) {
     Column(
         modifier = modifier
+            .shadow(elevation = Elevation.sm, shape = RoundedCornerShape(Radius.md))
             .clip(RoundedCornerShape(Radius.md))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.md))
+            .pressScaleClickable(onClick = onClick)
     ) {
         CarImage(imageUrl = car.imageUrl)
         Column(modifier = Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xs)) {
@@ -219,7 +223,7 @@ private fun EmptyCarSlot(onClick: () -> Unit, modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.outlineVariant,
                 shape = RoundedCornerShape(Radius.md)
             )
-            .clickable(onClick = onClick),
+            .pressScaleClickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
