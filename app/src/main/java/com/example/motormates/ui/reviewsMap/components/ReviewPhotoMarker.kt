@@ -34,6 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.motormates.ui.theme.MotorMatesCarMeetBlue
+import com.example.motormates.ui.theme.MotorMatesChargingTeal
+import com.example.motormates.ui.theme.MotorMatesFuelPurple
+import com.example.motormates.ui.theme.MotorMatesPiqueGreen
 import com.example.motormates.ui.theme.MotorMatesRed
 import com.example.motormates.ui.theme.MotorMatesSurface
 import com.example.motormates.ui.theme.MotorMatesTextSecondary
@@ -56,7 +60,15 @@ data class MarkerPalette(
     val selectedBorder: Color,
     /** Fondo del círculo cuando no hay foto. */
     val placeholderBackground: Color,
-    val placeholderIcon: Color
+    val placeholderIcon: Color,
+    /** Borde de un Car Meet. Ver los colores de categoría en Color.kt. */
+    val carMeetBorder: Color = MotorMatesCarMeetBlue,
+    /** Borde de un pique. */
+    val piqueBorder: Color = MotorMatesPiqueGreen,
+    /** Relleno del marcador de una gasolinera. */
+    val fuelStationFill: Color = MotorMatesFuelPurple,
+    /** Relleno del marcador de un punto de carga. */
+    val chargingStationFill: Color = MotorMatesChargingTeal
 ) {
     companion object {
         /** La paleta oscura de marca. Es la de los @Preview. */

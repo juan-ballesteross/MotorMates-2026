@@ -65,6 +65,38 @@ class AuthRepositoryImplTest {
     }
 
     @Test
+    fun deleteAccountClearsCurrentUser() = runTest {
+        val currentUser = AuthUser(
+            id = "user-1",
+            email = "jose@example.com",
+            displayName = "Jose"
+        )
+        val repository = AuthRepositoryImpl(
+            FakeAuthDataSource(currentUser = currentUser),
+            FakeUserDataSource(),
+            FakePushTokenRepository()
+        )
+
+        val result = repository.deleteAccount()
+
+        assertTrue(result.isSuccess)
+        assertEquals(null, repository.getCurrentUser())
+    }
+
+    @Test
+    fun deleteAccountFailureIsPropagated() = runTest {
+        val repository = AuthRepositoryImpl(
+            FakeAuthDataSource(deleteCurrentUserError = IllegalStateException("boom")),
+            FakeUserDataSource(),
+            FakePushTokenRepository()
+        )
+
+        val result = repository.deleteAccount()
+
+        assertTrue(result.isFailure)
+    }
+
+    @Test
     fun authStateExposesSourceSessionFlow() {
         val currentUser = AuthUser(
             id = "user-1",
@@ -85,7 +117,8 @@ internal class FakeAuthDataSource(
     ),
     private val signUpResult: Result<AuthUser> = Result.success(
         AuthUser(id = "user-2", email = "ana@example.com", displayName = "Ana")
-    )
+    ),
+    private val deleteCurrentUserError: Throwable? = null
 ) : AuthDataSource {
 
     private val session = MutableStateFlow(currentUser)
@@ -111,6 +144,7 @@ internal class FakeAuthDataSource(
     override fun getCurrentUser(): AuthUser? = session.value
 
     override suspend fun deleteCurrentUser() {
+        deleteCurrentUserError?.let { throw it }
         session.value = null
     }
 

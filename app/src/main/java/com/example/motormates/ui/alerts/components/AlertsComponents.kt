@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
@@ -125,11 +126,14 @@ private fun NotificationIcon(type: NotificationType, avatarUrl: String? = null) 
 
     val (icon, tint) = when (type) {
         NotificationType.LIKE, NotificationType.LIKE_STORY -> Icons.Filled.Favorite to MaterialTheme.colorScheme.primary
-        NotificationType.RATING -> Icons.Filled.Star to MaterialTheme.colorScheme.primary
+        NotificationType.RATING, NotificationType.REVIEW_ON_MY_CAR -> Icons.Filled.Star to MaterialTheme.colorScheme.primary
         NotificationType.COMMENT, NotificationType.REVIEW ->
             Icons.AutoMirrored.Filled.Comment to MaterialTheme.colorScheme.onSurfaceVariant
         NotificationType.FOLLOW -> Icons.Filled.Person to MaterialTheme.colorScheme.onSurfaceVariant
         NotificationType.MESSAGE -> Icons.AutoMirrored.Filled.Chat to MaterialTheme.colorScheme.primary
+        // El mismo ícono con el que PublishSheet representa los eventos.
+        NotificationType.EVENT_INTERESTED, NotificationType.EVENT_GOING ->
+            Icons.Filled.Event to MaterialTheme.colorScheme.primary
     }
 
     Box(

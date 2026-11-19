@@ -1,5 +1,6 @@
 package com.example.motormates.ui.story
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import kotlinx.coroutines.delay
 
 private const val STORY_DURATION_MS = 5000L
 private const val STORY_STEP_MS = 50L
+private const val REPLY_SENT_VISIBLE_MS = 2_000L
 
 @Composable
 fun StoryScreen(
@@ -58,11 +60,17 @@ fun StoryScreen(
 
     val story = uiState.story
 
-    LaunchedEffect(currentIndex, story?.id, uiState.pendingDelete, uiState.showLikers) {
-        if (story == null || uiState.pendingDelete || uiState.showLikers) return@LaunchedEffect
-        progress = 0f
+    // Mientras se escribe una respuesta la historia se queda quieta: si no,
+    // pasaría a la siguiente con el teclado abierto.
+    var isReplyFocused by remember(currentIndex) { mutableStateOf(false) }
+    val isPaused = isReplyFocused || uiState.replyText.isNotBlank() || uiState.isSendingReply
+
+    LaunchedEffect(currentIndex, story?.id, uiState.pendingDelete, uiState.showLikers, isPaused) {
+        if (story == null || uiState.pendingDelete || uiState.showLikers || isPaused) return@LaunchedEffect
+        // Retoma desde donde iba (al cambiar de historia progress ya vuelve a 0).
         val steps = (STORY_DURATION_MS / STORY_STEP_MS).toInt()
-        repeat(steps) { step ->
+        val startStep = (progress * steps).toInt()
+        for (step in startStep until steps) {
             delay(STORY_STEP_MS)
             progress = (step + 1) / steps.toFloat()
         }
@@ -152,6 +160,11 @@ fun StoryScreen(
                 onCloseClick = onCloseClick,
                 onUserClick = { onUserClick(story.userId) },
                 onDeleteClick = viewModel::askDeleteStory,
+                replyText = uiState.replyText,
+                isSendingReply = uiState.isSendingReply,
+                onReplyChange = viewModel::onReplyChange,
+                onReplyFocusChange = { focused -> isReplyFocused = focused },
+                onSendReply = viewModel::sendReply,
                 onPreviousClick = {
                     val previous = viewModel.previousIndexWithContent(currentIndex - 1)
                     if (previous != null) currentIndex = previous
@@ -160,6 +173,23 @@ fun StoryScreen(
                     val next = viewModel.nextIndexWithContent(currentIndex + 1)
                     if (next != null) currentIndex = next else onCloseClick()
                 }
+            )
+        }
+        // Aviso corto de "Respuesta enviada", como en otras apps de historias.
+        val sentTo = uiState.replySentTo
+        if (sentTo != null) {
+            LaunchedEffect(sentTo) {
+                delay(REPLY_SENT_VISIBLE_MS)
+                viewModel.onReplySentShown()
+            }
+            Text(
+                text = "Respuesta enviada a $sentTo",
+                color = Color.White,
+                fontSize = 13.sp,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(20.dp))
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
             )
         }
         if (uiState.errorMessage != null) {

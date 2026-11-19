@@ -8,6 +8,7 @@ import com.example.motormates.data.repository.ReviewRepositoryImpl
 import com.example.motormates.data.repository.VehicleRepositoryImpl
 import com.example.motormates.data.source.DeviceLocationDataSource
 import com.example.motormates.data.source.FirebaseAuthDataSource
+import com.example.motormates.data.source.FirestoreEventDataSource
 import com.example.motormates.data.source.FirestoreNotificationDataSource
 import com.example.motormates.data.source.FirestoreReviewDataSource
 import com.example.motormates.data.source.FirestoreReviewRealtimeDataSource
@@ -47,7 +48,12 @@ class NewReviewViewModelIntegrationTest {
         userDataSource = userDataSource,
         authDataSource = FirebaseAuthDataSource(FirebaseEmulator.auth),
         notificationRepository = NotificationRepositoryImpl(
-            FirestoreNotificationDataSource(firestore), userDataSource, vehicleDataSource
+            FirestoreNotificationDataSource(firestore),
+            userDataSource,
+            vehicleDataSource,
+            // Pieza real como el resto del armado, aunque una notificación de
+            // reseña nunca la usa: solo se consulta si la fila trae eventId.
+            FirestoreEventDataSource(firestore, FirebaseEmulator.storage)
         )
     )
 

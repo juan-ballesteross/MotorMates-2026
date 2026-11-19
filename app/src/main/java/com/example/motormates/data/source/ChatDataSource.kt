@@ -1,5 +1,6 @@
 package com.example.motormates.data.source
 
+import com.example.motormates.data.model.StoryReplyRef
 import com.example.motormates.data.dto.ChatFirestoreDto
 import com.example.motormates.data.dto.MessageFirestoreDto
 import com.google.firebase.firestore.FirebaseFirestore
@@ -14,7 +15,8 @@ interface ChatDataSource {
     suspend fun getOrCreateChat(uidA: String, uidB: String): String
     fun observeChats(uid: String): Flow<List<ChatFirestoreDto>>
     fun observeMessages(chatId: String): Flow<List<MessageFirestoreDto>>
-    suspend fun sendMessage(chatId: String, senderId: String, text: String)
+    /** storyReply: si el mensaje es una respuesta a una historia. */
+    suspend fun sendMessage(chatId: String, senderId: String, text: String, storyReply: StoryReplyRef? = null)
     suspend fun markAsRead(chatId: String, uid: String)
 }
 
@@ -67,19 +69,27 @@ class FirestoreChatDataSource @Inject constructor(
         awaitClose { registration.remove() }
     }
 
-    override suspend fun sendMessage(chatId: String, senderId: String, text: String) {
+    override suspend fun sendMessage(chatId: String, senderId: String, text: String, storyReply: StoryReplyRef?) {
         val now = System.currentTimeMillis()
         val messageRef = chatRef(chatId).collection(MESSAGES_COLLECTION).document()
 
         firestore.runBatch { batch ->
             batch.set(
                 messageRef,
-                MessageFirestoreDto(id = messageRef.id, senderId = senderId, text = text, createdAt = now)
+                MessageFirestoreDto(
+                    id = messageRef.id,
+                    senderId = senderId,
+                    text = text,
+                    createdAt = now,
+                    storyId = storyReply?.storyId,
+                    storyImageUrl = storyReply?.imageUrl
+                )
             )
             batch.update(
                 chatRef(chatId),
                 mapOf(
-                    "lastMessageText" to text,
+                    // En la lista de chats se nota que fue a una historia.
+                    "lastMessageText" to if (storyReply != null) "Respondió a una historia: $text" else text,
                     "lastMessageSenderId" to senderId,
                     "lastMessageAt" to now
                 )

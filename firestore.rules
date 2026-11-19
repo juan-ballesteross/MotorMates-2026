@@ -4,6 +4,11 @@ rules_version = '2';
 // servidor lo que la app ya valida, para que un cliente modificado o con
 // errores no pueda dejar datos inconsistentes. La Cloud Function usa el
 // Admin SDK y no pasa por estas reglas.
+//
+// OJO: este archivo es la única fuente de verdad. Hasta el 2026-11-18 hubo
+// reglas editadas a mano en la consola que nunca se commitearon (vehicles,
+// la consulta de grupo de likes y todo AI Tuning), y un `firebase deploy`
+// desde el repo las borró. Si editas en la consola, trae el cambio aquí.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -28,10 +33,33 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
     }
 
-    // Catálogo de vehículos: solo lectura desde la app.
+    // Vehículos: los del catálogo semilla y los que publican los usuarios.
     match /vehicles/{vehicleId} {
       allow read: if signedIn();
-      allow update: if signedIn() && onlyChanges(['ownerId', 'owner']);
+
+      // Publicar (pestaña Publicar): solo a nombre propio y con los datos
+      // mínimos bien formados. La app ya lo valida; esto lo hace cumplir.
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.brand is string
+        && request.resource.data.brand.size() > 0
+        && request.resource.data.brand.size() <= 40
+        && request.resource.data.model is string
+        && request.resource.data.model.size() > 0
+        && request.resource.data.model.size() <= 40
+        && request.resource.data.year is int
+        && request.resource.data.category is string;
+
+      // Antes cualquiera podía cambiarle el dueño a cualquier vehículo.
+      // Ahora: el dueño edita el suyo sin poder regalarlo, y el
+      // backfillVehicleOwners del seeder solo puede asignar dueño a los
+      // vehículos semilla que todavía no tienen uno.
+      allow update: if signedIn() && (
+        (isUser(resource.data.get('ownerId', '')) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['ownerId']))
+        || (resource.data.get('ownerId', '') == '' && onlyChanges(['ownerId', 'owner']))
+      );
+
+      allow delete: if isUser(resource.data.get('ownerId', ''));
     }
 
     match /users/{userId} {
@@ -100,7 +128,12 @@ service cloud.firestore {
           && onlyChanges(['likesCount'])
           && stepsByOne('likesCount'));
 
-      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+      // El autor borra la suya, o el dueño del carro borra cualquier reseña
+      // que le hayan dejado (moderación en su propio vehículo).
+      allow delete: if signedIn() && (
+        resource.data.userId == request.auth.uid
+        || get(/databases/$(database)/documents/vehicles/$(resource.data.vehicleId)).data.ownerId == request.auth.uid
+      );
 
       // reviews/{id}/likes/{uid}: cada quien solo da o quita su propio like.
       match /likes/{likeUserId} {
@@ -122,6 +155,115 @@ service cloud.firestore {
         allow read: if signedIn();
         allow create, delete: if isUser(likeUserId);
       }
+    }
+
+    // Pestaña Actividad: "los likes que yo di" es una consulta de grupo sobre
+    // todas las subcolecciones "likes". Cada quien solo puede leer los suyos
+    // (la consulta filtra por userId, así que la regla se puede verificar).
+    match /{path=**}/likes/{likeUserId} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /events/{eventId} {
+      allow read: if signedIn();
+
+      // Se publica a nombre propio, con tipo y fechas válidas y sin
+      // participantes. El estado inicial siempre es programado: cancelar es
+      // una edición posterior, no una forma de crear.
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.type in ['CAR_MEET', 'PIQUE']
+        && request.resource.data.status == 'SCHEDULED'
+        && request.resource.data.startAt is int
+        && (request.resource.data.get('endAt', null) == null
+          || request.resource.data.endAt > request.resource.data.startAt)
+        && request.resource.data.get('interestedCount', 0) == 0
+        && request.resource.data.get('goingCount', 0) == 0;
+
+      // El organizador edita o cancela su evento (sin cambiar de dueño).
+      // Cualquier otro usuario solo puede mover los contadores de
+      // participación en ±1, que es lo que hace la transacción de participar:
+      // misma forma que las reglas de reviews con likesCount.
+      //
+      // stepsByOne también aplica a la rama del organizador: así, al editar,
+      // no puede poner los contadores en cero.
+      allow update: if (signedIn()
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.type in ['CAR_MEET', 'PIQUE']
+          && request.resource.data.status in ['SCHEDULED', 'CANCELLED']
+          && request.resource.data.startAt is int
+          && (request.resource.data.get('endAt', null) == null
+            || request.resource.data.endAt > request.resource.data.startAt)
+          && stepsByOne('interestedCount')
+          && stepsByOne('goingCount'))
+        || (signedIn()
+          // Los dos contadores, no uno: pasar de "me interesa" a "voy" mueve
+          // ambos en la misma escritura.
+          && onlyChanges(['interestedCount', 'goingCount'])
+          && stepsByOne('interestedCount')
+          && stepsByOne('goingCount'));
+
+      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+
+      // events/{id}/participants/{uid}: cada quien pone o quita solo su
+      // propia participación, y solo con uno de los dos estados. Se permite
+      // update y no solo create porque pasar de "me interesa" a "voy"
+      // reescribe el mismo documento (igual que al refrescar un fcmToken).
+      match /participants/{participantUid} {
+        allow read: if signedIn();
+        allow create, update: if isUser(participantUid)
+          && request.resource.data.status in ['INTERESTED', 'GOING'];
+        allow delete: if isUser(participantUid);
+      }
+    }
+
+    // ---------- AI Tuning ----------
+
+    // Catálogo de piezas y paquetes: lo escribe solo el seeder (Admin SDK).
+    match /parts/{partId} {
+      allow read: if signedIn();
+    }
+    match /tuningPackages/{packageId} {
+      allow read: if signedIn();
+    }
+
+    // Builds: el dueño los crea, publica/despublica y borra. Los demás solo
+    // ven los publicados.
+    match /builds/{buildId} {
+      allow read: if signedIn()
+        && (resource.data.published == true || resource.data.ownerId == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.resultImageUrl is string
+        && request.resource.data.published is bool;
+      allow update: if signedIn()
+        && resource.data.ownerId == request.auth.uid
+        && onlyChanges(['published'])
+        && request.resource.data.published is bool;
+      allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // aiUsage/{uid}: contador diario de imágenes generadas. Solo el propio
+    // usuario, y el contador solo sube de a uno (o vuelve a 1 en un día nuevo).
+    match /aiUsage/{userId} {
+      allow read: if isUser(userId);
+      allow create: if isUser(userId)
+        && request.resource.data.count == 1
+        && request.resource.data.date is string;
+      allow update: if isUser(userId)
+        && request.resource.data.date is string
+        && request.resource.data.count is int
+        // Techo duro por si alguien sube ai_daily_limit por error en Remote Config.
+        && request.resource.data.count <= 50
+        && (
+          (request.resource.data.date == resource.data.date
+            && request.resource.data.count == resource.data.count + 1)
+          || (request.resource.data.date != resource.data.date
+            && request.resource.data.count == 1)
+        );
     }
 
     match /chats/{chatId} {

@@ -32,7 +32,12 @@ fun StoryScreenContent(
     onDeleteClick: () -> Unit,
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    replyText: String = "",
+    isSendingReply: Boolean = false,
+    onReplyChange: (String) -> Unit = {},
+    onReplyFocusChange: (Boolean) -> Unit = {},
+    onSendReply: () -> Unit = {}
 ) {
     val imageUrl = story.imageUrl ?: return
     val caption = story.caption.orEmpty()
@@ -90,6 +95,12 @@ fun StoryScreenContent(
             likesCount = likesCount,
             onLikeClick = onLikeClick,
             onLikesCountClick = onLikesCountClick,
+            ownerName = story.name,
+            replyText = replyText,
+            isSendingReply = isSendingReply,
+            onReplyChange = onReplyChange,
+            onReplyFocusChange = onReplyFocusChange,
+            onSendReply = onSendReply,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
     }

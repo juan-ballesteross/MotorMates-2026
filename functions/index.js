@@ -18,11 +18,20 @@ const BATCH_LIMIT = 500;
 /**
  * Integridad de datos desnormalizados.
  *
- * Cada reseña guarda una copia del autor (user.fullName y user.avatarUrl)
- * para pintarse sin leer el perfil. Cuando el usuario cambia su nombre o
- * su foto en users/{userId}, esta función actualiza esa copia en todas sus
- * reseñas, así las viejas no se quedan con los datos anteriores.
+ * Cada reseña y cada evento guardan una copia del autor (user.fullName y
+ * user.avatarUrl) para pintarse sin leer el perfil. Cuando el usuario cambia
+ * su nombre o su foto en users/{userId}, esta función actualiza esa copia en
+ * todos sus documentos, así los viejos no se quedan con los datos anteriores.
+ *
+ * Las dos colecciones se recorren en el MISMO trigger y no en funciones
+ * separadas: dos triggers sobre users/{userId} duplicarían las invocaciones.
+ * Los nombres de campo (userId, user.fullName, user.avatarUrl) son iguales en
+ * "reviews" y en "events" justamente para poder compartir este código.
+ *
+ * El nombre se conserva aunque ya cubra más que las reseñas: renombrar una
+ * función desplegada equivale a borrarla y crear otra.
  */
+const DENORMALIZED_USER_COLLECTIONS = ["reviews", "events"];
 exports.updateUserInfoInReviews = onDocumentUpdated(
   { document: "users/{userId}", database: DATABASE_ID },
   async (event) => {
@@ -39,28 +48,32 @@ exports.updateUserInfoInReviews = onDocumentUpdated(
       return;
     }
 
-    const reviewsSnapshot = await db.collection("reviews")
-      .where("userId", "==", userId)
-      .get();
-
-    if (reviewsSnapshot.empty) {
-      logger.log(`El usuario ${userId} no tiene reseñas publicadas.`);
-      return;
-    }
-
     const changes = {};
     if (nameChanged) changes["user.fullName"] = after.fullName ?? "";
     if (avatarChanged) changes["user.avatarUrl"] = after.avatarUrl ?? null;
 
-    // Se reparte en lotes de 500: cada batch es atómico por sí solo.
-    const docs = reviewsSnapshot.docs;
-    for (let start = 0; start < docs.length; start += BATCH_LIMIT) {
-      const batch = db.batch();
-      docs.slice(start, start + BATCH_LIMIT).forEach((doc) => batch.update(doc.ref, changes));
-      await batch.commit();
-    }
+    for (const collection of DENORMALIZED_USER_COLLECTIONS) {
+      const snapshot = await db.collection(collection)
+        .where("userId", "==", userId)
+        .get();
 
-    logger.log(`Datos del autor actualizados en ${docs.length} reseñas del usuario ${userId}.`);
+      if (snapshot.empty) {
+        logger.log(`El usuario ${userId} no tiene documentos en ${collection}.`);
+        continue;
+      }
+
+      // Se reparte en lotes de 500: cada batch es atómico por sí solo.
+      const docs = snapshot.docs;
+      for (let start = 0; start < docs.length; start += BATCH_LIMIT) {
+        const batch = db.batch();
+        docs.slice(start, start + BATCH_LIMIT).forEach((doc) => batch.update(doc.ref, changes));
+        await batch.commit();
+      }
+
+      logger.log(
+        `Datos del autor actualizados en ${docs.length} documentos de ${collection} del usuario ${userId}.`
+      );
+    }
   }
 );
 
@@ -108,6 +121,167 @@ exports.sendFollowNotification = onDocumentCreated(
 
     logger.log(
       `Push de seguimiento para ${userId}: ${response.successCount} enviados, ${response.failureCount} fallidos.`
+    );
+
+    await deleteStaleTokens(userId, tokens, response.responses);
+  }
+);
+
+/**
+ * Notificación push cuando alguien marca interés o asistencia en tu evento.
+ *
+ * onDocumentCreated y no onDocumentWritten, y por eso no hace falta comparar
+ * before/after: el set de la transacción de participación
+ * (FirestoreEventParticipationDataSource) CREA el documento al marcar por
+ * primera vez y lo SOBREESCRIBE al pasar de "me interesa" a "voy". Así este
+ * trigger se dispara exactamente en los dos casos que hay que avisar, y no al
+ * cambiar de estado ni al quitar la participación.
+ *
+ * Un trigger por acción y no uno genérico sobre
+ * users/{uid}/notifications/{id}: el genérico daría push también a likes,
+ * reseñas y mensajes, y el de mensajes dispararía uno por CADA mensaje de una
+ * conversación. Además el documento de la campana lo escribe la app en
+ * best-effort, mientras que el de la acción es la verdad transaccional.
+ * Cuando se decida darle push a lo demás, este trigger y
+ * sendFollowNotification se funden en uno.
+ *
+ * Sin `retry`: en v2 está desactivado por defecto y la semántica es "a lo
+ * sumo una vez". Un reintento mandaría un segundo push y la función no
+ * escribe nada en Firestore, así que no habría forma de hacerla idempotente
+ * sin un documento centinela. Perder un push suelto es aceptable; duplicarlo
+ * en el celular de alguien, no.
+ */
+exports.sendEventParticipationNotification = onDocumentCreated(
+  { document: "events/{eventId}/participants/{participantUid}", database: DATABASE_ID },
+  async (event) => {
+    const { eventId, participantUid } = event.params;
+
+    // El estado viene en el documento que acabó de crearse: no hace falta
+    // volver a leerlo.
+    const status = event.data?.data()?.status;
+    if (status !== "INTERESTED" && status !== "GOING") {
+      return;
+    }
+
+    const eventSnapshot = await db.collection("events").doc(eventId).get();
+    if (!eventSnapshot.exists) {
+      return;
+    }
+
+    // El organizador se guarda en userId, no en organizerId: el nombre de
+    // campo es el mismo que en "reviews" para que updateUserInfoInReviews
+    // pueda recorrer las dos colecciones con las mismas rutas (ver
+    // EventFirestoreDto). organizerId solo existe en el dominio de la app.
+    const organizerId = eventSnapshot.data().userId;
+
+    // Nadie se notifica a sí mismo (mismo criterio que la app).
+    if (!organizerId || organizerId === participantUid) {
+      return;
+    }
+
+    const [participantSnapshot, tokensSnapshot] = await Promise.all([
+      db.collection("users").doc(participantUid).get(),
+      db.collection("users").doc(organizerId).collection("fcmTokens").get(),
+    ]);
+
+    if (tokensSnapshot.empty) {
+      logger.log(`El usuario ${organizerId} no tiene dispositivos registrados.`);
+      return;
+    }
+
+    const participantName = participantSnapshot.data()?.fullName || "Alguien";
+    const eventTitle = eventSnapshot.data().title || "tu evento";
+    const tokens = tokensSnapshot.docs.map((doc) => doc.id);
+    const going = status === "GOING";
+
+    const response = await getMessaging().sendEachForMulticast({
+      tokens,
+      notification: {
+        title: going ? "Alguien va a tu evento" : "Le interesa tu evento",
+        body: going
+          ? `${participantName} va a ir a ${eventTitle}`
+          : `A ${participantName} le interesa ${eventTitle}`,
+      },
+      // Los valores de type son idénticos a las constantes de NotificationType
+      // en Kotlin, igual que "FOLLOW".
+      data: {
+        type: going ? "EVENT_GOING" : "EVENT_INTERESTED",
+        actorId: participantUid,
+        eventId,
+      },
+    });
+
+    logger.log(
+      `Push de participación para ${organizerId}: ${response.successCount} enviados, ${response.failureCount} fallidos.`
+    );
+
+    await deleteStaleTokens(organizerId, tokens, response.responses);
+  }
+);
+
+/**
+ * Notificación push cuando alguien reseña un carro tuyo.
+ *
+ * Al publicar la reseña, la app deja en la campana del dueño del carro la
+ * notificación users/{userId}/notifications/{id} con type
+ * "REVIEW_ON_MY_CAR" (ReviewRepository.notifyVehicleOwner). Esta función la
+ * convierte en push: igual que con los seguidores, el dispositivo del dueño
+ * puede estar cerrado y solo el servidor sabe a qué tokens enviar.
+ * Las demás notificaciones de la campana se ignoran aquí.
+ */
+exports.sendReviewOnMyCarNotification = onDocumentCreated(
+  { document: "users/{userId}/notifications/{notificationId}", database: DATABASE_ID },
+  async (event) => {
+    const notification = event.data?.data();
+    if (!notification || notification.type !== "REVIEW_ON_MY_CAR") {
+      return;
+    }
+
+    const { userId } = event.params;
+    const { actorId, vehicleId, reviewId } = notification;
+
+    // La app ya lo evita, pero nadie se notifica a sí mismo.
+    if (!actorId || actorId === userId) {
+      return;
+    }
+
+    const [actorSnapshot, vehicleSnapshot, reviewSnapshot, tokensSnapshot] = await Promise.all([
+      db.collection("users").doc(actorId).get(),
+      vehicleId ? db.collection("vehicles").doc(vehicleId).get() : Promise.resolve(null),
+      reviewId ? db.collection("reviews").doc(reviewId).get() : Promise.resolve(null),
+      db.collection("users").doc(userId).collection("fcmTokens").get(),
+    ]);
+
+    if (tokensSnapshot.empty) {
+      logger.log(`El usuario ${userId} no tiene dispositivos registrados.`);
+      return;
+    }
+
+    const actorName = actorSnapshot.data()?.fullName || "Alguien";
+    const vehicle = vehicleSnapshot?.data();
+    const vehicleName = vehicle ? `${vehicle.brand} ${vehicle.model}`.trim() : "carro";
+    const review = reviewSnapshot?.data();
+
+    // "Diego le dio ★★★★☆ a tu Mazda MX-5: Una delicia de manejar"
+    const rating = Number.isInteger(review?.rating) ? review.rating : null;
+    const stars = rating !== null ? ` ${"★".repeat(rating)}${"☆".repeat(5 - rating)}` : "";
+    const comment = (review?.comment || "").trim();
+    const shortComment = comment.length > 80 ? `${comment.slice(0, 77)}...` : comment;
+    const body = `${actorName} le dio${stars || " una reseña"} a tu ${vehicleName}` +
+      (shortComment ? `: ${shortComment}` : "");
+
+    const tokens = tokensSnapshot.docs.map((doc) => doc.id);
+    const response = await getMessaging().sendEachForMulticast({
+      tokens,
+      notification: {
+        title: `Nueva reseña de tu ${vehicleName}`,
+        body,
+      },
+      data: { type: "REVIEW_ON_MY_CAR", actorId, vehicleId: vehicleId || "", reviewId: reviewId || "" },
+    });
+
+    logger.log(
+      `Push de reseña para ${userId}: ${response.successCount} enviados, ${response.failureCount} fallidos.`
     );
 
     await deleteStaleTokens(userId, tokens, response.responses);

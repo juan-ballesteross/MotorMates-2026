@@ -7,6 +7,7 @@ import com.example.motormates.data.model.StoryUser
 import com.example.motormates.data.model.toStoryUser
 import com.example.motormates.data.model.toUserSearchResult
 import com.example.motormates.data.repository.AuthRepository
+import com.example.motormates.data.repository.ChatRepository
 import com.example.motormates.data.repository.FollowRepository
 import com.example.motormates.data.repository.StoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +24,8 @@ import kotlinx.coroutines.launch
 class StoryViewModel @Inject constructor(
     private val storyRepository: StoryRepository,
     private val authRepository: AuthRepository,
-    private val followRepository: FollowRepository
+    private val followRepository: FollowRepository,
+    private val chatRepository: ChatRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StoryUiState())
@@ -47,7 +49,9 @@ class StoryViewModel @Inject constructor(
                 it.copy(
                     story = story,
                     totalStories = stories.size,
-                    isOwnStory = story != null && story.userId == currentUserId
+                    isOwnStory = story != null && story.userId == currentUserId,
+                    // Lo escrito para una historia no pasa a la siguiente.
+                    replyText = ""
                 )
             }
             observeLikeData(story?.id)
@@ -156,7 +160,51 @@ class StoryViewModel @Inject constructor(
         }
     }
 
+    // ---------- Responder ----------
+
+    fun onReplyChange(text: String) {
+        _uiState.update { it.copy(replyText = text.take(MAX_REPLY_LENGTH)) }
+    }
+
+    /**
+     * La respuesta le llega al dueño como mensaje directo, con la foto de la
+     * historia para que sepa a cuál respondí. Si falla, el texto se queda
+     * para poder reintentar.
+     */
+    fun sendReply() {
+        val state = _uiState.value
+        val story = state.story ?: return
+        if (state.isOwnStory || state.isSendingReply || state.replyText.isBlank()) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSendingReply = true) }
+            chatRepository.replyToStory(
+                storyOwnerId = story.userId,
+                storyId = story.id,
+                storyImageUrl = story.imageUrl,
+                text = state.replyText
+            ).fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isSendingReply = false, replyText = "", replySentTo = story.name) }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(isSendingReply = false, errorMessage = error.message ?: "No se pudo enviar la respuesta")
+                    }
+                }
+            )
+        }
+    }
+
+    fun onReplySentShown() {
+        _uiState.update { it.copy(replySentTo = null) }
+    }
+
     fun dismissError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    private companion object {
+        const val MAX_REPLY_LENGTH = 500
     }
 }

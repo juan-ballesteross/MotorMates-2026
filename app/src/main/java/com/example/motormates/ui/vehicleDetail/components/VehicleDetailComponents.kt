@@ -279,10 +279,12 @@ fun ReviewItem(
                             modifier = Modifier.size(18.dp)
                         )
                     }
+                }
+                if (review.isMine || review.canDeleteAsOwner) {
                     IconButton(onClick = { onDeleteClick(review.id) }) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = "Eliminar mi reseña",
+                            contentDescription = "Eliminar reseña",
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(18.dp)
                         )

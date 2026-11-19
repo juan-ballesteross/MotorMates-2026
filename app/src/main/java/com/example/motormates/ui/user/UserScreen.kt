@@ -29,6 +29,8 @@ fun UserScreen(
     onFollowersClick: () -> Unit = {},
     onFollowingClick: () -> Unit = {},
     onLoggedOut: () -> Unit = {},
+    onPublishVehicleClick: () -> Unit = {},
+    onUserClick: (String) -> Unit = {},
     reloadSignal: Boolean = false,
     onReloadHandled: () -> Unit = {},
     viewModel: UserViewModel = hiltViewModel(),
@@ -86,7 +88,20 @@ fun UserScreen(
         onFollowersClick = onFollowersClick,
         onFollowingClick = onFollowingClick,
         onLogOutClick = { viewModel.logOut(onLoggedOut) },
-        modifier = modifier
+        modifier = modifier,
+        onGarageCarClick = onVehicleClick,
+        onPublishVehicleClick = onPublishVehicleClick,
+        activity = uiState.activity,
+        isActivityLoading = uiState.isActivityLoading,
+        activityError = uiState.activityError,
+        // El carro manda: en un like se abre el carro reseñado, no al autor.
+        onActivityClick = { item ->
+            when {
+                item.vehicleId != null -> onVehicleClick(item.vehicleId)
+                item.userId != null -> onUserClick(item.userId)
+            }
+        },
+        onRetryActivity = viewModel::loadActivity
     )
 }
 
