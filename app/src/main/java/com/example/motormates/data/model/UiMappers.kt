@@ -56,7 +56,11 @@ fun Vehicle.toReviewCarSummary(): ReviewCarSummary = ReviewCarSummary(
  * currentUserId es el uid de Firebase Auth de quien usa la app (null si no
  * hay sesión): con él se decide si la reseña es mía y se puede editar.
  */
-fun Review.toReviewUi(currentUserId: String?, likedReviewIds: Set<String> = emptySet()): ReviewUi = ReviewUi(
+fun Review.toReviewUi(
+    currentUserId: String?,
+    likedReviewIds: Set<String> = emptySet(),
+    isVehicleOwner: Boolean = false
+): ReviewUi = ReviewUi(
     id = id,
     userId = userId,
     nombreUsuario = author?.fullName?.ifBlank { null } ?: "Usuario",
@@ -65,6 +69,7 @@ fun Review.toReviewUi(currentUserId: String?, likedReviewIds: Set<String> = empt
     calificacion = rating.coerceIn(0, 5),
     comentario = comment.orEmpty(),
     isMine = userId == currentUserId,
+    canDeleteAsOwner = isVehicleOwner,
     likesCount = likesCount,
     isLikedByMe = id in likedReviewIds,
     lugarTexto = location?.placeName,
@@ -233,6 +238,8 @@ fun Notification.toNotificationUi(): NotificationUi {
             if (vehicleName != null) "le dio like a tu reseña del $vehicleName" else "le dio like a tu reseña"
         NotificationType.REVIEW ->
             if (vehicleName != null) "también dejó una reseña en el $vehicleName" else "también dejó una reseña en un carro que reseñaste"
+        NotificationType.REVIEW_ON_MY_CAR ->
+            if (vehicleName != null) "dejó una reseña de tu $vehicleName" else "dejó una reseña de tu carro"
         NotificationType.FOLLOW -> "empezó a seguirte"
         NotificationType.LIKE_STORY -> "le dio like a tu historia"
         NotificationType.MESSAGE -> "te envió un mensaje"
@@ -266,7 +273,8 @@ fun Notification.toNotificationUi(): NotificationUi {
         timeAgo = createdAt.toRelativeTimeEs(),
         section = section,
         thumbnailUrl = vehicleImageUrl,
-        eventId = eventId
+        eventId = eventId,
+        vehicleId = vehicleId
     )
 }
 

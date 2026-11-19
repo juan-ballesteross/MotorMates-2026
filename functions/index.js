@@ -220,6 +220,75 @@ exports.sendEventParticipationNotification = onDocumentCreated(
 );
 
 /**
+ * Notificación push cuando alguien reseña un carro tuyo.
+ *
+ * Al publicar la reseña, la app deja en la campana del dueño del carro la
+ * notificación users/{userId}/notifications/{id} con type
+ * "REVIEW_ON_MY_CAR" (ReviewRepository.notifyVehicleOwner). Esta función la
+ * convierte en push: igual que con los seguidores, el dispositivo del dueño
+ * puede estar cerrado y solo el servidor sabe a qué tokens enviar.
+ * Las demás notificaciones de la campana se ignoran aquí.
+ */
+exports.sendReviewOnMyCarNotification = onDocumentCreated(
+  { document: "users/{userId}/notifications/{notificationId}", database: DATABASE_ID },
+  async (event) => {
+    const notification = event.data?.data();
+    if (!notification || notification.type !== "REVIEW_ON_MY_CAR") {
+      return;
+    }
+
+    const { userId } = event.params;
+    const { actorId, vehicleId, reviewId } = notification;
+
+    // La app ya lo evita, pero nadie se notifica a sí mismo.
+    if (!actorId || actorId === userId) {
+      return;
+    }
+
+    const [actorSnapshot, vehicleSnapshot, reviewSnapshot, tokensSnapshot] = await Promise.all([
+      db.collection("users").doc(actorId).get(),
+      vehicleId ? db.collection("vehicles").doc(vehicleId).get() : Promise.resolve(null),
+      reviewId ? db.collection("reviews").doc(reviewId).get() : Promise.resolve(null),
+      db.collection("users").doc(userId).collection("fcmTokens").get(),
+    ]);
+
+    if (tokensSnapshot.empty) {
+      logger.log(`El usuario ${userId} no tiene dispositivos registrados.`);
+      return;
+    }
+
+    const actorName = actorSnapshot.data()?.fullName || "Alguien";
+    const vehicle = vehicleSnapshot?.data();
+    const vehicleName = vehicle ? `${vehicle.brand} ${vehicle.model}`.trim() : "carro";
+    const review = reviewSnapshot?.data();
+
+    // "Diego le dio ★★★★☆ a tu Mazda MX-5: Una delicia de manejar"
+    const rating = Number.isInteger(review?.rating) ? review.rating : null;
+    const stars = rating !== null ? ` ${"★".repeat(rating)}${"☆".repeat(5 - rating)}` : "";
+    const comment = (review?.comment || "").trim();
+    const shortComment = comment.length > 80 ? `${comment.slice(0, 77)}...` : comment;
+    const body = `${actorName} le dio${stars || " una reseña"} a tu ${vehicleName}` +
+      (shortComment ? `: ${shortComment}` : "");
+
+    const tokens = tokensSnapshot.docs.map((doc) => doc.id);
+    const response = await getMessaging().sendEachForMulticast({
+      tokens,
+      notification: {
+        title: `Nueva reseña de tu ${vehicleName}`,
+        body,
+      },
+      data: { type: "REVIEW_ON_MY_CAR", actorId, vehicleId: vehicleId || "", reviewId: reviewId || "" },
+    });
+
+    logger.log(
+      `Push de reseña para ${userId}: ${response.successCount} enviados, ${response.failureCount} fallidos.`
+    );
+
+    await deleteStaleTokens(userId, tokens, response.responses);
+  }
+);
+
+/**
  * Un token deja de servir cuando el usuario desinstala la app o borra sus
  * datos, y FCM lo reporta con este código. Si no se limpian, la lista crece
  * y cada envío arrastra tokens muertos.

@@ -2,8 +2,10 @@ package com.example.motormates.ui.user
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.motormates.data.mock.UserMocks
 import com.example.motormates.data.model.ProfileTab
+import com.example.motormates.data.model.garageOf
+import com.example.motormates.data.model.toActivityUi
+import com.example.motormates.data.repository.ActivityRepository
 import com.example.motormates.data.model.toUserProfile
 import com.example.motormates.data.model.toUserReviewUi
 import com.example.motormates.data.repository.AuthRepository
@@ -26,7 +28,8 @@ class UserViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val reviewRepository: ReviewRepository,
     private val vehicleRepository: VehicleRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val activityRepository: ActivityRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserUiState())
@@ -39,9 +42,6 @@ class UserViewModel @Inject constructor(
     private var profileJob: Job? = null
 
     init {
-        // El garaje se queda con datos locales: el backend no lo modela.
-        _uiState.update { it.copy(cars = UserMocks.sampleUserCars) }
-
         viewModelScope.launch {
             profileImageRepository.profileImageUrl.collect { photoUrl ->
                 _uiState.update { it.copy(profileImageUrl = photoUrl) }
@@ -67,7 +67,7 @@ class UserViewModel @Inject constructor(
             return
         }
 
-        loadVehicleImages()
+        loadVehicles(authUser.id)
 
         profileJob?.cancel()
         profileJob = viewModelScope.launch {
@@ -106,12 +106,17 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    /** Si falla, las reseñas se muestran igual, sin miniatura. */
-    private fun loadVehicleImages() {
+    /**
+     * Una consulta de vehículos para dos cosas: las miniaturas de mis
+     * reseñas y mi garaje (los que publiqué). Si falla, las reseñas se ven
+     * igual (sin miniatura) y el garaje se queda como estaba.
+     */
+    private fun loadVehicles(uid: String) {
         viewModelScope.launch {
-            vehicleImagesByVehicleId.value = vehicleRepository.getVehicles()
-                .getOrElse { emptyList() }
-                .associate { it.id to it.imageUrl }
+            vehicleRepository.getVehicles().onSuccess { vehicles ->
+                vehicleImagesByVehicleId.value = vehicles.associate { it.id to it.imageUrl }
+                _uiState.update { it.copy(cars = vehicles.garageOf(uid)) }
+            }
         }
     }
 
@@ -129,6 +134,33 @@ class UserViewModel @Inject constructor(
 
     fun updateSelectedTab(tab: ProfileTab) {
         _uiState.update { it.copy(selectedTab = tab) }
+        // El perfil es una pestaña que se conserva: si publiqué un carro
+        // mientras tanto, al abrir el garaje se vuelve a consultar.
+        if (tab == ProfileTab.GARAGE) {
+            authRepository.getCurrentUser()?.id?.let(::loadVehicles)
+        }
+        // La actividad se consulta cada vez que se abre la pestaña: así
+        // aparece lo que hice desde la última vez sin tener que recargar.
+        if (tab == ProfileTab.ACTIVITY) loadActivity()
+    }
+
+    fun loadActivity() {
+        viewModelScope.launch {
+            // El spinner solo la primera vez; después se refresca por debajo.
+            _uiState.update { it.copy(isActivityLoading = it.activity.isEmpty(), activityError = null) }
+            activityRepository.getMyActivity().fold(
+                onSuccess = { items ->
+                    _uiState.update {
+                        it.copy(isActivityLoading = false, activity = items.map { item -> item.toActivityUi() })
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(isActivityLoading = false, activityError = error.message ?: "No se pudo cargar tu actividad")
+                    }
+                }
+            )
+        }
     }
 
     fun askDeleteReview(reviewId: String) {

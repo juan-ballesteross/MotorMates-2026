@@ -18,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,11 +26,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.motormates.R
-import com.example.motormates.data.model.GarageCar
+import com.example.motormates.data.model.ActivityUi
+import com.example.motormates.data.model.GarageVehicleUi
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
 import com.example.motormates.data.model.UserReviewUi
-import com.example.motormates.ui.user.components.ProfileCarCard
+import com.example.motormates.ui.common.components.GarageEmptyState
+import com.example.motormates.ui.common.components.GarageVehicleCard
+import com.example.motormates.ui.user.components.ActivityRow
+import com.example.motormates.ui.user.components.ActivitySectionHeader
 import com.example.motormates.ui.user.components.ProfileEmptyTabState
 import com.example.motormates.ui.user.components.ProfileHeader
 import com.example.motormates.ui.user.components.ProfileInfoSection
@@ -51,7 +56,7 @@ fun UserScreenContent(
     reviews: List<UserReviewUi>,
     isLoading: Boolean,
     errorMessage: String?,
-    cars: List<GarageCar>,
+    cars: List<GarageVehicleUi>,
     selectedTab: ProfileTab,
     onSelectTab: (ProfileTab) -> Unit,
     onEditProfileClick: () -> Unit,
@@ -61,7 +66,14 @@ fun UserScreenContent(
     onFollowersClick: () -> Unit = {},
     onFollowingClick: () -> Unit = {},
     onLogOutClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onGarageCarClick: (String) -> Unit = {},
+    onPublishVehicleClick: () -> Unit = {},
+    activity: List<ActivityUi> = emptyList(),
+    isActivityLoading: Boolean = false,
+    activityError: String? = null,
+    onActivityClick: (ActivityUi) -> Unit = {},
+    onRetryActivity: () -> Unit = {}
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -93,9 +105,43 @@ fun UserScreenContent(
             ProfileTabsRow(selected = selectedTab, onSelect = onSelectTab)
         }
         when (selectedTab) {
-            ProfileTab.ACTIVITY -> {
-                item(span = { GridItemSpan(maxLineSpan) }) {
+            // Todo lo que hice, de lo más reciente a lo más viejo, agrupado
+            // por Hoy / Esta semana / Antes.
+            ProfileTab.ACTIVITY -> when {
+                isActivityLoading -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Spacing.xl),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                activityError != null && activity.isEmpty() -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.lg),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = activityError, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+                        TextButton(onClick = onRetryActivity) { Text("Reintentar") }
+                    }
+                }
+
+                activity.isEmpty() -> item(span = { GridItemSpan(maxLineSpan) }) {
                     ProfileEmptyTabState()
+                }
+
+                else -> activity.groupBy { it.section }.forEach { (section, items) ->
+                    item(key = "activity_header_$section", span = { GridItemSpan(maxLineSpan) }) {
+                        ActivitySectionHeader(title = section)
+                    }
+                    gridItems(items, key = { it.id }, span = { GridItemSpan(maxLineSpan) }) { item ->
+                        ActivityRow(item = item, onClick = { onActivityClick(item) })
+                    }
                 }
             }
             // Solo las reseñas que yo hice, traídas de GET /users/{id}/reviews.
@@ -154,9 +200,17 @@ fun UserScreenContent(
                 }
             }
             // El garaje se queda local: el backend no modela los autos del usuario.
-            ProfileTab.GARAGE -> {
-                gridItems(cars) { car ->
-                    ProfileCarCard(car)
+            // Los vehículos que publiqué desde la pestaña Publicar.
+            ProfileTab.GARAGE -> if (cars.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    GarageEmptyState(
+                        message = "Todavía no has publicado ningún carro",
+                        onPublishClick = onPublishVehicleClick
+                    )
+                }
+            } else {
+                gridItems(cars, key = { "garage_${it.id}" }) { car ->
+                    GarageVehicleCard(car = car, onClick = { onGarageCarClick(car.id) })
                 }
             }
         }

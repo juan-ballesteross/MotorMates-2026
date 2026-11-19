@@ -20,5 +20,7 @@ data class Vehicle(
     val traccion: String?,
     val ownerId: String? = null,
     val ownerName: String? = null,
-    val ownerAvatarUrl: String? = null
+    val ownerAvatarUrl: String? = null,
+    /** Cuándo se publicó (epoch en millis). Null en los vehículos del catálogo semilla. */
+    val createdAt: Long? = null
 )

@@ -9,6 +9,7 @@ import com.example.motormates.data.remote.datasource.ReviewRetrofitDataSource
 import com.example.motormates.data.remote.datasource.UserRetrofitDataSource
 import com.example.motormates.data.remote.datasource.VehicleRemoteDataSource
 import com.example.motormates.data.remote.datasource.VehicleRetrofitDataSource
+import com.example.motormates.data.remote.datasource.VehicleRetrofitPublishDataSource
 import com.example.motormates.data.source.FirestoreFollowDataSource
 import com.example.motormates.data.source.FirestoreLikeDataSource
 import com.example.motormates.data.source.FirestoreNotificationDataSource
@@ -16,11 +17,13 @@ import com.example.motormates.data.source.FirestoreReviewDataSource
 import com.example.motormates.data.source.FirestoreReviewRealtimeDataSource
 import com.example.motormates.data.source.FirestoreUserDataSource
 import com.example.motormates.data.source.FirestoreVehicleDataSource
+import com.example.motormates.data.source.FirestoreVehiclePublishDataSource
 import com.example.motormates.data.source.FollowDataSource
 import com.example.motormates.data.source.LikeDataSource
 import com.example.motormates.data.source.NotificationDataSource
 import com.example.motormates.data.source.ReviewRealtimeDataSource
 import com.example.motormates.data.source.UserDataSource
+import com.example.motormates.data.source.VehiclePublishDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,6 +55,13 @@ object DataSourceModule {
         firebase: Provider<FirestoreVehicleDataSource>,
         express: Provider<VehicleRetrofitDataSource>
     ): VehicleRemoteDataSource = pick(firebase, express)
+
+    @Provides
+    @Singleton
+    fun provideVehiclePublishDataSource(
+        firebase: Provider<FirestoreVehiclePublishDataSource>,
+        express: Provider<VehicleRetrofitPublishDataSource>
+    ): VehiclePublishDataSource = pick(firebase, express)
 
     @Provides
     @Singleton

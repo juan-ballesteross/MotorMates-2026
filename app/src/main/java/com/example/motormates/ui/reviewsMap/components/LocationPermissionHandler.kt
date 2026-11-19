@@ -55,8 +55,10 @@ import com.google.android.gms.location.Priority
  * - Lo quitó desde Ajustes con la app abierta -> se revisa en ON_RESUME.
  * - Sin Play Services -> UNAVAILABLE y el botón se oculta.
  *
- * Solo pide ACCESS_COARSE_LOCATION: al mapa le basta el barrio, y es el mismo
- * permiso con el que la app adjunta la ubicación al publicar.
+ * Pide ubicación precisa y aproximada juntas (Android 12+ deja elegir). Antes
+ * pedía solo la aproximada, y como el permiso es de toda la app, las reseñas
+ * se publicaban con la posición movida hasta ~2 km. Con cualquiera de los dos
+ * el mapa funciona.
  */
 class LocationPermissionHandler internal constructor(
     private val requestAction: () -> Unit,
@@ -115,7 +117,7 @@ fun rememberLocationPermissionHandler(
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestMultiplePermissions()
     ) {
         askedBefore = true
         when (evaluate()) {
@@ -145,7 +147,7 @@ fun rememberLocationPermissionHandler(
             dialog = dialog,
             onConfirmRationale = {
                 dialog.value = null
-                permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                permissionLauncher.launch(LOCATION_PERMISSIONS)
             },
             onOpenSettings = {
                 dialog.value = null
@@ -208,8 +210,9 @@ private fun evaluateAccess(context: Context, activity: Activity?, askedBefore: B
     val playServices = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
     if (playServices != ConnectionResult.SUCCESS) return LocationAccess.UNAVAILABLE
 
-    val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-        PackageManager.PERMISSION_GRANTED
+    val granted = LOCATION_PERMISSIONS.any {
+        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+    }
     if (granted) {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return if (LocationManagerCompat.isLocationEnabled(locationManager)) {
@@ -219,7 +222,7 @@ private fun evaluateAccess(context: Context, activity: Activity?, askedBefore: B
         }
     }
 
-    val canAskAgain = activity?.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) == true
+    val canAskAgain = LOCATION_PERMISSIONS.any { activity?.shouldShowRequestPermissionRationale(it) == true }
     return when {
         canAskAgain -> LocationAccess.DENIED_CAN_ASK
         askedBefore -> LocationAccess.DENIED_PERMANENTLY
@@ -228,3 +231,8 @@ private fun evaluateAccess(context: Context, activity: Activity?, askedBefore: B
 }
 
 private const val LOCATION_INTERVAL_MS = 10_000L
+
+private val LOCATION_PERMISSIONS = arrayOf(
+    Manifest.permission.ACCESS_FINE_LOCATION,
+    Manifest.permission.ACCESS_COARSE_LOCATION
+)

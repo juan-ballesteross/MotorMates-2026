@@ -21,9 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.example.motormates.data.model.GarageVehicleUi
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
 import com.example.motormates.data.model.UserReviewUi
+import com.example.motormates.ui.common.components.GarageEmptyState
+import com.example.motormates.ui.common.components.GarageVehicleCard
 import com.example.motormates.ui.publicProfile.components.PublicProfileHeader
 import com.example.motormates.ui.user.components.ProfileEmptyTabState
 import com.example.motormates.ui.user.components.ProfileInfoSection
@@ -51,7 +54,10 @@ fun PublicProfileScreenContent(
     onReviewClick: (String) -> Unit = {},
     onFollowersClick: () -> Unit = {},
     onFollowingClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    garage: List<GarageVehicleUi> = emptyList(),
+    onGarageCarClick: (String) -> Unit = {},
+    onCompareWithMineClick: (String) -> Unit = {}
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -89,10 +95,24 @@ fun PublicProfileScreenContent(
             ProfileTabsRow(selected = selectedTab, onSelect = onSelectTab)
         }
         when (selectedTab) {
-            // El backend no modela garaje ni actividad para otros usuarios.
-            ProfileTab.ACTIVITY, ProfileTab.GARAGE -> {
+            // El backend no modela la actividad de otros usuarios.
+            ProfileTab.ACTIVITY -> {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     ProfileEmptyTabState()
+                }
+            }
+            // Los carros a su nombre, cada uno con "Comparar con el mío".
+            ProfileTab.GARAGE -> if (garage.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    GarageEmptyState(message = "Todavía no tiene carros en su garaje")
+                }
+            } else {
+                gridItems(items = garage, key = { "garage_${it.id}" }) { car ->
+                    GarageVehicleCard(
+                        car = car,
+                        onClick = { onGarageCarClick(car.id) },
+                        onCompareWithMineClick = { onCompareWithMineClick(car.id) }
+                    )
                 }
             }
             // Las reseñas que ESTE usuario ha realizado.
@@ -125,7 +145,11 @@ fun PublicProfileScreenContent(
                     key = { it.id },
                     span = { GridItemSpan(maxLineSpan) }
                 ) { review ->
-                    ProfileReviewCard(review = review, onClick = onReviewClick)
+                    ProfileReviewCard(
+                        review = review,
+                        onClick = onReviewClick,
+                        onCompareWithMineClick = onCompareWithMineClick
+                    )
                 }
             }
         }

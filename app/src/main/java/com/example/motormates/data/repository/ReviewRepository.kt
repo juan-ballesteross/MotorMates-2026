@@ -158,12 +158,16 @@ class ReviewRepositoryImpl @Inject constructor(
             return Result.failure(Exception(INVALID_RATING))
         }
 
+        // Se guarda para avisarle al dueño del carro una vez publicada.
+        var vehicleOwnerId: String? = null
+
         val result = safeCall(
             notFound = "El usuario o el vehículo ya no existe",
             fallback = "No se pudo publicar la reseña"
         ) {
             val profile = userDataSource.getUser(currentUser.id)
             val vehicle = vehicleDataSource.getVehicleById(vehicleId).toDomain()
+            vehicleOwnerId = vehicle.ownerId
 
             remoteDataSource.createReview(
                 NewReview(
@@ -183,8 +187,27 @@ class ReviewRepositoryImpl @Inject constructor(
             ).toDomain()
         }
 
-        result.getOrNull()?.let { newReview -> notifyOtherReviewers(newReview) }
+        result.getOrNull()?.let { newReview ->
+            notifyVehicleOwner(newReview, vehicleOwnerId)
+            notifyOtherReviewers(newReview, vehicleOwnerId)
+        }
         return result
+    }
+
+    /**
+     * Al dueño del carro (quien lo publicó) le llega "X dejó una reseña de tu
+     * carro". La push al celular la manda la Cloud Function al ver esta
+     * notificación. No se avisa si el dueño reseñó su propio carro.
+     */
+    private suspend fun notifyVehicleOwner(newReview: Review, ownerId: String?) {
+        if (ownerId.isNullOrBlank() || ownerId == newReview.userId) return
+        notificationRepository.notify(
+            recipientUid = ownerId,
+            type = NotificationType.REVIEW_ON_MY_CAR,
+            actorId = newReview.userId,
+            vehicleId = newReview.vehicleId,
+            reviewId = newReview.id
+        )
     }
 
     /**
@@ -192,11 +215,13 @@ class ReviewRepositoryImpl @Inject constructor(
      * este mismo carro, para que sepan que alguien más lo reseñó. Es
      * best-effort: si falla la consulta, la reseña igual quedó publicada.
      */
-    private suspend fun notifyOtherReviewers(newReview: Review) {
+    private suspend fun notifyOtherReviewers(newReview: Review, vehicleOwnerId: String?) {
         val otherReviewerIds = runCatching { remoteDataSource.getReviewsByVehicle(newReview.vehicleId) }
             .getOrElse { emptyList() }
             .map { it.toDomain().userId }
             .filter { it != newReview.userId }
+            // El dueño ya recibió su propia notificación: no se le manda dos veces.
+            .filter { it != vehicleOwnerId }
             .distinct()
 
         otherReviewerIds.forEach { recipientId ->

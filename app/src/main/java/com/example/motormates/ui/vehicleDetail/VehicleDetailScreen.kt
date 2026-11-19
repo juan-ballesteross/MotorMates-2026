@@ -24,6 +24,7 @@ fun VehicleDetailScreen(
     onSeeAllReviewsClick: () -> Unit = {},
     onAuthorClick: (String) -> Unit = {},
     onEditReviewClick: (String) -> Unit = {},
+    onCompareClick: () -> Unit = {},
     reloadSignal: Boolean = false,
     onReloadHandled: () -> Unit = {},
     viewModel: VehicleDetailViewModel = hiltViewModel(),
@@ -50,7 +51,7 @@ fun VehicleDetailScreen(
         AlertDialog(
             onDismissRequest = viewModel::dismissDeleteReview,
             title = { Text(text = "Eliminar reseña") },
-            text = { Text(text = "¿Seguro que quieres eliminar tu reseña? Esta acción no se puede deshacer.") },
+            text = { Text(text = "¿Seguro que quieres eliminar esta reseña? Esta acción no se puede deshacer.") },
             confirmButton = {
                 TextButton(onClick = { viewModel.confirmDeleteReview() }) {
                     Text(text = "Eliminar", color = MaterialTheme.colorScheme.error)
@@ -90,6 +91,7 @@ fun VehicleDetailScreen(
             onSeeAllReviewsClick = onSeeAllReviewsClick,
             onAuthorClick = onAuthorClick,
             onEditReviewClick = onEditReviewClick,
+            onCompareClick = onCompareClick,
             onDeleteReviewClick = viewModel::askDeleteReview,
             onLikeClick = viewModel::toggleLike,
             modifier = modifier

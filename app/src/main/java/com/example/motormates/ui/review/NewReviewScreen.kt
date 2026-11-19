@@ -75,21 +75,27 @@ fun NewReviewScreen(
     // permiso, el data source devuelve null y la fila queda en "sin
     // ubicación", con la opción de reintentar.
     val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
+        contract = ActivityResultContracts.RequestMultiplePermissions()
     ) {
         viewModel.captureLocation()
     }
 
-    fun hasLocationPermission(): Boolean = ContextCompat.checkSelfPermission(
+    // Se pide el permiso PRECISO: con solo el aproximado Android mueve la
+    // posición hasta ~2 km a propósito y la reseña sale en otro barrio. Si el
+    // usuario ya había dado el aproximado, Android le ofrece pasar a preciso;
+    // si lo rechaza, se publica igual con la aproximada.
+    fun hasPreciseLocationPermission(): Boolean = ContextCompat.checkSelfPermission(
         context,
-        Manifest.permission.ACCESS_COARSE_LOCATION
+        Manifest.permission.ACCESS_FINE_LOCATION
     ) == PackageManager.PERMISSION_GRANTED
 
     fun requestLocation() {
-        if (hasLocationPermission()) {
+        if (hasPreciseLocationPermission()) {
             viewModel.captureLocation()
         } else {
-            locationPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+            locationPermissionLauncher.launch(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+            )
         }
     }
 

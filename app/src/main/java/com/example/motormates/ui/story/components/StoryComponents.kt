@@ -1,5 +1,17 @@
 package com.example.motormates.ui.story.components
 
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -169,50 +181,131 @@ fun StoryBottomBar(
     likesCount: Long,
     onLikeClick: () -> Unit,
     onLikesCountClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    ownerName: String = "",
+    replyText: String = "",
+    isSendingReply: Boolean = false,
+    onReplyChange: (String) -> Unit = {},
+    onReplyFocusChange: (Boolean) -> Unit = {},
+    onSendReply: () -> Unit = {}
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
+            // Con el teclado abierto la barra sube con él (la app es edge-to-edge).
+            .imePadding()
             .navigationBarsPadding()
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
-                .padding(horizontal = 16.dp, vertical = 10.dp)
-        ) {
-            Text(text = caption, color = Color.White, fontSize = 14.sp)
+        if (caption.isNotBlank()) {
+            Box(
+                modifier = Modifier
+                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+            ) {
+                Text(text = caption, color = Color.White, fontSize = 14.sp)
+            }
         }
         Row(
             modifier = Modifier
                 .padding(top = 16.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                contentDescription = stringResource(R.string.story_like_cd),
-                tint = if (isLiked) MaterialTheme.colorScheme.primary else Color.White,
-                modifier = Modifier
-                    .size(26.dp)
-                    .clickable(onClick = onLikeClick)
-            )
             if (isOwnStory) {
+                // En la propia no se responde: se ve quién le dio like.
+                Icon(
+                    imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = stringResource(R.string.story_like_cd),
+                    tint = if (isLiked) MaterialTheme.colorScheme.primary else Color.White,
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clickable(onClick = onLikeClick)
+                )
                 Text(
                     text = "$likesCount Me gusta",
                     color = Color.White,
                     fontSize = 14.sp,
                     modifier = Modifier.clickable(onClick = onLikesCountClick)
                 )
+            } else {
+                StoryReplyField(
+                    value = replyText,
+                    ownerName = ownerName,
+                    onValueChange = onReplyChange,
+                    onFocusChange = onReplyFocusChange,
+                    onSend = onSendReply,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = stringResource(R.string.story_like_cd),
+                    tint = if (isLiked) MaterialTheme.colorScheme.primary else Color.White,
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clickable(onClick = onLikeClick)
+                )
+                if (isSendingReply) {
+                    CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(22.dp))
+                } else {
+                    val canSend = replyText.isNotBlank()
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        contentDescription = stringResource(R.string.story_send_cd),
+                        tint = if (canSend) Color.White else Color.White.copy(alpha = 0.4f),
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable(enabled = canSend, onClick = onSendReply)
+                            .testTag("storyReplySend")
+                    )
+                }
             }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Send,
-                contentDescription = stringResource(R.string.story_send_cd),
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
         }
     }
+}
+
+/**
+ * Campo translúcido "Responder a ..." sobre la foto. Avisa cuando gana o
+ * pierde el foco para que la historia se pause mientras se escribe.
+ */
+@Composable
+private fun StoryReplyField(
+    value: String,
+    ownerName: String,
+    onValueChange: (String) -> Unit,
+    onFocusChange: (Boolean) -> Unit,
+    onSend: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = true,
+        textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
+        cursorBrush = SolidColor(Color.White),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send, capitalization = KeyboardCapitalization.Sentences),
+        keyboardActions = KeyboardActions(onSend = { onSend() }),
+        modifier = modifier
+            .onFocusChanged { onFocusChange(it.isFocused) }
+            .testTag("storyReplyField"),
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier
+                    .border(1.dp, Color.White.copy(alpha = 0.7f), RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                if (value.isEmpty()) {
+                    Text(
+                        text = if (ownerName.isNotBlank()) "Responder a $ownerName…" else "Enviar mensaje…",
+                        color = Color.White.copy(alpha = 0.75f),
+                        fontSize = 14.sp,
+                        maxLines = 1
+                    )
+                }
+                innerTextField()
+            }
+        }
+    )
 }

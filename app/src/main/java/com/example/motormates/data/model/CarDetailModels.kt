@@ -35,6 +35,7 @@ data class ReviewUi(
     val calificacion: Int,
     val comentario: String,
     val isMine: Boolean = false,
+    val canDeleteAsOwner: Boolean = false,
     val likesCount: Int = 0,
     val isLikedByMe: Boolean = false,
     /**

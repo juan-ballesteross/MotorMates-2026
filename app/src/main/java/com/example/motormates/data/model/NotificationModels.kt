@@ -5,6 +5,9 @@ import com.example.motormates.data.mock.VehicleImages
 /**
  * Tipo de evento que generó la notificación — determina el ícono mostrado.
  *
+ * REVIEW: alguien reseñó un carro que yo también reseñé.
+ * REVIEW_ON_MY_CAR: alguien reseñó un carro que es mío (lo publiqué yo).
+ *
  * La participación en eventos son DOS valores (EVENT_INTERESTED y EVENT_GOING)
  * y no uno solo con un campo de estado al lado. El motivo es el compilador:
  * hay dos `when` exhaustivos sin `else` sobre este enum (el del mensaje en
@@ -17,7 +20,8 @@ import com.example.motormates.data.mock.VehicleImages
  * NotificationRepositoryImpl.toDomain), no tumba la lista.
  */
 enum class NotificationType {
-    LIKE, COMMENT, FOLLOW, RATING, REVIEW, LIKE_STORY, MESSAGE, EVENT_INTERESTED, EVENT_GOING
+    LIKE, COMMENT, FOLLOW, RATING, REVIEW, REVIEW_ON_MY_CAR, LIKE_STORY, MESSAGE,
+    EVENT_INTERESTED, EVENT_GOING
 }
 
 data class NotificationUi(
@@ -32,7 +36,9 @@ data class NotificationUi(
     val thumbnailResId: Int? = null, // null = sin miniatura; 0 = con miniatura pero foto pendiente; id real = foto ya puesta
     val thumbnailUrl: String? = null,
     /** Con qué evento navegar al detalle. Null en los tipos que no son de evento. */
-    val eventId: String? = null
+    val eventId: String? = null,
+    /** Carro al que se refiere (reseñas y likes): tocarla abre su detalle. */
+    val vehicleId: String? = null
 )
 
 // ===== Datos locales quemados =====

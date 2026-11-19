@@ -74,7 +74,12 @@ fun ChatScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(uiState.messages, key = { it.id }) { message ->
-                    MessageBubble(text = message.text, isMine = message.isMine)
+                    MessageBubble(
+                        text = message.text,
+                        isMine = message.isMine,
+                        isStoryReply = message.storyReply != null,
+                        storyImageUrl = message.storyReply?.imageUrl
+                    )
                 }
             }
         }

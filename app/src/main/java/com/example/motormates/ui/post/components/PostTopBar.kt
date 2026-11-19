@@ -28,7 +28,9 @@ fun PostTopBar(
     canPublish: Boolean,
     onCancelClick: () -> Unit,
     onPublishClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    title: String = stringResource(R.string.post_top_bar_title),
+    actionLabel: String = stringResource(R.string.post_publish_button)
 ) {
     Box(
         modifier = modifier
@@ -46,14 +48,14 @@ fun PostTopBar(
                 .clickable(onClick = onCancelClick)
         )
         Text(
-            text = stringResource(R.string.post_top_bar_title),
+            text = title,
             color = MaterialTheme.colorScheme.onBackground,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.align(Alignment.Center)
         )
         Text(
-            text = stringResource(R.string.post_publish_button),
+            text = actionLabel,
             color = if (canPublish) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,

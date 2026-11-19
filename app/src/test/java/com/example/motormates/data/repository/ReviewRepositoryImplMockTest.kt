@@ -203,6 +203,62 @@ class ReviewRepositoryImplMockTest {
         coVerify(exactly = 0) { notificationRepository.notify("uid-jose", any(), any(), any(), any()) }
     }
 
+    // ---------- Notificación al dueño del carro ----------
+
+    private fun publishAsJose(ownerId: String, otherReviewers: List<String> = emptyList()) {
+        every { authDataSource.getCurrentUser() } returns AuthUser(id = "uid-jose", email = null, displayName = "Jose")
+        coEvery { userDataSource.getUser("uid-jose") } returns UserDto(id = "uid-jose", fullName = "Jose")
+        coEvery { vehicleDataSource.getVehicleById("1") } returns porscheDto.copy(ownerId = ownerId)
+        coEvery { remoteDataSource.createReview(any()) } returns reviewDto(id = "nueva")
+        coEvery { remoteDataSource.getReviewsByVehicle("1") } returns
+            listOf(reviewDto(id = "nueva", userId = "uid-jose")) +
+                otherReviewers.mapIndexed { i, uid -> reviewDto(id = "vieja$i", userId = uid) }
+    }
+
+    @Test
+    fun `createReview le avisa al duenio del carro`() = runTest {
+        publishAsJose(ownerId = "uid-duenio")
+
+        repository.createReview(vehicleId = "1", rating = 5, comment = null, location = null)
+
+        coVerify(exactly = 1) {
+            notificationRepository.notify("uid-duenio", NotificationType.REVIEW_ON_MY_CAR, "uid-jose", "1", "nueva")
+        }
+    }
+
+    @Test
+    fun `si el duenio tambien habia reseniado recibe una sola notificacion`() = runTest {
+        publishAsJose(ownerId = "uid-duenio", otherReviewers = listOf("uid-duenio", "uid-otro"))
+
+        repository.createReview(vehicleId = "1", rating = 4, comment = null, location = null)
+
+        coVerify(exactly = 1) { notificationRepository.notify("uid-duenio", any(), any(), any(), any()) }
+        coVerify(exactly = 1) {
+            notificationRepository.notify("uid-duenio", NotificationType.REVIEW_ON_MY_CAR, any(), any(), any())
+        }
+        coVerify(exactly = 1) {
+            notificationRepository.notify("uid-otro", NotificationType.REVIEW, "uid-jose", "1", "nueva")
+        }
+    }
+
+    @Test
+    fun `reseniar tu propio carro no te notifica`() = runTest {
+        publishAsJose(ownerId = "uid-jose")
+
+        repository.createReview(vehicleId = "1", rating = 5, comment = null, location = null)
+
+        coVerify(exactly = 0) { notificationRepository.notify(any(), NotificationType.REVIEW_ON_MY_CAR, any(), any(), any()) }
+    }
+
+    @Test
+    fun `un carro sin duenio no genera notificacion de duenio`() = runTest {
+        publishAsJose(ownerId = "")
+
+        repository.createReview(vehicleId = "1", rating = 5, comment = null, location = null)
+
+        coVerify(exactly = 0) { notificationRepository.notify(any(), NotificationType.REVIEW_ON_MY_CAR, any(), any(), any()) }
+    }
+
     private fun reviewDto(
         id: String = "r1",
         userId: String = "uid-jose",

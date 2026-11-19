@@ -3,6 +3,7 @@ package com.example.motormates.ui.publicProfile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.model.ProfileTab
+import com.example.motormates.data.model.garageOf
 import com.example.motormates.data.model.toUserProfile
 import com.example.motormates.data.model.toUserReviewUi
 import com.example.motormates.data.repository.AuthRepository
@@ -50,7 +51,7 @@ class PublicProfileViewModel @Inject constructor(
     fun loadProfileByUid(uid: String) {
         profileUid = uid
 
-        loadVehicleImages()
+        loadVehicles(uid)
         loadIsFollowing(uid)
 
         profileJob?.cancel()
@@ -92,12 +93,16 @@ class PublicProfileViewModel @Inject constructor(
         }
     }
 
-    /** Si falla, las reseñas se muestran igual, sin miniatura. */
-    private fun loadVehicleImages() {
+    /**
+     * Una sola consulta de vehículos sirve para dos cosas: las miniaturas de
+     * las reseñas y el garaje del usuario. Si falla, las reseñas se muestran
+     * igual (sin miniatura) y el garaje queda vacío.
+     */
+    private fun loadVehicles(uid: String) {
         viewModelScope.launch {
-            vehicleImagesByVehicleId.value = vehicleRepository.getVehicles()
-                .getOrElse { emptyList() }
-                .associate { it.id to it.imageUrl }
+            val vehicles = vehicleRepository.getVehicles().getOrElse { emptyList() }
+            vehicleImagesByVehicleId.value = vehicles.associate { it.id to it.imageUrl }
+            _uiState.update { it.copy(garage = vehicles.garageOf(uid)) }
         }
     }
 
