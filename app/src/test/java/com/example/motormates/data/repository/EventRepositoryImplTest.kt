@@ -8,6 +8,8 @@ import com.example.motormates.data.model.AuthUser
 import com.example.motormates.data.model.EventFeature
 import com.example.motormates.data.model.EventType
 import com.example.motormates.data.model.NewEvent
+import com.example.motormates.data.model.NotificationType
+import com.example.motormates.data.model.ParticipationChange
 import com.example.motormates.data.model.ParticipationStatus
 import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.source.AuthDataSource
@@ -38,17 +40,22 @@ class EventRepositoryImplTest {
     private val participationDataSource = mockk<EventParticipationDataSource>(relaxed = true)
     private val authDataSource = mockk<AuthDataSource>()
     private val userDataSource = mockk<UserDataSource>()
+    private val notificationRepository = mockk<NotificationRepository>(relaxed = true)
 
     private val repository = EventRepositoryImpl(
         eventDataSource = eventDataSource,
         participationDataSource = participationDataSource,
         authDataSource = authDataSource,
-        userDataSource = userDataSource
+        userDataSource = userDataSource,
+        notificationRepository = notificationRepository
     )
 
     private val bogota = ReviewLocation(lat = 4.6280, lng = -74.0643, placeName = "Chapinero")
     private val inicio = 1_700_000_000_000L
     private val ana = AuthUser(id = "uid-ana", email = "ana@mail.com", displayName = "Ana")
+
+    /** Quien marca. Los eventos de las fixtures los organiza Ana. */
+    private val beto = AuthUser(id = "uid-beto", email = "beto@mail.com", displayName = "Beto")
 
     // ---------- Organizador ----------
 
@@ -236,6 +243,7 @@ class EventRepositoryImplTest {
     @Test
     fun `participar usa el uid de la sesion`() = runTest {
         every { authDataSource.getCurrentUser() } returns ana
+        givenParticipationChange(ParticipationChange.UNCHANGED)
 
         val resultado = repository.setParticipation("evt-1", ParticipationStatus.GOING)
 
@@ -272,7 +280,160 @@ class EventRepositoryImplTest {
         assertThat(repository.observeMyParticipation("evt-1").first()).isNull()
     }
 
+    // ---------- Aviso al organizador ----------
+
+    @Test
+    fun `marcar me interesa por primera vez avisa al organizador`() = runTest {
+        givenBetoMarks(ParticipationChange.CREATED)
+
+        val resultado = repository.setParticipation("evt-1", ParticipationStatus.INTERESTED)
+
+        assertThat(resultado.isSuccess).isTrue()
+        coVerify(exactly = 1) {
+            notificationRepository.notify(
+                recipientUid = "uid-ana",
+                type = NotificationType.EVENT_INTERESTED,
+                actorId = "uid-beto",
+                eventId = "evt-1"
+            )
+        }
+    }
+
+    @Test
+    fun `marcar voy por primera vez avisa al organizador`() = runTest {
+        givenBetoMarks(ParticipationChange.CREATED)
+
+        repository.setParticipation("evt-1", ParticipationStatus.GOING)
+
+        coVerify(exactly = 1) {
+            notificationRepository.notify(
+                recipientUid = "uid-ana",
+                type = NotificationType.EVENT_GOING,
+                actorId = "uid-beto",
+                eventId = "evt-1"
+            )
+        }
+    }
+
+    @Test
+    fun `pasar de me interesa a voy no vuelve a avisar`() = runTest {
+        givenBetoMarks(ParticipationChange.UPDATED)
+
+        val resultado = repository.setParticipation("evt-1", ParticipationStatus.GOING)
+
+        assertThat(resultado.isSuccess).isTrue()
+        coVerify(exactly = 0) { notificationRepository.notify(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `quitar la participacion no avisa`() = runTest {
+        givenBetoMarks(ParticipationChange.REMOVED)
+
+        val resultado = repository.setParticipation("evt-1", null)
+
+        assertThat(resultado.isSuccess).isTrue()
+        coVerify(exactly = 0) { notificationRepository.notify(any(), any(), any(), any(), any(), any()) }
+    }
+
+    /**
+     * El caso que justifica que la fuente devuelva [ParticipationChange] y no
+     * el estado anterior: volver a marcar lo mismo sale de la transacción sin
+     * escribir nada, y con un estado anterior nulable sería indistinguible de
+     * "antes no había nada", así que un doble toque avisaría de la nada.
+     */
+    @Test
+    fun `volver a marcar lo mismo no avisa`() = runTest {
+        givenBetoMarks(ParticipationChange.UNCHANGED)
+
+        val resultado = repository.setParticipation("evt-1", ParticipationStatus.GOING)
+
+        assertThat(resultado.isSuccess).isTrue()
+        coVerify(exactly = 0) { notificationRepository.notify(any(), any(), any(), any(), any(), any()) }
+    }
+
+    /** El destinatario no lo elige la pantalla: sale del evento. */
+    @Test
+    fun `el destinatario sale del evento y no de la pantalla`() = runTest {
+        every { authDataSource.getCurrentUser() } returns beto
+        givenParticipationChange(ParticipationChange.CREATED)
+        coEvery { eventDataSource.getEventById("evt-1") } returns dto(userId = "uid-carla")
+
+        repository.setParticipation("evt-1", ParticipationStatus.GOING)
+
+        coVerify(exactly = 1) { eventDataSource.getEventById("evt-1") }
+        coVerify(exactly = 1) {
+            notificationRepository.notify(
+                recipientUid = "uid-carla",
+                type = NotificationType.EVENT_GOING,
+                actorId = "uid-beto",
+                eventId = "evt-1"
+            )
+        }
+    }
+
+    @Test
+    fun `no se lee el evento si no hubo marca nueva`() = runTest {
+        givenBetoMarks(ParticipationChange.UPDATED)
+
+        repository.setParticipation("evt-1", ParticipationStatus.GOING)
+
+        coVerify(exactly = 0) { eventDataSource.getEventById(any()) }
+    }
+
+    /**
+     * Avisar es secundario: la participación ya quedó escrita, así que un
+     * fallo al leer el organizador no puede devolver failure ni hacer que el
+     * ViewModel revierta el botón contra la verdad del servidor.
+     */
+    @Test
+    fun `si no se puede leer el organizador la participacion sigue siendo exitosa`() = runTest {
+        every { authDataSource.getCurrentUser() } returns beto
+        givenParticipationChange(ParticipationChange.CREATED)
+        coEvery { eventDataSource.getEventById("evt-1") } throws IOException("sin red")
+
+        val resultado = repository.setParticipation("evt-1", ParticipationStatus.GOING)
+
+        assertThat(resultado.isSuccess).isTrue()
+        coVerify(exactly = 0) { notificationRepository.notify(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `si avisar al organizador falla la participacion sigue siendo exitosa`() = runTest {
+        givenBetoMarks(ParticipationChange.CREATED)
+        coEvery {
+            notificationRepository.notify(any(), any(), any(), any(), any(), any())
+        } throws IOException("sin red")
+
+        val resultado = repository.setParticipation("evt-1", ParticipationStatus.GOING)
+
+        assertThat(resultado.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `una participacion fallida no avisa a nadie`() = runTest {
+        every { authDataSource.getCurrentUser() } returns beto
+        coEvery {
+            participationDataSource.setParticipation(any(), any(), any())
+        } throws IOException("sin red")
+
+        val resultado = repository.setParticipation("evt-1", ParticipationStatus.GOING)
+
+        assertThat(resultado.isFailure).isTrue()
+        coVerify(exactly = 0) { notificationRepository.notify(any(), any(), any(), any(), any(), any()) }
+    }
+
     // ---------- Fixtures ----------
+
+    private fun givenParticipationChange(change: ParticipationChange) {
+        coEvery { participationDataSource.setParticipation(any(), any(), any()) } returns change
+    }
+
+    /** Beto marca en un evento que organiza Ana ("uid-ana", el dto por defecto). */
+    private fun givenBetoMarks(change: ParticipationChange) {
+        every { authDataSource.getCurrentUser() } returns beto
+        givenParticipationChange(change)
+        coEvery { eventDataSource.getEventById("evt-1") } returns dto()
+    }
 
     private fun draft(title: String = "Encuentro en el 93") = EventDraft(
         type = EventType.CAR_MEET,

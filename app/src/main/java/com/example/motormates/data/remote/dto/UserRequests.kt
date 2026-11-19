@@ -34,5 +34,11 @@ data class CreateNotificationRequest(
     @SerializedName("type") val type: String,
     @SerializedName("actorId") val actorId: String,
     @SerializedName("vehicleId") val vehicleId: String?,
-    @SerializedName("reviewId") val reviewId: String?
+    @SerializedName("reviewId") val reviewId: String?,
+    /**
+     * El backend propio no tiene tabla de eventos (ver EventDataModule), así
+     * que hoy lo ignora. Viaja igual para que las dos implementaciones de
+     * NotificationDataSource manden lo mismo.
+     */
+    @SerializedName("eventId") val eventId: String? = null
 )

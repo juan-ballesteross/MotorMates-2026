@@ -128,6 +128,98 @@ exports.sendFollowNotification = onDocumentCreated(
 );
 
 /**
+ * Notificación push cuando alguien marca interés o asistencia en tu evento.
+ *
+ * onDocumentCreated y no onDocumentWritten, y por eso no hace falta comparar
+ * before/after: el set de la transacción de participación
+ * (FirestoreEventParticipationDataSource) CREA el documento al marcar por
+ * primera vez y lo SOBREESCRIBE al pasar de "me interesa" a "voy". Así este
+ * trigger se dispara exactamente en los dos casos que hay que avisar, y no al
+ * cambiar de estado ni al quitar la participación.
+ *
+ * Un trigger por acción y no uno genérico sobre
+ * users/{uid}/notifications/{id}: el genérico daría push también a likes,
+ * reseñas y mensajes, y el de mensajes dispararía uno por CADA mensaje de una
+ * conversación. Además el documento de la campana lo escribe la app en
+ * best-effort, mientras que el de la acción es la verdad transaccional.
+ * Cuando se decida darle push a lo demás, este trigger y
+ * sendFollowNotification se funden en uno.
+ *
+ * Sin `retry`: en v2 está desactivado por defecto y la semántica es "a lo
+ * sumo una vez". Un reintento mandaría un segundo push y la función no
+ * escribe nada en Firestore, así que no habría forma de hacerla idempotente
+ * sin un documento centinela. Perder un push suelto es aceptable; duplicarlo
+ * en el celular de alguien, no.
+ */
+exports.sendEventParticipationNotification = onDocumentCreated(
+  { document: "events/{eventId}/participants/{participantUid}", database: DATABASE_ID },
+  async (event) => {
+    const { eventId, participantUid } = event.params;
+
+    // El estado viene en el documento que acabó de crearse: no hace falta
+    // volver a leerlo.
+    const status = event.data?.data()?.status;
+    if (status !== "INTERESTED" && status !== "GOING") {
+      return;
+    }
+
+    const eventSnapshot = await db.collection("events").doc(eventId).get();
+    if (!eventSnapshot.exists) {
+      return;
+    }
+
+    // El organizador se guarda en userId, no en organizerId: el nombre de
+    // campo es el mismo que en "reviews" para que updateUserInfoInReviews
+    // pueda recorrer las dos colecciones con las mismas rutas (ver
+    // EventFirestoreDto). organizerId solo existe en el dominio de la app.
+    const organizerId = eventSnapshot.data().userId;
+
+    // Nadie se notifica a sí mismo (mismo criterio que la app).
+    if (!organizerId || organizerId === participantUid) {
+      return;
+    }
+
+    const [participantSnapshot, tokensSnapshot] = await Promise.all([
+      db.collection("users").doc(participantUid).get(),
+      db.collection("users").doc(organizerId).collection("fcmTokens").get(),
+    ]);
+
+    if (tokensSnapshot.empty) {
+      logger.log(`El usuario ${organizerId} no tiene dispositivos registrados.`);
+      return;
+    }
+
+    const participantName = participantSnapshot.data()?.fullName || "Alguien";
+    const eventTitle = eventSnapshot.data().title || "tu evento";
+    const tokens = tokensSnapshot.docs.map((doc) => doc.id);
+    const going = status === "GOING";
+
+    const response = await getMessaging().sendEachForMulticast({
+      tokens,
+      notification: {
+        title: going ? "Alguien va a tu evento" : "Le interesa tu evento",
+        body: going
+          ? `${participantName} va a ir a ${eventTitle}`
+          : `A ${participantName} le interesa ${eventTitle}`,
+      },
+      // Los valores de type son idénticos a las constantes de NotificationType
+      // en Kotlin, igual que "FOLLOW".
+      data: {
+        type: going ? "EVENT_GOING" : "EVENT_INTERESTED",
+        actorId: participantUid,
+        eventId,
+      },
+    });
+
+    logger.log(
+      `Push de participación para ${organizerId}: ${response.successCount} enviados, ${response.failureCount} fallidos.`
+    );
+
+    await deleteStaleTokens(organizerId, tokens, response.responses);
+  }
+);
+
+/**
  * Un token deja de servir cuando el usuario desinstala la app o borra sus
  * datos, y FCM lo reporta con este código. Si no se limpian, la lista crece
  * y cada envío arrastra tokens muertos.

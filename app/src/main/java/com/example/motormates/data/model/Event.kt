@@ -112,6 +112,30 @@ enum class EventFeature(val type: EventType) {
 enum class ParticipationStatus { INTERESTED, GOING }
 
 /**
+ * Qué hizo de verdad la escritura de participación, para que quien llama
+ * pueda decidir si hay algo que avisar.
+ *
+ * No es un [ParticipationStatus] nulable con el estado anterior, que sería lo
+ * obvio: ese tipo no distingue "antes no había nada" de "no escribí nada".
+ * Volver a marcar lo que ya estaba marcado sale de la transacción sin escribir,
+ * y leer eso como "antes no había nada" haría que un doble toque le avisara al
+ * organizador de una participación que nunca cambió.
+ */
+enum class ParticipationChange {
+    /** Volver a marcar lo mismo: no se escribió nada. */
+    UNCHANGED,
+
+    /** Marca nueva, de no participar a "me interesa" o "voy". Es la que avisa. */
+    CREATED,
+
+    /** Cambio entre los dos estados, que mueve los dos contadores a la vez. */
+    UPDATED,
+
+    /** Se quitó la participación. */
+    REMOVED
+}
+
+/**
  * Lo que el repositorio le entrega a la fuente de datos para crear o editar
  * un evento. Igual que [NewReview], lleva la captura desnormalizada del
  * organizador para no tener que hacer JOINs al leer.

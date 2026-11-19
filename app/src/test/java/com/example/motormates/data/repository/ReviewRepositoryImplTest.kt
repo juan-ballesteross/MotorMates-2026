@@ -165,7 +165,8 @@ private class FakeNotificationRepository : NotificationRepository {
         type: NotificationType,
         actorId: String,
         vehicleId: String?,
-        reviewId: String?
+        reviewId: String?,
+        eventId: String?
     ) {
         notified += recipientUid
     }

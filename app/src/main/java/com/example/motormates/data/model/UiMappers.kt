@@ -236,6 +236,10 @@ fun Notification.toNotificationUi(): NotificationUi {
         NotificationType.FOLLOW -> "empezó a seguirte"
         NotificationType.LIKE_STORY -> "le dio like a tu historia"
         NotificationType.MESSAGE -> "te envió un mensaje"
+        NotificationType.EVENT_INTERESTED ->
+            if (!eventTitle.isNullOrBlank()) "le interesa tu evento $eventTitle" else "le interesa tu evento"
+        NotificationType.EVENT_GOING ->
+            if (!eventTitle.isNullOrBlank()) "va a ir a tu evento $eventTitle" else "va a ir a tu evento"
         NotificationType.COMMENT, NotificationType.RATING -> ""
     }
 
@@ -261,7 +265,8 @@ fun Notification.toNotificationUi(): NotificationUi {
         message = message,
         timeAgo = createdAt.toRelativeTimeEs(),
         section = section,
-        thumbnailUrl = vehicleImageUrl
+        thumbnailUrl = vehicleImageUrl,
+        eventId = eventId
     )
 }
 

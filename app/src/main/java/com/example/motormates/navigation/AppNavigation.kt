@@ -168,9 +168,17 @@ fun AppNavigation(
         }
         composable(ScreenRoute.Alerts.route) {
             AlertsScreen(
+                // else y no un when exhaustivo: la mitad de los tipos no lleva
+                // a ninguna parte, y listarlos sería siete ramas vacías.
                 onNotificationClick = { notification ->
-                    if (notification.type == NotificationType.MESSAGE) {
-                        navController.navigate(ScreenRoute.Chat.createRoute(notification.actorId))
+                    when (notification.type) {
+                        NotificationType.MESSAGE ->
+                            navController.navigate(ScreenRoute.Chat.createRoute(notification.actorId))
+                        NotificationType.EVENT_INTERESTED, NotificationType.EVENT_GOING ->
+                            notification.eventId?.let {
+                                navController.navigate(ScreenRoute.EventDetail.createRoute(it))
+                            }
+                        else -> Unit
                     }
                 }
             )

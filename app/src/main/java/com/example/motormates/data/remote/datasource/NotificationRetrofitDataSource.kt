@@ -18,12 +18,19 @@ class NotificationRetrofitDataSource @Inject constructor(
         type: String,
         actorId: String,
         vehicleId: String?,
-        reviewId: String?
+        reviewId: String?,
+        eventId: String?
     ) {
         if (recipientUid == actorId) return
         service.createNotification(
             recipientUid,
-            CreateNotificationRequest(type = type, actorId = actorId, vehicleId = vehicleId, reviewId = reviewId)
+            CreateNotificationRequest(
+                type = type,
+                actorId = actorId,
+                vehicleId = vehicleId,
+                reviewId = reviewId,
+                eventId = eventId
+            )
         )
     }
 

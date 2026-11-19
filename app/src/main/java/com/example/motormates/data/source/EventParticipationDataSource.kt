@@ -2,6 +2,7 @@ package com.example.motormates.data.source
 
 import com.example.motormates.data.dto.EventParticipantDto
 import com.example.motormates.data.dto.toParticipationStatusOrNull
+import com.example.motormates.data.model.ParticipationChange
 import com.example.motormates.data.model.ParticipationStatus
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -25,8 +26,20 @@ import kotlinx.coroutines.tasks.await
  */
 interface EventParticipationDataSource {
 
-    /** status null quita la participación. */
-    suspend fun setParticipation(eventId: String, userId: String, status: ParticipationStatus?)
+    /**
+     * status null quita la participación.
+     *
+     * Devuelve qué pasó y no Unit porque solo la transacción sabe cuál era el
+     * estado anterior, y de eso depende si hay que avisarle al organizador
+     * (ver notifyOrganizer en EventRepositoryImpl). Resolverlo con una lectura
+     * previa fuera de la transacción tendría carrera: dos toques rápidos
+     * podrían leer los dos que no había nada y avisar dos veces.
+     */
+    suspend fun setParticipation(
+        eventId: String,
+        userId: String,
+        status: ParticipationStatus?
+    ): ParticipationChange
 
     fun observeMyParticipation(eventId: String, userId: String): Flow<ParticipationStatus?>
 }
@@ -52,18 +65,18 @@ class FirestoreEventParticipationDataSource @Inject constructor(
         eventId: String,
         userId: String,
         status: ParticipationStatus?
-    ) {
+    ): ParticipationChange {
         val eventRef = firestore.collection(EVENTS_COLLECTION).document(eventId)
         val participantRef = eventRef.collection(PARTICIPANTS_COLLECTION).document(userId)
 
-        firestore.runTransaction { transaction ->
+        return firestore.runTransaction { transaction ->
             val snapshot = transaction.get(participantRef)
             val before = snapshot
                 .takeIf { it.exists() }
                 ?.getString("status")
                 ?.toParticipationStatusOrNull()
 
-            if (before == status) return@runTransaction null
+            if (before == status) return@runTransaction ParticipationChange.UNCHANGED
 
             before?.let { transaction.update(eventRef, it.counterField, FieldValue.increment(-1)) }
             status?.let { transaction.update(eventRef, it.counterField, FieldValue.increment(1)) }
@@ -80,8 +93,14 @@ class FirestoreEventParticipationDataSource @Inject constructor(
                 )
             }
 
-            // Una transacción debe terminar devolviendo un valor; no necesitamos ninguno.
-            null
+            // Lo que acabó de pasar, para que el repositorio sepa si hay algo
+            // que avisar. Se calcula aquí dentro porque `before` solo existe
+            // dentro de la transacción.
+            when {
+                status == null -> ParticipationChange.REMOVED
+                before == null -> ParticipationChange.CREATED
+                else -> ParticipationChange.UPDATED
+            }
         }.await()
     }
 

@@ -5,6 +5,8 @@ import com.example.motormates.data.model.Event
 import com.example.motormates.data.model.EventFeature
 import com.example.motormates.data.model.EventType
 import com.example.motormates.data.model.NewEvent
+import com.example.motormates.data.model.NotificationType
+import com.example.motormates.data.model.ParticipationChange
 import com.example.motormates.data.model.ParticipationStatus
 import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.source.AuthDataSource
@@ -25,7 +27,9 @@ import retrofit2.HttpException
  *
  * El organizador nunca llega desde la UI: se resuelve aquí con
  * [AuthDataSource], igual que el autor de una reseña. Así la pantalla no
- * puede publicar a nombre de otro ni por error.
+ * puede publicar a nombre de otro ni por error. Lo mismo vale para el
+ * destinatario de las notificaciones de participación: se lee del evento
+ * (ver notifyOrganizer).
  */
 interface EventRepository {
 
@@ -74,7 +78,8 @@ class EventRepositoryImpl @Inject constructor(
     private val eventDataSource: EventDataSource,
     private val participationDataSource: EventParticipationDataSource,
     private val authDataSource: AuthDataSource,
-    private val userDataSource: UserDataSource
+    private val userDataSource: UserDataSource,
+    private val notificationRepository: NotificationRepository
 ) : EventRepository {
 
     override fun observeEventsBetween(
@@ -127,8 +132,47 @@ class EventRepositoryImpl @Inject constructor(
     ): Result<Unit> =
         safeCall(notFound = EVENT_NOT_FOUND, fallback = "No se pudo guardar tu respuesta") {
             val userId = currentUserId()
-            participationDataSource.setParticipation(eventId, userId, status)
+            val change = participationDataSource.setParticipation(eventId, userId, status)
+            // Solo la marca nueva avisa: pasar de "me interesa" a "voy" y
+            // quitar la participación no le interesan al organizador, y
+            // volver a marcar lo mismo no escribió nada.
+            if (change == ParticipationChange.CREATED && status != null) {
+                notifyOrganizer(eventId, userId, status)
+            }
         }
+
+    /**
+     * Secundario y best-effort, igual que el notify de FollowRepositoryImpl:
+     * si falla, la participación ya quedó guardada y la pantalla no se entera.
+     *
+     * El runCatching es propio y no basta el de NotificationRepository.notify
+     * porque este bloque corre DENTRO del safeCall: sin él, un fallo leyendo
+     * el evento convertiría una participación ya escrita en Result.failure y
+     * el ViewModel revertiría el botón contra la verdad del servidor. En
+     * likeReview no hace falta porque allí notify va fuera del safeLikeCall.
+     *
+     * El organizador se lee del evento y no llega por la firma, al contrario
+     * que reviewAuthorId en likeReview: firestore.rules deja crear
+     * notificaciones en la bandeja de cualquier uid con solo firmar el propio
+     * actorId, así que el destinatario no debe poder elegirlo la pantalla.
+     *
+     * Marcar, quitar y volver a marcar sí avisa de nuevo, igual que seguir,
+     * dejar de seguir y volver a seguir.
+     */
+    private suspend fun notifyOrganizer(
+        eventId: String,
+        actorId: String,
+        status: ParticipationStatus
+    ) {
+        runCatching {
+            notificationRepository.notify(
+                recipientUid = eventDataSource.getEventById(eventId).userId,
+                type = status.toNotificationType(),
+                actorId = actorId,
+                eventId = eventId
+            )
+        }
+    }
 
     /**
      * Se comprueba también en el cliente, aunque firestore.rules ya lo
@@ -203,4 +247,14 @@ class EventRepositoryImpl @Inject constructor(
         const val NOT_ORGANIZER = "Solo el organizador puede editar este evento"
         const val ORGANIZER_FALLBACK_NAME = "Usuario"
     }
+}
+
+/**
+ * Vive en el repositorio y no en la fuente de datos ni en el enum: qué se le
+ * avisa al organizador es una regla de negocio, igual que la de "solo la marca
+ * nueva avisa". La fuente de datos solo sabe de contadores y documentos.
+ */
+private fun ParticipationStatus.toNotificationType(): NotificationType = when (this) {
+    ParticipationStatus.INTERESTED -> NotificationType.EVENT_INTERESTED
+    ParticipationStatus.GOING -> NotificationType.EVENT_GOING
 }
