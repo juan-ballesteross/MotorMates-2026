@@ -1,7 +1,7 @@
 package com.example.motormates.ui.user.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.platform.testTag
@@ -109,17 +109,18 @@ fun ProfileHeader(
             }
             Spacer(modifier = Modifier.weight(1f))
             // La configuración de la cuenta (perfil, garaje, gustos, cerrar sesión).
+            // Sin marco: solo el ícono, con el toque circular de IconButton.
             IconButton(
                 onClick = onEditProfileClick,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(Radius.sm))
-                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(Radius.sm))
+                    .size(48.dp)
                     .testTag("profileSettingsButton")
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Settings,
+                    imageVector = Icons.Outlined.Settings,
                     contentDescription = stringResource(R.string.user_edit_profile_button),
-                    tint = MaterialTheme.colorScheme.onBackground
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(26.dp)
                 )
             }
         }
