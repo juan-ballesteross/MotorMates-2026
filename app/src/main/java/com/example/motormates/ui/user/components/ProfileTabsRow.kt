@@ -23,7 +23,7 @@ import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.ui.theme.Spacing
 
 /**
- * Pestañas Reseñas / Garaje / Actividad con indicador rojo bajo la
+ * Pestañas Reseñas / Garaje / Builds / Actividad con indicador rojo bajo la
  * pestaña seleccionada.
  */
 @Composable
@@ -33,13 +33,14 @@ fun ProfileTabsRow(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        // Cada pestaña ocupa un tercio del ancho; el divisor gris de abajo
+        // Cada pestaña ocupa la misma fracción del ancho; el divisor gris de abajo
         // y el indicador rojo de la seleccionada quedan alineados.
         Row(modifier = Modifier.fillMaxWidth()) {
             ProfileTab.entries.forEach { tab ->
                 val label = when (tab) {
                     ProfileTab.REVIEWS -> stringResource(R.string.user_tab_reviews)
                     ProfileTab.GARAGE -> stringResource(R.string.user_tab_garage)
+                    ProfileTab.BUILDS -> stringResource(R.string.user_tab_builds)
                     ProfileTab.ACTIVITY -> stringResource(R.string.user_tab_activity)
                 }
                 ProfileTabItem(

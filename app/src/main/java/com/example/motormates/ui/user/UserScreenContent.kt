@@ -25,11 +25,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.motormates.R
+import com.example.motormates.data.model.Build
 import com.example.motormates.data.model.GarageCar
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
 import com.example.motormates.data.model.UserReviewUi
 import com.example.motormates.ui.user.components.ProfileCarCard
+import com.example.motormates.ui.user.components.ProfileBuildCard
 import com.example.motormates.ui.user.components.ProfileEmptyTabState
 import com.example.motormates.ui.user.components.ProfileHeader
 import com.example.motormates.ui.user.components.ProfileInfoSection
@@ -61,6 +63,9 @@ fun UserScreenContent(
     onFollowersClick: () -> Unit = {},
     onFollowingClick: () -> Unit = {},
     onLogOutClick: () -> Unit = {},
+    builds: List<Build> = emptyList(),
+    isBuildsLoading: Boolean = false,
+    onBuildClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -151,6 +156,32 @@ fun UserScreenContent(
                         onEditClick = onEditReviewClick,
                         onDeleteClick = onDeleteReviewClick
                     )
+                }
+            }
+            // Mis builds de AI Tuning, públicos y privados.
+            ProfileTab.BUILDS -> when {
+                isBuildsLoading && builds.isEmpty() -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Spacing.xl),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                builds.isEmpty() -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Text(
+                        text = "Todavía no tienes builds. Abre un vehículo y toca \"Modificar con AI\".",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.lg)
+                    )
+                }
+                else -> gridItems(builds, key = { it.id }) { build ->
+                    ProfileBuildCard(build = build, onClick = onBuildClick, showVisibility = true)
                 }
             }
             // El garaje se queda local: el backend no modela los autos del usuario.

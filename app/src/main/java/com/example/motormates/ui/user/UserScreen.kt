@@ -28,6 +28,7 @@ fun UserScreen(
     onEditReviewClick: (String, String) -> Unit = { _, _ -> },
     onFollowersClick: () -> Unit = {},
     onFollowingClick: () -> Unit = {},
+    onBuildClick: (String) -> Unit = {},
     onLoggedOut: () -> Unit = {},
     reloadSignal: Boolean = false,
     onReloadHandled: () -> Unit = {},
@@ -86,6 +87,9 @@ fun UserScreen(
         onFollowersClick = onFollowersClick,
         onFollowingClick = onFollowingClick,
         onLogOutClick = { viewModel.logOut(onLoggedOut) },
+        builds = uiState.builds,
+        isBuildsLoading = uiState.isBuildsLoading,
+        onBuildClick = onBuildClick,
         modifier = modifier
     )
 }

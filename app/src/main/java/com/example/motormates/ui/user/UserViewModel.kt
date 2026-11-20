@@ -7,6 +7,7 @@ import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.toUserProfile
 import com.example.motormates.data.model.toUserReviewUi
 import com.example.motormates.data.repository.AuthRepository
+import com.example.motormates.data.repository.BuildRepository
 import com.example.motormates.data.repository.ProfileImageRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.UserRepository
@@ -26,7 +27,8 @@ class UserViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val reviewRepository: ReviewRepository,
     private val vehicleRepository: VehicleRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val buildRepository: BuildRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserUiState())
@@ -129,6 +131,19 @@ class UserViewModel @Inject constructor(
 
     fun updateSelectedTab(tab: ProfileTab) {
         _uiState.update { it.copy(selectedTab = tab) }
+        if (tab == ProfileTab.BUILDS) loadBuilds()
+    }
+
+    /**
+     * Se piden al abrir la pestaña (y cada vez que se vuelve a ella): así un
+     * build recién guardado aparece sin tener que recargar todo el perfil.
+     */
+    fun loadBuilds() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isBuildsLoading = true) }
+            val builds = buildRepository.getMyBuilds().getOrElse { emptyList() }
+            _uiState.update { it.copy(isBuildsLoading = false, builds = builds) }
+        }
     }
 
     fun askDeleteReview(reviewId: String) {

@@ -26,6 +26,7 @@ fun PublicProfileScreen(
     onFollowersClick: (String) -> Unit = {},
     onFollowingClick: (String) -> Unit = {},
     onMessageClick: (String) -> Unit = {},
+    onBuildClick: (String) -> Unit = {},
     viewModel: PublicProfileViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -80,6 +81,8 @@ fun PublicProfileScreen(
             onReviewClick = onVehicleClick,
             onFollowersClick = { firebaseUid?.let(onFollowersClick) },
             onFollowingClick = { firebaseUid?.let(onFollowingClick) },
+            builds = uiState.builds,
+            onBuildClick = onBuildClick,
             modifier = modifier
         )
     }

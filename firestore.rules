@@ -124,6 +124,52 @@ service cloud.firestore {
       }
     }
 
+    // ---------- AI Tuning ----------
+
+    // Catálogo de piezas y paquetes: lo escribe solo el seeder (Admin SDK).
+    match /parts/{partId} {
+      allow read: if signedIn();
+    }
+    match /tuningPackages/{packageId} {
+      allow read: if signedIn();
+    }
+
+    // Builds: el dueño los crea, publica/despublica y borra. Los demás solo
+    // ven los publicados.
+    match /builds/{buildId} {
+      allow read: if signedIn()
+        && (resource.data.published == true || resource.data.ownerId == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.resultImageUrl is string
+        && request.resource.data.published is bool;
+      allow update: if signedIn()
+        && resource.data.ownerId == request.auth.uid
+        && onlyChanges(['published'])
+        && request.resource.data.published is bool;
+      allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // aiUsage/{uid}: contador diario de imágenes generadas. Solo el propio
+    // usuario, y el contador solo sube de a uno (o vuelve a 1 en un día nuevo).
+    match /aiUsage/{userId} {
+      allow read: if isUser(userId);
+      allow create: if isUser(userId)
+        && request.resource.data.count == 1
+        && request.resource.data.date is string;
+      allow update: if isUser(userId)
+        && request.resource.data.date is string
+        && request.resource.data.count is int
+        // Techo duro por si alguien sube ai_daily_limit por error en Remote Config.
+        && request.resource.data.count <= 50
+        && (
+          (request.resource.data.date == resource.data.date
+            && request.resource.data.count == resource.data.count + 1)
+          || (request.resource.data.date != resource.data.date
+            && request.resource.data.count == 1)
+        );
+    }
+
     match /chats/{chatId} {
       allow read: if signedIn() && request.auth.uid in resource.data.participants;
       allow create: if signedIn()

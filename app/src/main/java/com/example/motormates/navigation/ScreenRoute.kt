@@ -38,6 +38,18 @@ sealed class ScreenRoute(val route: String) {
             if (reviewId == null) "newReview/$vehicleId" else "newReview/$vehicleId?reviewId=$reviewId"
     }
 
+    /** Configurador de AI Tuning de un vehículo. */
+    object AiTuning : ScreenRoute("aiTuning/{vehicleId}") {
+        const val ARG_VEHICLE_ID = "vehicleId"
+        fun createRoute(vehicleId: String) = "aiTuning/$vehicleId"
+    }
+
+    /** Un Build guardado (imagen modificada + ficha). */
+    object BuildDetail : ScreenRoute("build/{buildId}") {
+        const val ARG_BUILD_ID = "buildId"
+        fun createRoute(buildId: String) = "build/$buildId"
+    }
+
     object Story : ScreenRoute("story/{storyIndex}") {
         const val ARG_STORY_INDEX = "storyIndex"
         fun createRoute(storyIndex: Int) = "story/$storyIndex"

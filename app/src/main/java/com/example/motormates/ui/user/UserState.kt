@@ -1,5 +1,6 @@
 package com.example.motormates.ui.user
 
+import com.example.motormates.data.model.Build
 import com.example.motormates.data.model.GarageCar
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
@@ -23,5 +24,8 @@ data class UserUiState(
     val coverImageUrl: String? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val pendingDeleteReviewId: String? = null
+    val pendingDeleteReviewId: String? = null,
+    /** Mis builds de AI Tuning (publicados y privados). */
+    val builds: List<Build> = emptyList(),
+    val isBuildsLoading: Boolean = false
 )

@@ -14,3 +14,9 @@ internal const val FCM_TOKENS_COLLECTION = "fcmTokens"
 internal const val STORIES_COLLECTION = "stories"
 internal const val CHATS_COLLECTION = "chats"
 internal const val MESSAGES_COLLECTION = "messages"
+
+// AI Tuning
+internal const val PARTS_COLLECTION = "parts"
+internal const val TUNING_PACKAGES_COLLECTION = "tuningPackages"
+internal const val BUILDS_COLLECTION = "builds"
+internal const val AI_USAGE_COLLECTION = "aiUsage"

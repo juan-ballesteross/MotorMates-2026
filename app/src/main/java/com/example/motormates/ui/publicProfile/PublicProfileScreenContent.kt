@@ -21,10 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.example.motormates.data.model.Build
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
 import com.example.motormates.data.model.UserReviewUi
 import com.example.motormates.ui.publicProfile.components.PublicProfileHeader
+import com.example.motormates.ui.user.components.ProfileBuildCard
 import com.example.motormates.ui.user.components.ProfileEmptyTabState
 import com.example.motormates.ui.user.components.ProfileInfoSection
 import com.example.motormates.ui.user.components.ProfileReviewCard
@@ -51,6 +53,8 @@ fun PublicProfileScreenContent(
     onReviewClick: (String) -> Unit = {},
     onFollowersClick: () -> Unit = {},
     onFollowingClick: () -> Unit = {},
+    builds: List<Build> = emptyList(),
+    onBuildClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -93,6 +97,16 @@ fun PublicProfileScreenContent(
             ProfileTab.ACTIVITY, ProfileTab.GARAGE -> {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     ProfileEmptyTabState()
+                }
+            }
+            // Solo los builds que este usuario decidió publicar.
+            ProfileTab.BUILDS -> if (builds.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    ProfileEmptyTabState()
+                }
+            } else {
+                gridItems(builds, key = { it.id }) { build ->
+                    ProfileBuildCard(build = build, onClick = onBuildClick)
                 }
             }
             // Las reseñas que ESTE usuario ha realizado.

@@ -13,6 +13,10 @@ class MotorMatesApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // App Check antes de cualquier llamada a Firebase: protege la cuota
+        // de Gemini (AI Tuning). Mientras no se active "enforcement" en la
+        // consola, no bloquea nada; solo adjunta el token a las peticiones.
+        AppCheckSetup.install(this)
         // En debug la app habla con el Firebase Local Emulator Suite
         // (firebase emulators:start) en vez del proyecto real. Se hace aquí
         // porque useEmulator() solo vale si se llama antes de la primera

@@ -1,0 +1,283 @@
+{
+  "version": 1,
+  "_nota": "Catálogo de AI Tuning. Es la ÚNICA fuente: la app lo usa como respaldo cuando la colección 'parts' de Firestore está vacía, y seed/seed.js lo sube a Firestore. Los precios y deltas de rendimiento son ESTIMADOS de referencia (priceSource = 'estimado'): reemplácenlos por datos reales de tiendas colombianas (con sourceUrl y priceCheckedAt) antes de la sustentación. compatibleCategories vacío = compatible con todas las categorías. visible = false significa que la pieza no se ve por fuera (no se pide a la AI que la dibuje, pero sí cuenta en precio y rendimiento).",
+  "parts": [
+    {
+      "id": "color_gris_nardo", "name": "Wrap gris Nardo satinado", "brand": "Vinilo cast premium (3M / Avery)",
+      "category": "COLOR", "colorHex": "#7E8285", "finish": "Satinado",
+      "priceMinCop": 5500000, "priceMaxCop": 9500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": [], "visible": true,
+      "visualPrompt": "a full-body satin Nardo Grey vinyl wrap (flat medium grey, color #7E8285) covering every painted body panel",
+      "perfSource": "No cambia el rendimiento"
+    },
+    {
+      "id": "color_verde_britanico", "name": "Verde Británico brillante", "brand": "Vinilo cast premium (3M / Avery)",
+      "category": "COLOR", "colorHex": "#1F4D36", "finish": "Brillante",
+      "priceMinCop": 5500000, "priceMaxCop": 9500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": [], "visible": true,
+      "visualPrompt": "a full-body gloss British Racing Green wrap (deep dark green, color #1F4D36) covering every painted body panel",
+      "perfSource": "No cambia el rendimiento"
+    },
+    {
+      "id": "color_negro_mate", "name": "Negro mate", "brand": "Vinilo cast premium (3M / Avery)",
+      "category": "COLOR", "colorHex": "#1B1B1B", "finish": "Mate",
+      "priceMinCop": 5500000, "priceMaxCop": 9500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": [], "visible": true,
+      "visualPrompt": "a full-body matte black vinyl wrap (no gloss, color #1B1B1B) covering every painted body panel",
+      "perfSource": "No cambia el rendimiento"
+    },
+    {
+      "id": "color_azul_rally", "name": "Azul Rally brillante", "brand": "Vinilo cast premium (3M / Avery)",
+      "category": "COLOR", "colorHex": "#1E4DB7", "finish": "Brillante",
+      "priceMinCop": 5500000, "priceMaxCop": 9500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": [], "visible": true,
+      "visualPrompt": "a full-body gloss rally blue wrap (vivid blue, color #1E4DB7) covering every painted body panel",
+      "perfSource": "No cambia el rendimiento"
+    },
+    {
+      "id": "color_rojo_racing", "name": "Rojo Racing brillante", "brand": "Pintura bicapa",
+      "category": "COLOR", "colorHex": "#C0141B", "finish": "Brillante",
+      "priceMinCop": 9000000, "priceMaxCop": 18000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": [], "visible": true,
+      "visualPrompt": "a full repaint in gloss racing red (color #C0141B) on every painted body panel",
+      "perfSource": "No cambia el rendimiento"
+    },
+    {
+      "id": "color_blanco_perla", "name": "Blanco perla", "brand": "Pintura tricapa",
+      "category": "COLOR", "colorHex": "#F2F0EB", "finish": "Brillante",
+      "priceMinCop": 10000000, "priceMaxCop": 20000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": [], "visible": true,
+      "visualPrompt": "a full repaint in pearl white with a subtle pearlescent sheen (color #F2F0EB) on every painted body panel",
+      "perfSource": "No cambia el rendimiento"
+    },
+    {
+      "id": "color_naranja_lava", "name": "Naranja Lava brillante", "brand": "Vinilo cast premium (3M / Avery)",
+      "category": "COLOR", "colorHex": "#E8590C", "finish": "Brillante",
+      "priceMinCop": 5500000, "priceMaxCop": 9500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": [], "visible": true,
+      "visualPrompt": "a full-body gloss lava orange wrap (bright orange, color #E8590C) covering every painted body panel",
+      "perfSource": "No cambia el rendimiento"
+    },
+    {
+      "id": "color_cromo_plata", "name": "Cromo plata", "brand": "Vinilo cromado",
+      "category": "COLOR", "colorHex": "#C7CCD1", "finish": "Cromado",
+      "priceMinCop": 9000000, "priceMaxCop": 15000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": [], "visible": true,
+      "visualPrompt": "a full-body mirror-finish silver chrome wrap reflecting the surroundings, covering every painted body panel",
+      "perfSource": "No cambia el rendimiento"
+    },
+
+    {
+      "id": "rin_18_5radios_negro", "name": "Rin 18\" 5 radios dobles negro mate", "brand": "Aleación flow-formed (tipo Enkei / OZ)",
+      "category": "RINES",
+      "priceMinCop": 4500000, "priceMaxCop": 7500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": -6, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo", "Eléctrico", "Clásico"], "visible": true,
+      "visualPrompt": "18-inch matte black alloy wheels with a twin 5-spoke design, replacing all visible wheels while keeping the original tires",
+      "perfSource": "Peso: juego de 4 frente a rines de serie (estimado)"
+    },
+    {
+      "id": "rin_19_mesh_bronce", "name": "Rin 19\" multirradio bronce", "brand": "Aleación forjada (tipo BBS)",
+      "category": "RINES",
+      "priceMinCop": 8000000, "priceMaxCop": 16000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": -8, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo", "SUV", "Eléctrico"], "visible": true,
+      "visualPrompt": "19-inch satin bronze forged mesh wheels with a cross-spoke pattern, replacing all visible wheels",
+      "perfSource": "Peso: juego de 4 forjados frente a fundidos de serie (estimado)"
+    },
+    {
+      "id": "rin_17_offroad_negro", "name": "Rin 17\" off-road negro con llanta AT", "brand": "Aleación off-road (tipo Method / Fuel)",
+      "category": "RINES",
+      "priceMinCop": 6000000, "priceMaxCop": 11000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 20, "heightDeltaMm": 20,
+      "compatibleCategories": ["SUV", "Pickup"], "visible": true,
+      "visualPrompt": "17-inch matte black off-road wheels with a faux beadlock ring and chunky all-terrain tires with aggressive tread",
+      "perfSource": "Incluye llantas todo terreno más grandes y pesadas (estimado)"
+    },
+    {
+      "id": "rin_15_clasico_cromo", "name": "Rin 15\" clásico cromado", "brand": "Rin estilo vintage (tipo Cragar)",
+      "category": "RINES",
+      "priceMinCop": 3000000, "priceMaxCop": 5500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 2, "heightDeltaMm": 0,
+      "compatibleCategories": ["Clásico"], "visible": true,
+      "visualPrompt": "15-inch vintage polished chrome wheels with a classic slotted design and tires with a thin white sidewall stripe",
+      "perfSource": "Peso aproximado frente a rin de acero de serie (estimado)"
+    },
+
+    {
+      "id": "aero_lip_spoiler", "name": "Lip spoiler en fibra de carbono", "brand": "Fibra de carbono",
+      "category": "AERO",
+      "priceMinCop": 800000, "priceMaxCop": 1800000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 1, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo", "Eléctrico", "Clásico"], "visible": true,
+      "visualPrompt": "a small carbon fiber lip spoiler on the trailing edge of the trunk lid, with visible carbon weave",
+      "perfSource": "Efecto aerodinámico despreciable en ciudad"
+    },
+    {
+      "id": "aero_ala_gt", "name": "Ala GT en fibra de carbono", "brand": "Fibra de carbono con soportes de aluminio",
+      "category": "AERO",
+      "priceMinCop": 2500000, "priceMaxCop": 6000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 5, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo"], "visible": true,
+      "visualPrompt": "a large carbon fiber GT racing wing mounted on the trunk with swan-neck aluminum uprights",
+      "perfSource": "Carga aerodinámica útil solo a alta velocidad (estimado)"
+    },
+    {
+      "id": "aero_kit_splitter_difusor", "name": "Splitter delantero + difusor trasero", "brand": "Fibra de carbono / ABS",
+      "category": "AERO",
+      "priceMinCop": 1800000, "priceMaxCop": 4000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 3, "heightDeltaMm": -10,
+      "compatibleCategories": ["Deportivo", "Eléctrico"], "visible": true,
+      "visualPrompt": "a carbon fiber front splitter under the front bumper and a carbon fiber rear diffuser with vertical fins under the rear bumper",
+      "perfSource": "Reduce el despeje unos 10 mm en la punta (estimado)"
+    },
+
+    {
+      "id": "susp_muelles_30", "name": "Muelles cortos -30 mm", "brand": "Tipo Eibach / H&R",
+      "category": "SUSPENSION",
+      "priceMinCop": 1500000, "priceMaxCop": 3000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": -1, "heightDeltaMm": -30,
+      "compatibleCategories": ["Deportivo", "Eléctrico", "Clásico"], "visible": true,
+      "visualPrompt": "lowering springs that drop the ride height by about 30 mm, reducing the gap between tires and fenders",
+      "perfSource": "Altura declarada por fabricantes de muelles cortos"
+    },
+    {
+      "id": "susp_coilovers", "name": "Coilovers regulables -50 mm", "brand": "Tipo KW / Bilstein",
+      "category": "SUSPENSION",
+      "priceMinCop": 6000000, "priceMaxCop": 14000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": -2, "heightDeltaMm": -50,
+      "compatibleCategories": ["Deportivo", "Eléctrico", "Clásico"], "visible": true,
+      "visualPrompt": "adjustable coilover suspension lowering the car by about 50 mm, with tires tucked close to the fender lips",
+      "perfSource": "Altura regulable; se muestra el ajuste más bajo típico"
+    },
+    {
+      "id": "susp_lift_2", "name": "Kit de levante 2\" off-road", "brand": "Tipo Old Man Emu / Rough Country",
+      "category": "SUSPENSION",
+      "priceMinCop": 5000000, "priceMaxCop": 11000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 15, "heightDeltaMm": 50,
+      "compatibleCategories": ["SUV", "Pickup"], "visible": true,
+      "visualPrompt": "a 2-inch suspension lift kit raising the body about 50 mm, with more visible suspension components and larger wheel gaps",
+      "perfSource": "Levante declarado por fabricantes de kits de 2\""
+    },
+
+    {
+      "id": "escape_catback_inox", "name": "Escape cat-back en acero inoxidable", "brand": "Tipo Borla / MagnaFlow",
+      "category": "ESCAPE",
+      "priceMinCop": 5000000, "priceMaxCop": 12000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 4, "torqueDeltaPct": 3, "weightDeltaKg": -8, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo", "SUV", "Clásico", "Pickup"], "visible": true,
+      "visualPrompt": "a stainless steel cat-back exhaust with dual polished round tips visible under the rear bumper",
+      "perfSource": "Ganancia típica declarada por fabricantes de cat-back (3-5 %)"
+    },
+    {
+      "id": "escape_titanio_valvulado", "name": "Escape de titanio valvulado", "brand": "Tipo Akrapovič",
+      "category": "ESCAPE",
+      "priceMinCop": 15000000, "priceMaxCop": 35000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 5, "torqueDeltaPct": 4, "weightDeltaKg": -12, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo"], "visible": true,
+      "visualPrompt": "a titanium valved exhaust with quad tips showing a blue-purple heat-tinted titanium finish under the rear bumper",
+      "perfSource": "Ganancia típica declarada para escapes de titanio (4-6 %)"
+    },
+    {
+      "id": "escape_silenciador_deportivo", "name": "Silenciador deportivo con puntas dobles", "brand": "Silenciador de flujo recto",
+      "category": "ESCAPE",
+      "priceMinCop": 1200000, "priceMaxCop": 2800000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 2, "torqueDeltaPct": 1, "weightDeltaKg": -3, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo", "SUV", "Clásico", "Pickup"], "visible": true,
+      "visualPrompt": "a sport muffler with dual black ceramic-coated exhaust tips under the rear bumper",
+      "perfSource": "Ganancia típica de un silenciador de flujo recto (1-2 %)"
+    },
+
+    {
+      "id": "admision_filtro_alto_flujo", "name": "Filtro de aire de alto flujo", "brand": "Tipo K&N",
+      "category": "ADMISION",
+      "priceMinCop": 300000, "priceMaxCop": 700000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 1.5, "torqueDeltaPct": 1, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo", "SUV", "Clásico", "Pickup"], "visible": false,
+      "visualPrompt": "",
+      "perfSource": "Ganancia típica declarada para filtros de reemplazo (1-2 %)"
+    },
+    {
+      "id": "admision_aire_frio", "name": "Admisión de aire frío (cold air intake)", "brand": "Tipo AEM / Injen",
+      "category": "ADMISION",
+      "priceMinCop": 1500000, "priceMaxCop": 3500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 3, "torqueDeltaPct": 2, "weightDeltaKg": -1, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo", "SUV", "Clásico", "Pickup"], "visible": false,
+      "visualPrompt": "",
+      "perfSource": "Ganancia típica declarada para admisiones de aire frío (2-4 %)"
+    },
+
+    {
+      "id": "ecu_stage1", "name": "Reprogramación Stage 1", "brand": "Software de ECU (tipo APR / Cobb)",
+      "category": "ECU",
+      "priceMinCop": 2500000, "priceMaxCop": 5000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 15, "torqueDeltaPct": 20, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo", "SUV", "Pickup"], "visible": false,
+      "visualPrompt": "",
+      "perfSource": "Valor típico en motores turbo; en atmosféricos la ganancia es mucho menor"
+    },
+    {
+      "id": "ecu_stage2", "name": "Reprogramación Stage 2", "brand": "Software de ECU + soporte de hardware",
+      "category": "ECU",
+      "priceMinCop": 5000000, "priceMaxCop": 9000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 25, "torqueDeltaPct": 30, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": ["Deportivo", "Pickup"], "visible": false,
+      "visualPrompt": "",
+      "perfSource": "Valor típico en motores turbo; requiere escape y admisión mejorados"
+    },
+
+    {
+      "id": "luces_faros_led", "name": "Faros LED con luz diurna (DRL)", "brand": "Faros LED homologados",
+      "category": "LUCES",
+      "priceMinCop": 2000000, "priceMaxCop": 5000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": [], "visible": true,
+      "visualPrompt": "modern full-LED headlights with a sharp white daytime running light signature, switched on",
+      "perfSource": "No cambia el rendimiento"
+    },
+    {
+      "id": "luces_barra_led", "name": "Barra LED off-road en el techo", "brand": "Barra LED 40\"",
+      "category": "LUCES",
+      "priceMinCop": 800000, "priceMaxCop": 2200000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 5, "heightDeltaMm": 0,
+      "compatibleCategories": ["SUV", "Pickup"], "visible": true,
+      "visualPrompt": "a black 40-inch off-road LED light bar mounted on the front edge of the roof",
+      "perfSource": "Peso aproximado de barra y soportes"
+    },
+    {
+      "id": "luces_polarizado_35", "name": "Polarizado 35 %", "brand": "Película de seguridad",
+      "category": "LUCES",
+      "priceMinCop": 400000, "priceMaxCop": 1000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
+      "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
+      "compatibleCategories": [], "visible": true,
+      "visualPrompt": "35 percent dark window tint on all side and rear windows (windshield untouched)",
+      "perfSource": "No cambia el rendimiento"
+    }
+  ],
+  "packages": [
+    {
+      "id": "street", "name": "Street", "description": "Rines, más bajo y sonido deportivo para el día a día",
+      "partIds": ["rin_18_5radios_negro", "rin_19_mesh_bronce", "susp_muelles_30", "escape_silenciador_deportivo", "luces_polarizado_35"]
+    },
+    {
+      "id": "track", "name": "Track", "description": "Aero, suspensión de pista y más potencia",
+      "partIds": ["aero_ala_gt", "aero_kit_splitter_difusor", "susp_coilovers", "escape_catback_inox", "admision_aire_frio", "ecu_stage1", "rin_18_5radios_negro"]
+    },
+    {
+      "id": "show", "name": "Show", "description": "Color llamativo, rines premium y luces para lucirlo",
+      "partIds": ["color_negro_mate", "rin_19_mesh_bronce", "rin_15_clasico_cromo", "aero_lip_spoiler", "luces_faros_led"]
+    },
+    {
+      "id": "offroad", "name": "Off-road", "description": "Levantado, llantas todo terreno y luces para la trocha",
+      "partIds": ["rin_17_offroad_negro", "susp_lift_2", "luces_barra_led", "escape_catback_inox"]
+    }
+  ]
+}

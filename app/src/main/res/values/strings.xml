@@ -214,4 +214,9 @@
     <string name="notification_channel_id">motormates_general</string>
     <string name="notification_channel_name">Actividad de MotorMates</string>
     <string name="notification_channel_description">Avisos cuando alguien te sigue o interactúa con tus reseñas</string>
+
+    <!-- AI Tuning -->
+    <string name="car_detail_ai_tuning_owner">Modificar con AI</string>
+    <string name="car_detail_ai_tuning_visitor">Imagínalo modificado</string>
+    <string name="user_tab_builds">Builds</string>
 </resources>
