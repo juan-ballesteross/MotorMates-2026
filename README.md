@@ -17,6 +17,7 @@ Jose Alejandro Villarroel Marcano
 - **Autenticación**: pantallas de inicio de sesión y registro (`LoginScreen`, `RegisterScreen`).
 - **Feed**: timeline de "stories" y reseñas de autos (`FeedScreen`) con acciones de like/comentario.
 - **Búsqueda**: exploración de autos por categorías con resultados en grilla (`SearchScreen`).
+- **Onboarding y feed personalizado**: al entrar se pregunta qué carros, marcas y ciudad le gustan al usuario (y su carro, con autocompletado de la API vPIC de la NHTSA). Con eso se ordena Explorar ("Para ti"), Siguiendo nunca queda vacía (personas sugeridas y reseñas destacadas) y el mapa arranca en su ciudad. Ver [docs/onboarding.md](docs/onboarding.md).
 - **Mapa de reseñas recientes**: pestaña "Mapa" del feed con un marcador por cada reseña
   publicada en las últimas 24 horas (`ReviewsMapScreen`). Al tocar un marcador se muestra el
   autor, el vehículo, la calificación y el comentario. Requiere configurar una API key de

@@ -25,6 +25,11 @@ import com.example.motormates.data.model.FeedReviewUi
 import com.example.motormates.data.model.FeedTab
 import com.example.motormates.data.model.FeedVehicleUi
 import com.example.motormates.data.model.StoryUser
+import com.example.motormates.data.util.SuggestedUser
+import com.example.motormates.ui.feed.components.FeedSectionHeader
+import com.example.motormates.ui.feed.components.FollowSuggestionsSection
+import com.example.motormates.ui.feed.components.ForYouCarousel
+import com.example.motormates.ui.feed.components.PersonalizeFeedCard
 import com.example.motormates.ui.feed.components.FollowingReviewCard
 import com.example.motormates.ui.feed.components.StoriesRow
 import com.example.motormates.ui.feed.components.VehicleFeedCard
@@ -49,7 +54,14 @@ fun FeedScreenContent(
     onRetryClick: () -> Unit = {},
     onFollowingRetryClick: () -> Unit = {},
     onAuthorClick: (String) -> Unit = {},
-    onLikeClick: (String) -> Unit = {}
+    onLikeClick: (String) -> Unit = {},
+    forYou: List<FeedVehicleUi> = emptyList(),
+    hasPreferences: Boolean = true,
+    suggestions: List<SuggestedUser> = emptyList(),
+    featuredReviews: List<FeedReviewUi> = emptyList(),
+    showFollowingDiscovery: Boolean = false,
+    onPersonalizeClick: () -> Unit = {},
+    onFollowSuggested: (String) -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -83,6 +95,15 @@ fun FeedScreenContent(
                     }
                 }
 
+                // Quien saltó el onboarding (o no marcó nada) recibe la invitación.
+                if (!hasPreferences && !isLoading) {
+                    item(key = "personalize") { PersonalizeFeedCard(onClick = onPersonalizeClick) }
+                }
+                if (forYou.isNotEmpty()) {
+                    item(key = "forYou") { ForYouCarousel(vehicles = forYou, onVehicleClick = onVehicleClick) }
+                    item(key = "allVehiclesHeader") { FeedSectionHeader(title = "Todos los vehículos") }
+                }
+
                 // Lo que viene del backend tiene cuatro estados: cargando,
                 // error, vacío o lista con datos.
                 feedSection(
@@ -110,7 +131,9 @@ fun FeedScreenContent(
             FeedTab.SIGUIENDO -> feedSection(
                 isLoading = isFollowingLoading,
                 errorMessage = followingErrorMessage,
-                isEmpty = followingReviews.isEmpty(),
+                // Con sugerencias o destacadas nunca queda en blanco.
+                isEmpty = followingReviews.isEmpty() &&
+                    (!showFollowingDiscovery || (suggestions.isEmpty() && featuredReviews.isEmpty())),
                 emptyMessage = "Todavía no sigues a nadie, o quienes sigues no han publicado reseñas",
                 onRetryClick = onFollowingRetryClick
             ) {
@@ -121,6 +144,35 @@ fun FeedScreenContent(
                         onVehicleClick = onVehicleClick,
                         onLikeClick = onLikeClick
                     )
+                }
+                // Siguiendo con poco: a quién seguir y reseñas de sus gustos.
+                if (showFollowingDiscovery) {
+                    if (suggestions.isNotEmpty()) {
+                        item(key = "followSuggestions") {
+                            FollowSuggestionsSection(
+                                suggestions = suggestions,
+                                onFollow = onFollowSuggested,
+                                onUserClick = onAuthorClick
+                            )
+                        }
+                    }
+                    if (featuredReviews.isNotEmpty()) {
+                        item(key = "featuredHeader") {
+                            FeedSectionHeader(
+                                title = "Destacadas para ti",
+                                subtitle = "Reseñas de carros que te gustan",
+                                modifier = Modifier.testTag("feedFeatured")
+                            )
+                        }
+                        items(featuredReviews, key = { "featured_${it.id}" }) { review ->
+                            FollowingReviewCard(
+                                review = review,
+                                onAuthorClick = onAuthorClick,
+                                onVehicleClick = onVehicleClick,
+                                onLikeClick = onLikeClick
+                            )
+                        }
+                    }
                 }
             }
         }

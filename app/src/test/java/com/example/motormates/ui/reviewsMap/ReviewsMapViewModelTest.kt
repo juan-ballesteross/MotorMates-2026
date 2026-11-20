@@ -1,5 +1,7 @@
 package com.example.motormates.ui.reviewsMap
 
+import com.example.motormates.data.repository.PreferencesRepository
+import com.example.motormates.data.model.UserPreferences
 import com.example.motormates.MainDispatcherRule
 import com.example.motormates.data.model.Event
 import com.example.motormates.data.model.EventOrganizer
@@ -56,6 +58,7 @@ class ReviewsMapViewModelTest {
     private lateinit var stationRepository: StationRepository
     private lateinit var deviceLocationDataSource: DeviceLocationDataSource
     private lateinit var timeSource: TimeSource
+    private lateinit var preferencesRepository: PreferencesRepository
     private lateinit var viewModel: ReviewsMapViewModel
 
     private val bogota = ReviewLocation(lat = 4.6280, lng = -74.0643)
@@ -76,6 +79,9 @@ class ReviewsMapViewModelTest {
         stationRepository = mockk()
         deviceLocationDataSource = mockk()
         timeSource = mockk()
+        // Sin preferencias: el mapa se comporta como antes del onboarding.
+        preferencesRepository = mockk()
+        coEvery { preferencesRepository.getMine() } returns Result.success(UserPreferences())
         every { timeSource.nowMillis() } answers { now }
         every { timeSource.ticks(any()) } returns ticks
         // Por defecto el catálogo está vacío: las pruebas de fotos lo cambian.
@@ -98,7 +104,8 @@ class ReviewsMapViewModelTest {
         authRepository,
         stationRepository,
         deviceLocationDataSource,
-        timeSource
+        timeSource,
+        preferencesRepository
     )
 
     private fun viewModelWith(vararg reviews: Review): ReviewsMapViewModel {
@@ -274,6 +281,58 @@ class ReviewsMapViewModelTest {
         val state = vm.uiState.value
         assertThat(state.markers.single().vehicleImageUrl).isNull()
         assertThat(state.errorMessage).isNull()
+    }
+
+    // ---------- Preferencias del onboarding ----------
+
+    @Test
+    fun `la ciudad del onboarding queda como encuadre inicial`() = runTest {
+        coEvery { preferencesRepository.getMine() } returns
+            Result.success(UserPreferences(city = "Medellín", categories = listOf("SUV")))
+        val vm = viewModelWith(review(id = "r1", location = bogota))
+
+        advanceUntilIdle()
+
+        val state = vm.uiState.value
+        assertThat(state.homeCityResolved).isTrue()
+        assertThat(state.homeCity?.lat).isWithin(0.01).of(6.2442)
+        assertThat(state.myCategories).containsExactly("SUV")
+    }
+
+    @Test
+    fun `sin preferencias se resuelve sin ciudad y sin filtro de categorias`() = runTest {
+        val vm = viewModelWith(review(id = "r1", location = bogota))
+
+        advanceUntilIdle()
+
+        assertThat(vm.uiState.value.homeCityResolved).isTrue()
+        assertThat(vm.uiState.value.homeCity).isNull()
+        assertThat(vm.uiState.value.myCategories).isEmpty()
+    }
+
+    @Test
+    fun `el chip mis categorias deja solo las resenias de esas categorias`() = runTest {
+        coEvery { preferencesRepository.getMine() } returns
+            Result.success(UserPreferences(categories = listOf("SUV")))
+        coEvery { vehicleRepository.getVehicles() } returns Result.success(
+            listOf(
+                vehicle(id = "1", imageUrl = null).copy(category = "Deportivo"),
+                vehicle(id = "2", imageUrl = null).copy(category = "SUV")
+            )
+        )
+        val vm = viewModelWith(
+            review(id = "deportivo", location = bogota),
+            review(id = "suv", location = bogota).copy(vehicleId = "2")
+        )
+        vm.start()
+        advanceUntilIdle()
+        assertThat(vm.uiState.value.markers.map { it.id }).containsExactly("deportivo", "suv")
+
+        vm.toggleOnlyMyCategories()
+        assertThat(vm.uiState.value.markers.map { it.id }).containsExactly("suv")
+
+        vm.toggleOnlyMyCategories()
+        assertThat(vm.uiState.value.markers).hasSize(2)
     }
 
     // ---------- Reloj ----------

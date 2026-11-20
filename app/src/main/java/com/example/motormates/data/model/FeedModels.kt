@@ -37,7 +37,9 @@ data class FeedVehicleUi(
     val imageUrl: String?,
     val ownerId: String? = null,
     val ownerName: String? = null,
-    val ownerAvatarUrl: String? = null
+    val ownerAvatarUrl: String? = null,
+    /** Por qué aparece arriba ("Porque te gustan los SUV"); null si no hay motivo. */
+    val reason: String? = null
 )
 
 /**

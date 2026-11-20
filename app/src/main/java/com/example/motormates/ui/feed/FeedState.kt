@@ -4,6 +4,7 @@ import com.example.motormates.data.model.FeedReviewUi
 import com.example.motormates.data.model.FeedTab
 import com.example.motormates.data.model.FeedVehicleUi
 import com.example.motormates.data.model.StoryUser
+import com.example.motormates.data.util.SuggestedUser
 
 /**
  * Las dos pestañas guardan su estado por separado (cargando y error
@@ -21,4 +22,23 @@ data class FeedUiState(
     val followingErrorMessage: String? = null,
     val isPostingStory: Boolean = false,
     val storyErrorMessage: String? = null,
-)
+
+    // ---- Personalización (onboarding) ----
+    /** Carrusel "Para ti". Vacío si el usuario no ha dicho qué le gusta. */
+    val forYou: List<FeedVehicleUi> = emptyList(),
+    /** false: se le ofrece "Personaliza tu feed" en Explorar. */
+    val hasPreferences: Boolean = true,
+    /** A quién seguir, para que Siguiendo no arranque vacía. */
+    val suggestions: List<SuggestedUser> = emptyList(),
+    /** Reseñas de los gustos del usuario para completar Siguiendo cuando es corta. */
+    val featuredReviews: List<FeedReviewUi> = emptyList(),
+) {
+    /** Siguiendo tiene poco: se completa con sugerencias y reseñas destacadas. */
+    val showFollowingDiscovery: Boolean
+        get() = !isFollowingLoading && followingErrorMessage == null &&
+            followingReviews.size < FOLLOWING_DISCOVERY_THRESHOLD
+
+    companion object {
+        const val FOLLOWING_DISCOVERY_THRESHOLD = 5
+    }
+}

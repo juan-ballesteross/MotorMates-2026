@@ -36,6 +36,8 @@ fun FeedScreen(
     /** Los dos siguientes solo los usa la pestaña del mapa. */
     onEventDetailClick: (String) -> Unit = {},
     onCreateEventClick: () -> Unit = {},
+    /** "Personaliza tu feed": abre el onboarding para editar gustos. */
+    onPersonalizeClick: () -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -124,7 +126,14 @@ fun FeedScreen(
             onRetryClick = viewModel::loadVehicles,
             onFollowingRetryClick = viewModel::retryFollowingReviews,
             onAuthorClick = onAuthorClick,
-            onLikeClick = viewModel::toggleLike
+            onLikeClick = viewModel::toggleLike,
+            forYou = uiState.forYou,
+            hasPreferences = uiState.hasPreferences,
+            suggestions = uiState.suggestions,
+            featuredReviews = uiState.featuredReviews,
+            showFollowingDiscovery = uiState.showFollowingDiscovery,
+            onPersonalizeClick = onPersonalizeClick,
+            onFollowSuggested = viewModel::followSuggested
         )
     }
 }

@@ -107,6 +107,15 @@ fun VehicleFeedCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp
             )
+            vehicle.reason?.let { reason ->
+                Text(
+                    text = reason,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = Spacing.xxs)
+                )
+            }
         }
     }
 }

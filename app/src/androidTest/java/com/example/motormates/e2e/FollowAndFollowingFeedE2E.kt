@@ -65,7 +65,7 @@ class FollowAndFollowingFeedE2E {
         composeRule.onNodeWithTag("loginEmail").performTextInput(E2ESeed.MEMBER_EMAIL)
         composeRule.onNodeWithTag("loginPassword").performTextInput(FirebaseEmulator.PASSWORD)
         composeRule.onNodeWithTag("loginSubmit").performClick()
-        composeRule.waitForTag("feedScreen")
+        composeRule.enterFeedSkippingOnboarding()
 
         // --- Al perfil del otro usuario, desde el autor de una reseña ---
         val tituloPublicacion = "${E2ESeed.BRAND} ${E2ESeed.MODEL}"

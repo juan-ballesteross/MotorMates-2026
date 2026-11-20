@@ -11,7 +11,8 @@ import com.example.motormates.data.dto.VehicleFirestoreDto
  *
  * Los ids son fijos a propósito: si el seed se ejecuta dos veces, set()
  * sobrescribe los mismos documentos en vez de duplicarlos. Los vehículos
- * usan "1".."8", los mismos ids que el buscador (SearchMocks).
+ * usan "1".."29"; los ocho primeros son los mismos ids del buscador
+ * (SearchMocks).
  */
 internal object SeedData {
 
@@ -74,6 +75,133 @@ internal object SeedData {
             id = "8", brand = "Ford", model = "Ranger", year = 2022, category = "Pickup",
             imageUrl = "https://imagenes.portafolio.co/files/image_600_455/uploads/2021/01/29/6014dcacba87b.jpeg",
             potencia = "210 hp", aceleracion = "10.3 s", velocidadMaxima = "180 km/h", traccion = "4x4",
+            ownerId = SEED_USER_IVAN
+        ),
+        // 9-29: los mismos que agrega seed/seed.js para el feed personalizado.
+        VehicleFirestoreDto(
+            id = "9", brand = "Mazda", model = "MX-5", year = 2023, category = "Deportivo",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Mazda_Roadster_%28MX-5%29_by_Negawa_Bridge_%28cropped%29.jpg/1280px-Mazda_Roadster_%28MX-5%29_by_Negawa_Bridge_%28cropped%29.jpg",
+            potencia = "181 hp", aceleracion = "6.5 s", velocidadMaxima = "219 km/h", traccion = "RWD",
+            ownerId = SEED_USER_RODRIGO
+        ),
+        VehicleFirestoreDto(
+            id = "10", brand = "BMW", model = "M2", year = 2024, category = "Deportivo",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/BMW_G87_M2_1X7A1838.jpg/1280px-BMW_G87_M2_1X7A1838.jpg",
+            potencia = "453 hp", aceleracion = "4.1 s", velocidadMaxima = "250 km/h", traccion = "RWD",
+            ownerId = SEED_USER_RODRIGO
+        ),
+        VehicleFirestoreDto(
+            id = "11", brand = "Toyota", model = "GR86", year = 2023, category = "Deportivo",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/2022_Toyota_GR86_Premium_in_Halo%2C_Front_Right%2C_04-10-2022.jpg/1280px-2022_Toyota_GR86_Premium_in_Halo%2C_Front_Right%2C_04-10-2022.jpg",
+            potencia = "228 hp", aceleracion = "6.3 s", velocidadMaxima = "226 km/h", traccion = "RWD",
+            ownerId = SEED_USER_RODRIGO
+        ),
+        VehicleFirestoreDto(
+            id = "12", brand = "Nissan", model = "Z", year = 2023, category = "Deportivo",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Nissan_FAIRLADY_Z_%28Z34%29_Version_ST%2C_2022%2C_left-front.jpg/1280px-Nissan_FAIRLADY_Z_%28Z34%29_Version_ST%2C_2022%2C_left-front.jpg",
+            potencia = "400 hp", aceleracion = "4.5 s", velocidadMaxima = "250 km/h", traccion = "RWD",
+            ownerId = SEED_USER_RODRIGO
+        ),
+        VehicleFirestoreDto(
+            id = "13", brand = "Mazda", model = "CX-5", year = 2024, category = "SUV",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/2024_Mazda_CX-5_2.5_S_Select_in_Platinum_Quartz_Metallic%2C_front_right.jpg/1280px-2024_Mazda_CX-5_2.5_S_Select_in_Platinum_Quartz_Metallic%2C_front_right.jpg",
+            potencia = "187 hp", aceleracion = "9.3 s", velocidadMaxima = "200 km/h", traccion = "AWD",
+            ownerId = SEED_USER_IVAN
+        ),
+        VehicleFirestoreDto(
+            id = "14", brand = "Renault", model = "Duster", year = 2024, category = "SUV",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Dacia_Duster_TCe_130_Extreme_%28III%29_%E2%80%93_f_13102024.jpg/1280px-Dacia_Duster_TCe_130_Extreme_%28III%29_%E2%80%93_f_13102024.jpg",
+            potencia = "130 hp", aceleracion = "11.2 s", velocidadMaxima = "185 km/h", traccion = "FWD",
+            ownerId = SEED_USER_IVAN
+        ),
+        VehicleFirestoreDto(
+            id = "15", brand = "Kia", model = "Sportage", year = 2024, category = "SUV",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/2025_Kia_Sportage_S_front_only.jpg/1280px-2025_Kia_Sportage_S_front_only.jpg",
+            potencia = "187 hp", aceleracion = "9.5 s", velocidadMaxima = "190 km/h", traccion = "AWD",
+            ownerId = SEED_USER_IVAN
+        ),
+        VehicleFirestoreDto(
+            id = "16", brand = "Chevrolet", model = "Tracker", year = 2024, category = "SUV",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/2024_Chevrolet_Trax_2RS%2C_front_left%2C_12-10-2023.jpg/1280px-2024_Chevrolet_Trax_2RS%2C_front_left%2C_12-10-2023.jpg",
+            potencia = "137 hp", aceleracion = "10.4 s", velocidadMaxima = "180 km/h", traccion = "FWD",
+            ownerId = SEED_USER_IVAN
+        ),
+        VehicleFirestoreDto(
+            id = "17", brand = "Renault", model = "4", year = 1985, category = "Clásico",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/1984_Renault_4_GTL%2C_front_left_%28Germany%29.jpg/1280px-1984_Renault_4_GTL%2C_front_left_%28Germany%29.jpg",
+            potencia = "34 hp", aceleracion = "23.0 s", velocidadMaxima = "120 km/h", traccion = "FWD",
+            ownerId = SEED_USER_SOFIA
+        ),
+        VehicleFirestoreDto(
+            id = "18", brand = "Chevrolet", model = "Bel Air '57", year = 1957, category = "Clásico",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/2/2a/57_Chevy_BelAir.jpg",
+            potencia = "220 hp", aceleracion = "9.5 s", velocidadMaxima = "175 km/h", traccion = "RWD",
+            ownerId = SEED_USER_SOFIA
+        ),
+        VehicleFirestoreDto(
+            id = "19", brand = "Mercedes-Benz", model = "280 SL", year = 1969, category = "Clásico",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/4/4e/1969_Mercedes_280_SL_Pagoda.jpg",
+            potencia = "168 hp", aceleracion = "9.3 s", velocidadMaxima = "200 km/h", traccion = "RWD",
+            ownerId = SEED_USER_SOFIA
+        ),
+        VehicleFirestoreDto(
+            id = "20", brand = "Toyota", model = "Land Cruiser FJ40", year = 1982, category = "Clásico",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/1982_Toyota_Land_Cruiser_FJ40_in_Freeborn_Red%2C_front_right.jpg/1280px-1982_Toyota_Land_Cruiser_FJ40_in_Freeborn_Red%2C_front_right.jpg",
+            potencia = "135 hp", aceleracion = "16.0 s", velocidadMaxima = "135 km/h", traccion = "4x4",
+            ownerId = SEED_USER_SOFIA
+        ),
+        VehicleFirestoreDto(
+            id = "21", brand = "BYD", model = "Dolphin", year = 2024, category = "Eléctrico",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/2021_BYD_Dolphin_EV_%28front%29.jpg/1280px-2021_BYD_Dolphin_EV_%28front%29.jpg",
+            potencia = "201 hp", aceleracion = "7.0 s", velocidadMaxima = "160 km/h", traccion = "FWD",
+            ownerId = SEED_USER_SOFIA
+        ),
+        VehicleFirestoreDto(
+            id = "22", brand = "BYD", model = "Seal", year = 2024, category = "Eléctrico",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/2022_BYD_Seal.jpg/1280px-2022_BYD_Seal.jpg",
+            potencia = "308 hp", aceleracion = "5.9 s", velocidadMaxima = "180 km/h", traccion = "RWD",
+            ownerId = SEED_USER_SOFIA
+        ),
+        VehicleFirestoreDto(
+            id = "23", brand = "Hyundai", model = "Ioniq 5", year = 2024, category = "Eléctrico",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Hyundai_Ioniq_5_AWD_Techniq-Paket_%E2%80%93_f_31122024.jpg/1280px-Hyundai_Ioniq_5_AWD_Techniq-Paket_%E2%80%93_f_31122024.jpg",
+            potencia = "320 hp", aceleracion = "5.1 s", velocidadMaxima = "185 km/h", traccion = "AWD",
+            ownerId = SEED_USER_SOFIA
+        ),
+        VehicleFirestoreDto(
+            id = "24", brand = "Kia", model = "EV6", year = 2024, category = "Eléctrico",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/2021_Kia_EV6_GT-Line_S.jpg/1280px-2021_Kia_EV6_GT-Line_S.jpg",
+            potencia = "320 hp", aceleracion = "5.2 s", velocidadMaxima = "185 km/h", traccion = "AWD",
+            ownerId = SEED_USER_SOFIA
+        ),
+        VehicleFirestoreDto(
+            id = "25", brand = "Toyota", model = "Hilux", year = 2024, category = "Pickup",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg/1280px-2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg",
+            potencia = "201 hp", aceleracion = "10.8 s", velocidadMaxima = "175 km/h", traccion = "4x4",
+            ownerId = SEED_USER_IVAN
+        ),
+        VehicleFirestoreDto(
+            id = "26", brand = "Chevrolet", model = "Colorado", year = 2024, category = "Pickup",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/2024_Chevrolet_Colorado_Z71%2C_front_left%2C_09-28-2024.jpg/1280px-2024_Chevrolet_Colorado_Z71%2C_front_left%2C_09-28-2024.jpg",
+            potencia = "310 hp", aceleracion = "7.0 s", velocidadMaxima = "180 km/h", traccion = "4x4",
+            ownerId = SEED_USER_IVAN
+        ),
+        VehicleFirestoreDto(
+            id = "27", brand = "Nissan", model = "Frontier", year = 2023, category = "Pickup",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/1/11/2021_Nissan_Navara_facelift_%28cropped%29.jpg",
+            potencia = "190 hp", aceleracion = "10.5 s", velocidadMaxima = "180 km/h", traccion = "4x4",
+            ownerId = SEED_USER_IVAN
+        ),
+        VehicleFirestoreDto(
+            id = "28", brand = "Ford", model = "F-150", year = 2023, category = "Pickup",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/2018_Ford_F-150_XLT_Crew_Cab%2C_front_11.10.19.jpg/1280px-2018_Ford_F-150_XLT_Crew_Cab%2C_front_11.10.19.jpg",
+            potencia = "400 hp", aceleracion = "6.1 s", velocidadMaxima = "180 km/h", traccion = "4x4",
+            ownerId = SEED_USER_IVAN
+        ),
+        VehicleFirestoreDto(
+            id = "29", brand = "Mitsubishi", model = "L200", year = 2023, category = "Pickup",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Mitsubishi_Triton_LC_2.4_GLS_2WD_Blade_Silver_Metallic_%28cropped%29.jpg/1280px-Mitsubishi_Triton_LC_2.4_GLS_2WD_Blade_Silver_Metallic_%28cropped%29.jpg",
+            potencia = "181 hp", aceleracion = "11.0 s", velocidadMaxima = "175 km/h", traccion = "4x4",
             ownerId = SEED_USER_IVAN
         )
     )

@@ -29,6 +29,7 @@ import com.example.motormates.ui.followlist.FollowListScreen
 import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.ui.login.LoginScreen
 import com.example.motormates.ui.newEvent.NewEventScreen
+import com.example.motormates.ui.onboarding.OnboardingScreen
 import com.example.motormates.ui.pickLocation.PickLocationScreen
 import com.example.motormates.ui.post.PostScreen
 import com.example.motormates.ui.publicProfile.PublicProfileScreen
@@ -64,8 +65,10 @@ fun AppNavigation(
         composable(ScreenRoute.Splash.route) {
             SplashScreen(
                 onSplashFinished = { isUserLoggedIn ->
+                    // Con sesión se pasa por el onboarding, que sigue solo al
+                    // feed si el usuario ya contestó.
                     val destination =
-                        if (isUserLoggedIn) ScreenRoute.Feed.route else ScreenRoute.Login.route
+                        if (isUserLoggedIn) ScreenRoute.Onboarding.createRoute() else ScreenRoute.Login.route
                     navController.navigate(destination) {
                         popUpTo(ScreenRoute.Splash.route) { inclusive = true }
                     }
@@ -75,7 +78,7 @@ fun AppNavigation(
         composable(ScreenRoute.Login.route) {
             LoginScreen(
                 onLoginClick = {
-                    navController.navigate(ScreenRoute.Feed.route) {
+                    navController.navigate(ScreenRoute.Onboarding.createRoute()) {
                         popUpTo(ScreenRoute.Login.route) { inclusive = true }
                     }
                 },
@@ -86,11 +89,35 @@ fun AppNavigation(
             RegisterScreen(
                 onBackClick = { navController.popBackStack() },
                 onRegisterClick = {
-                    navController.navigate(ScreenRoute.Feed.route) {
+                    navController.navigate(ScreenRoute.Onboarding.createRoute()) {
                         popUpTo(ScreenRoute.Login.route) { inclusive = true }
                     }
                 },
                 onLoginClick = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = ScreenRoute.Onboarding.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.Onboarding.ARG_EDIT) {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) { entry ->
+            val editMode = entry.arguments?.getBoolean(ScreenRoute.Onboarding.ARG_EDIT) ?: false
+            OnboardingScreen(
+                editMode = editMode,
+                onFinished = {
+                    if (editMode) {
+                        navController.popBackStack()
+                    } else {
+                        navController.navigate(ScreenRoute.Feed.route) {
+                            popUpTo(ScreenRoute.Onboarding.route) { inclusive = true }
+                        }
+                    }
+                },
+                onClose = { navController.popBackStack() }
             )
         }
         composable(ScreenRoute.Feed.route) {
@@ -108,6 +135,9 @@ fun AppNavigation(
                 },
                 onCreateEventClick = {
                     navController.navigate(ScreenRoute.NewEvent.createRoute())
+                },
+                onPersonalizeClick = {
+                    navController.navigate(ScreenRoute.Onboarding.createRoute(edit = true))
                 }
             )
         }
@@ -219,6 +249,9 @@ fun AppNavigation(
                     navController.navigate(ScreenRoute.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onEditPreferencesClick = {
+                    navController.navigate(ScreenRoute.Onboarding.createRoute(edit = true))
                 }
             )
         }

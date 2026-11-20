@@ -33,6 +33,18 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
     }
 
+    // preferences (onboarding): opcional, pero si viene tiene la forma que
+    // escribe la app y listas cortas (la app no deja marcar más de 10).
+    function validPreferences(data) {
+      let prefs = data.get('preferences', null);
+      return prefs == null || (prefs is map
+        && prefs.get('categories', []) is list && prefs.get('categories', []).size() <= 10
+        && prefs.get('brands', []) is list && prefs.get('brands', []).size() <= 10
+        && prefs.get('interests', []) is list && prefs.get('interests', []).size() <= 10
+        && prefs.get('completed', false) is bool
+        && prefs.get('skipped', false) is bool);
+    }
+
     // Vehículos: los del catálogo semilla y los que publican los usuarios.
     match /vehicles/{vehicleId} {
       allow read: if signedIn();
@@ -64,13 +76,15 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if signedIn();
-      allow create: if isUser(userId);
+      allow create: if isUser(userId) && validPreferences(request.resource.data);
 
-      // El dueño edita su perfil. Otro usuario solo puede mover su contador
-      // de seguidores en ±1 (la transacción de follow lo hace al seguirlo).
+      // El dueño edita su perfil (y sus preferencias del onboarding). Otro
+      // usuario solo puede mover su contador de seguidores en ±1 (la
+      // transacción de follow lo hace al seguirlo).
       allow update: if (isUser(userId)
           && stepsByOne('followersCount')
-          && stepsByOne('followingCount'))
+          && stepsByOne('followingCount')
+          && validPreferences(request.resource.data))
         || (signedIn()
           && onlyChanges(['followersCount'])
           && stepsByOne('followersCount'));

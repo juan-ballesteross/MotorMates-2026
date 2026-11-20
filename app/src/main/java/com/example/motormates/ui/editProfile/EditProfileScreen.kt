@@ -28,6 +28,7 @@ fun EditProfileScreen(
     onAddVehicleClick: () -> Unit = {},
     onEditVehicleClick: (vehicleId: String) -> Unit = {},
     onLoggedOut: () -> Unit = {},
+    onEditPreferencesClick: () -> Unit = {},
     viewModel: EditProfileViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -81,7 +82,8 @@ fun EditProfileScreen(
         onLogoutClick = { viewModel.logOut(onLoggedOut) },
         onDeleteAccountClick = viewModel::askDeleteAccount,
         modifier = modifier,
-        isGarageLoading = uiState.isGarageLoading
+        isGarageLoading = uiState.isGarageLoading,
+        onEditPreferencesClick = onEditPreferencesClick
     )
 
     if (uiState.isPendingDeleteAccount) {
