@@ -255,7 +255,7 @@ private fun SpecRow(label: String, before: String?, after: String?, delta: Strin
             Spacer(Modifier.width(8.dp))
             Text(
                 text = delta,
-                color = if (improves) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (improves) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -313,7 +313,7 @@ fun CostBreakdownCard(
 /** Ficha técnica redactada por la AI. */
 @Composable
 fun InsightsCard(insights: TuningInsights, modifier: Modifier = Modifier) {
-    TuningCard(title = "Ficha técnica AI", icon = { Icon(Icons.Filled.AutoAwesome, null, tint = MaterialTheme.colorScheme.tertiary) }, modifier = modifier) {
+    TuningCard(title = "Ficha técnica AI", icon = { Icon(Icons.Filled.AutoAwesome, null, tint = MaterialTheme.colorScheme.primary) }, modifier = modifier) {
         if (insights.summary.isNotBlank()) {
             Text(insights.summary, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
             Spacer(Modifier.height(8.dp))

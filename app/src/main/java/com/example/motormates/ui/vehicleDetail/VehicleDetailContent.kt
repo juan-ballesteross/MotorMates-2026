@@ -237,7 +237,7 @@ fun VehicleDetailContent(
                 OutlinedButton(
                     onClick = onAiTuningClick,
                     shape = RoundedCornerShape(Radius.md),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
@@ -246,7 +246,7 @@ fun VehicleDetailContent(
                     Icon(
                         imageVector = Icons.Filled.AutoAwesome,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary
+                        tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(

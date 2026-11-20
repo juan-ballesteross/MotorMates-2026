@@ -122,7 +122,7 @@ fun GeneratingView(baseImageUrl: String?, onCancel: () -> Unit,
             Icon(
                 Icons.Filled.AutoAwesome,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.tertiary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .size(56.dp)
                     .scale(0.8f + pulse * 0.4f)

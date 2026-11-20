@@ -127,7 +127,7 @@ fun PackagesRow(
                     .testTag("package_${pkg.id}")
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.AutoAwesome, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Filled.AutoAwesome, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(pkg.name, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 }
@@ -264,7 +264,7 @@ fun PartCard(part: Part, isSelected: Boolean, onClick: () -> Unit, modifier: Mod
                 Spacer(Modifier.height(4.dp))
                 Text(
                     badges.joinToString(" · "),
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -476,7 +476,7 @@ fun SelectionBar(
                 if (hpDelta != null && hpDelta != 0.0) {
                     Text(
                         "${signed(hpDelta)} HP",
-                        color = MaterialTheme.colorScheme.tertiary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
                         modifier = Modifier.padding(end = 12.dp)

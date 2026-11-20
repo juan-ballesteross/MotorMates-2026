@@ -181,9 +181,9 @@ private fun TuningTopBar(title: String, onBack: () -> Unit) {
         }
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.AutoAwesome, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(14.dp))
+                Icon(Icons.Filled.AutoAwesome, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("AI TUNING", color = MaterialTheme.colorScheme.tertiary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("AI TUNING", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
             Text(title, color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp, fontWeight = FontWeight.Bold, maxLines = 1)
         }
@@ -245,7 +245,7 @@ private fun ConfiguratorContent(state: AiTuningState, actions: AiTuningActions) 
             state.busyWithVehicleName?.let { name ->
                 Text(
                     "Ya se está modificando tu $name. Cuando termine podrás generar esta.",
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 13.sp,
                     modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp)
                 )

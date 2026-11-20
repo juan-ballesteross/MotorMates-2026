@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +50,7 @@ fun ChatScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
     var showPhotoSourceDialog by remember { mutableStateOf(false) }
 
@@ -95,6 +98,12 @@ fun ChatScreen(
         }
     }
 
+    LaunchedEffect(uiState.errorMessage) {
+        val message = uiState.errorMessage ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(message)
+        viewModel.dismissError()
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -137,14 +146,17 @@ fun ChatScreen(
             }
         }
 
-        ChatInputBar(
-            draft = uiState.draft,
-            onDraftChange = viewModel::updateDraft,
-            onSendClick = viewModel::sendMessage,
-            pickedImageUri = uiState.pickedImageUri,
-            onAttachImageClick = { showPhotoSourceDialog = true },
-            onRemovePickedImageClick = viewModel::clearPickedImage
-        )
+        if (!uiState.isLoading) {
+            ChatInputBar(
+                draft = uiState.draft,
+                onDraftChange = viewModel::updateDraft,
+                onSendClick = viewModel::sendMessage,
+                pickedImageUri = uiState.pickedImageUri,
+                onAttachImageClick = { showPhotoSourceDialog = true },
+                onRemovePickedImageClick = viewModel::clearPickedImage
+            )
+        }
+        SnackbarHost(hostState = snackbarHostState)
     }
 }
 

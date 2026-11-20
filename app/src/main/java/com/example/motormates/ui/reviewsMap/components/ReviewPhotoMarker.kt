@@ -107,14 +107,19 @@ fun ReviewPhotoMarker(
     val size = if (isSelected) MarkerSize + 8.dp else MarkerSize
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Box {
-            PhotoCircle(photo = photo, size = size, borderColor = borderColor, palette = palette)
-            RatingBadge(
-                rating = rating,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset(x = 6.dp, y = 2.dp)
-            )
+        Box(
+            modifier = Modifier.size(MarkerSize + 8.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Box {
+                PhotoCircle(photo = photo, size = size, borderColor = borderColor, palette = palette)
+                RatingBadge(
+                    rating = rating,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(x = 6.dp, y = 2.dp)
+                )
+            }
         }
         Pointer(color = borderColor)
     }
@@ -131,21 +136,17 @@ fun ReviewClusterBubble(
     modifier: Modifier = Modifier,
     palette: MarkerPalette = MarkerPalette.Default
 ) {
-    Box(modifier = modifier.padding(end = 12.dp), contentAlignment = Alignment.CenterStart) {
-        photos.take(MAX_STACKED).forEachIndexed { index, photo ->
-            // Borde blanco y no del color del tema: separa una foto de la de
-            // atrás en los dos mapas (sobre el claro lleva sombra del propio SDK).
-            PhotoCircle(
-                photo = photo,
-                size = 40.dp,
-                borderColor = Color.White,
-                palette = palette,
-                modifier = Modifier.offset(x = (index * 12).dp)
-            )
-        }
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        PhotoCircle(
+            photo = photos.firstOrNull(),
+            size = MarkerSize,
+            borderColor = Color.White,
+            palette = palette
+        )
         Box(
             modifier = Modifier
-                .offset(x = (photos.take(MAX_STACKED).size.coerceAtLeast(1) * 12).dp, y = 12.dp)
+                .align(Alignment.BottomEnd)
+                .offset(x = 6.dp, y = 2.dp)
                 .size(28.dp)
                 .clip(CircleShape)
                 .background(palette.border)
@@ -211,7 +212,7 @@ private fun RatingBadge(rating: Int, modifier: Modifier = Modifier) {
         Icon(
             imageVector = Icons.Filled.Star,
             contentDescription = null,
-            tint = md3_dark_tertiary,
+            tint = MotorMatesRed,
             modifier = Modifier.size(10.dp)
         )
         Text(
@@ -237,8 +238,6 @@ private fun Pointer(color: Color) {
         drawLine(color, Offset(0f, 0f), Offset(size.width, 0f), strokeWidth = 2f)
     }
 }
-
-private const val MAX_STACKED = 3
 
 @Preview
 @Composable
