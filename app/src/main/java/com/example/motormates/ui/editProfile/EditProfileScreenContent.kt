@@ -18,6 +18,7 @@ import com.example.motormates.ui.editProfile.components.EditProfileGarageCard
 import com.example.motormates.ui.editProfile.components.EditProfileHeader
 import com.example.motormates.ui.editProfile.components.EditProfileInfoCard
 import com.example.motormates.ui.editProfile.components.EditProfileLogoutButton
+import com.example.motormates.ui.editProfile.components.EditProfilePreferencesButton
 import com.example.motormates.ui.editProfile.components.EditProfileTopBar
 import com.example.motormates.ui.theme.MotorMatesTheme
 import com.example.motormates.ui.theme.Spacing
@@ -57,7 +58,8 @@ fun EditProfileScreenContent(
     onLogoutClick: () -> Unit,
     onDeleteAccountClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isGarageLoading: Boolean = false
+    isGarageLoading: Boolean = false,
+    onEditPreferencesClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -119,6 +121,7 @@ fun EditProfileScreenContent(
                 )
             }
 
+            item { EditProfilePreferencesButton(onClick = onEditPreferencesClick) }
             item { EditProfileLogoutButton(onClick = onLogoutClick) }
             item { EditProfileDeleteAccountButton(onClick = onDeleteAccountClick) }
         }

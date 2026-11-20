@@ -59,6 +59,17 @@ data class ReviewsMapUiState(
      * ViewModel no: así, al volver, no salta otra vez.
      */
     val hasFittedInitially: Boolean = false,
+    /**
+     * La ciudad del onboarding, para el primer encuadre: se encuadran las
+     * reseñas de esa ciudad (o su centro si no hay) en vez de todo el país.
+     * homeCityResolved dice si ya se consultó, para no encuadrar antes.
+     */
+    val homeCity: MapCamera? = null,
+    val homeCityResolved: Boolean = false,
+    /** Categorías favoritas del onboarding. Vacío = no se ofrece el filtro. */
+    val myCategories: Set<String> = emptySet(),
+    /** Chip "Mis categorías": solo reseñas de carros de esas categorías. */
+    val onlyMyCategories: Boolean = false,
     /** Marcadores que ya estaban en pantalla la última vez que se encuadró. */
     val acknowledgedMarkerIds: Set<String> = emptySet(),
     /** Última posición de la cámara, para restaurarla al volver a la pestaña. */

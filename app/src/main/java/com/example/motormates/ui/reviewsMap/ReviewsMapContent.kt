@@ -56,6 +56,7 @@ import com.example.motormates.ui.reviewsMap.components.StationMarkerCard
 import com.example.motormates.ui.reviewsMap.components.rememberMarkerBitmaps
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.data.util.CityCoordinates
 import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -87,6 +88,7 @@ fun ReviewsMapContent(
     uiState: ReviewsMapUiState,
     modifier: Modifier = Modifier,
     onToggleLayer: (MapLayer) -> Unit = {},
+    onToggleMyCategories: () -> Unit = {},
     onMarkerClick: (String) -> Unit = {},
     onDismissSelection: () -> Unit = {},
     onClusterClick: (List<String>) -> Boolean = { false },
@@ -137,8 +139,26 @@ fun ReviewsMapContent(
     // Solo la primera vez que hay marcadores. Antes se reencuadraba con cada
     // emisión del listener: un like o una reseña nueva hacía saltar la
     // cámara mientras el usuario estaba mirando otra zona.
-    LaunchedEffect(allPoints.isNotEmpty(), uiState.hasFittedInitially) {
-        if (allPoints.isNotEmpty() && !uiState.hasFittedInitially) fitAllMarkers()
+    //
+    // Con ciudad del onboarding se encuadra lo de esa ciudad (o su centro si
+    // no hay nada), y se espera a saber la ciudad para no encuadrar dos veces.
+    LaunchedEffect(allPoints.isNotEmpty(), uiState.hasFittedInitially, uiState.homeCityResolved) {
+        if (uiState.hasFittedInitially || !uiState.homeCityResolved) return@LaunchedEffect
+        val home = uiState.homeCity
+        if (home != null) {
+            val local = allPoints.filter {
+                CityCoordinates.distanceKm(it.latitude, it.longitude, home.lat, home.lng) <= CityCoordinates.RADIUS_KM
+            }
+            coroutineScope.launch {
+                cameraPositionState.animateSafely(
+                    if (local.isNotEmpty()) local.fitUpdate(boundsPaddingPx)
+                    else CameraUpdateFactory.newLatLngZoom(LatLng(home.lat, home.lng), home.zoom)
+                )
+                onCameraFitted()
+            }
+        } else if (allPoints.isNotEmpty()) {
+            fitAllMarkers()
+        }
     }
 
     // Se guarda la cámara cada vez que se detiene, para restaurarla al volver,
@@ -190,7 +210,10 @@ fun ReviewsMapContent(
         MapFilterChips(
             selected = uiState.layers,
             onToggle = onToggleLayer,
-            available = uiState.availableLayers
+            available = uiState.availableLayers,
+            showMyCategories = uiState.myCategories.isNotEmpty() && MapLayer.REVIEWS in uiState.layers,
+            onlyMyCategories = uiState.onlyMyCategories,
+            onToggleMyCategories = onToggleMyCategories
         )
 
         // El mapa y sus controles flotantes van en un Box aparte para que los

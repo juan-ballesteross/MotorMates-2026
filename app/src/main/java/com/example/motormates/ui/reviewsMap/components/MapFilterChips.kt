@@ -42,7 +42,11 @@ fun MapFilterChips(
     selected: Set<MapLayer>,
     onToggle: (MapLayer) -> Unit,
     modifier: Modifier = Modifier,
-    available: List<MapLayer> = MapLayer.entries
+    available: List<MapLayer> = MapLayer.entries,
+    /** Chip extra "Mis categorías" (onboarding): solo reseñas de esas categorías. */
+    showMyCategories: Boolean = false,
+    onlyMyCategories: Boolean = false,
+    onToggleMyCategories: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
@@ -59,6 +63,14 @@ fun MapFilterChips(
                 onClick = { onToggle(layer) },
                 label = { Text(text = stringResource(layer.labelRes)) },
                 modifier = Modifier.testTag("reviewsMapFilter_${layer.name.lowercase()}")
+            )
+        }
+        if (showMyCategories) {
+            FilterChip(
+                selected = onlyMyCategories,
+                onClick = onToggleMyCategories,
+                label = { Text(text = "Mis categorías") },
+                modifier = Modifier.testTag("reviewsMapFilter_myCategories")
             )
         }
     }

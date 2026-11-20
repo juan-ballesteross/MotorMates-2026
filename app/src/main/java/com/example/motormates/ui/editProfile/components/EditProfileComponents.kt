@@ -33,11 +33,13 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -647,6 +649,29 @@ private fun SpecChip(icon: ImageVector, text: String) {
 }
 
 /** Cerrar sesión, discreto al final: no compite con Guardar. */
+/** Abre el onboarding en modo edición: categorías, marcas, carro, intereses y ciudad. */
+@Composable
+fun EditProfilePreferencesButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("editProfilePreferences")
+    ) {
+        Icon(
+            imageVector = Icons.Default.Tune,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(Spacing.xs))
+        Text(
+            text = "Editar mis gustos",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
 @Composable
 fun EditProfileLogoutButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     TextButton(

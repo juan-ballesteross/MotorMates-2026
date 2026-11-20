@@ -68,7 +68,7 @@ class ReviewsMapE2E {
         composeRule.onNodeWithTag("loginEmail").performTextInput(E2ESeed.MEMBER_EMAIL)
         composeRule.onNodeWithTag("loginPassword").performTextInput(FirebaseEmulator.PASSWORD)
         composeRule.onNodeWithTag("loginSubmit").performClick()
-        composeRule.waitForTag("feedScreen")
+        composeRule.enterFeedSkippingOnboarding()
 
         // --- A la pestaña del mapa ---
         composeRule.onNodeWithTag("feedTab_mapa").performClick()
@@ -105,7 +105,7 @@ class ReviewsMapE2E {
         composeRule.onNodeWithTag("loginEmail").performTextInput(E2ESeed.MEMBER_EMAIL)
         composeRule.onNodeWithTag("loginPassword").performTextInput(FirebaseEmulator.PASSWORD)
         composeRule.onNodeWithTag("loginSubmit").performClick()
-        composeRule.waitForTag("feedScreen")
+        composeRule.enterFeedSkippingOnboarding()
 
         val tituloPublicacion = "${E2ESeed.BRAND} ${E2ESeed.MODEL}"
         composeRule.waitForText(tituloPublicacion)

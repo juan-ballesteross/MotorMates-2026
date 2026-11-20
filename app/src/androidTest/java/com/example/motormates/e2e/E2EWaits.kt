@@ -5,6 +5,8 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 
 /**
  * Esperas de las pruebas E2E.
@@ -78,4 +80,20 @@ fun ComposeTestRule.waitForTagText(
                 ?.any { it.text == text } == true
         }
     }
+}
+
+/**
+ * Después del login o del registro se pasa por el onboarding. Un usuario
+ * sin preferencias lo ve: se toca "Ahora no" y se sigue al feed. Uno que ya
+ * contestó llega directo. Las pruebas que no son del onboarding lo saltan.
+ */
+fun ComposeTestRule.enterFeedSkippingOnboarding(timeoutMillis: Long = E2E_TIMEOUT_MS) {
+    waitUntil(timeoutMillis) {
+        onAllNodesWithTag("feedScreen").fetchSemanticsNodes().isNotEmpty() ||
+            onAllNodesWithTag("onboardingSkip").fetchSemanticsNodes().isNotEmpty()
+    }
+    if (onAllNodesWithTag("onboardingSkip").fetchSemanticsNodes().isNotEmpty()) {
+        onNodeWithTag("onboardingSkip").performClick()
+    }
+    waitForTag("feedScreen", timeoutMillis = timeoutMillis)
 }

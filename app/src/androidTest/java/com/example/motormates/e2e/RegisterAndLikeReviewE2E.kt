@@ -94,7 +94,7 @@ class RegisterAndLikeReviewE2E {
         composeRule.onNodeWithTag("registerConfirmPassword").performTextInput("123456")
         composeRule.onNodeWithTag("registerSubmit").performClick()
 
-        composeRule.waitForTag("feedScreen")
+        composeRule.enterFeedSkippingOnboarding()
 
         // --- La primera publicación y su detalle ---
         abrirPublicacion()

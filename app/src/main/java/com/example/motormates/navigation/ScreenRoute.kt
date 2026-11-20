@@ -6,6 +6,17 @@ sealed class ScreenRoute(val route: String) {
     object Login : ScreenRoute("login")
     object Register : ScreenRoute("register")
 
+    /**
+     * Preguntas de gustos. Después del login, del registro y del splash se
+     * pasa siempre por aquí (edit=false): si el usuario ya contestó o saltó,
+     * la pantalla sigue de una vez al feed. Desde Editar perfil se abre con
+     * edit=true para cambiar las respuestas.
+     */
+    object Onboarding : ScreenRoute("onboarding?edit={edit}") {
+        const val ARG_EDIT = "edit"
+        fun createRoute(edit: Boolean = false) = if (edit) "onboarding?edit=true" else "onboarding"
+    }
+
     object Feed : ScreenRoute("feed")
     object Explore : ScreenRoute("explore")
     object Post : ScreenRoute("post")

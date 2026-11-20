@@ -52,6 +52,7 @@ fun ReviewsMapScreen(
     ReviewsMapContent(
         uiState = uiState,
         onToggleLayer = viewModel::toggleLayer,
+        onToggleMyCategories = viewModel::toggleOnlyMyCategories,
         onMarkerClick = viewModel::onMarkerClick,
         onDismissSelection = viewModel::clearSelection,
         onClusterClick = viewModel::onClusterClick,

@@ -33,6 +33,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import com.example.motormates.data.repository.PreferencesRepository
+import com.example.motormates.data.util.CityCoordinates
 
 /**
  * El mapa de reseñas recientes.
@@ -49,7 +52,8 @@ class ReviewsMapViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val stationRepository: StationRepository,
     private val deviceLocationDataSource: DeviceLocationDataSource,
-    private val timeSource: TimeSource
+    private val timeSource: TimeSource,
+    private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ReviewsMapUiState())
@@ -77,6 +81,9 @@ class ReviewsMapViewModel @Inject constructor(
      * catálogo es corto y no cambia mientras se mira el mapa.
      */
     private var vehicleImages: Map<String, String?>? = null
+
+    /** vehicleId -> categoría, para el chip "Mis categorías". Se llena con el catálogo. */
+    private var vehicleCategories: Map<String, String> = emptyMap()
 
     /**
      * Lo último que mandó el listener de eventos, sin recortar. Igual que
@@ -124,6 +131,32 @@ class ReviewsMapViewModel @Inject constructor(
             val stationLayers = MapLayer.entries.filter { it.stationKind != null }
             _uiState.update { it.copy(availableLayers = it.availableLayers + stationLayers) }
         }
+        loadPreferences()
+    }
+
+    /**
+     * Ciudad y categorías del onboarding. Con tope: si no responde, el mapa
+     * se encuadra como siempre (todas las reseñas).
+     */
+    private fun loadPreferences() {
+        viewModelScope.launch {
+            val preferences = withTimeoutOrNull(PREFERENCES_TIMEOUT_MS) {
+                preferencesRepository.getMine()
+            }?.getOrNull()
+            val city = CityCoordinates.find(preferences?.city)
+            _uiState.update {
+                it.copy(
+                    homeCity = city?.let { c -> MapCamera(c.lat, c.lng, HOME_CITY_ZOOM) },
+                    homeCityResolved = true,
+                    myCategories = preferences?.categories.orEmpty().toSet()
+                )
+            }
+        }
+    }
+
+    fun toggleOnlyMyCategories() {
+        _uiState.update { it.copy(onlyMyCategories = !it.onlyMyCategories) }
+        refreshMarkers()
     }
 
     /**
@@ -238,6 +271,7 @@ class ReviewsMapViewModel @Inject constructor(
                 launch {
                     vehicleRepository.getVehicles().onSuccess { vehicles ->
                         vehicleImages = vehicles.associate { it.id to it.imageUrl }
+                        vehicleCategories = vehicles.associate { it.id to it.category }
                         refreshMarkers()
                     }
                 }
@@ -635,10 +669,15 @@ class ReviewsMapViewModel @Inject constructor(
     private fun refreshMarkers() {
         val cutoff = recentWindowStart()
         val images = vehicleImages.orEmpty()
+        val state = _uiState.value
+        val categoryFilter = state.myCategories.takeIf { state.onlyMyCategories && it.isNotEmpty() }
         val markers = recentReviews
             .filter { review ->
                 val createdAt = review.createdAt.toEpochMillisOrNull()
                 createdAt != null && createdAt >= cutoff
+            }
+            .filter { review ->
+                categoryFilter == null || vehicleCategories[review.vehicleId] in categoryFilter
             }
             // mapNotNull descarta las reseñas sin ubicación: no hay dónde
             // ponerles un marcador.
@@ -650,6 +689,10 @@ class ReviewsMapViewModel @Inject constructor(
     private fun recentWindowStart(): Long = timeSource.nowMillis() - RECENT_WINDOW_MS
 
     private companion object {
+        /** Zoom de ciudad: se ve el área metropolitana entera. */
+        const val HOME_CITY_ZOOM = 11f
+        const val PREFERENCES_TIMEOUT_MS = 3_000L
+
         const val RECENT_WINDOW_HOURS = 24L
         const val RECENT_WINDOW_MS = RECENT_WINDOW_HOURS * 60 * 60 * 1000
 

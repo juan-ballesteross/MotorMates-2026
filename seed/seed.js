@@ -33,10 +33,10 @@ const BATCH_LIMIT = 500;
 // Semilla fija: cada corrida genera exactamente los mismos datos.
 faker.seed(42);
 
-const USERS_COUNT = 8;
+const USERS_COUNT = 15;
 // Cada usuario reseña cada carro a lo sumo una vez, así que el tope real es
-// USERS_COUNT. Con 4-7 por carro salen ~40 reseñas: suficientes para que el
-// mapa forme clusters y se separen al acercar.
+// USERS_COUNT. Con 4-7 por carro salen ~160 reseñas: suficientes para que el
+// mapa forme clusters y para que el feed personalizado tenga variedad.
 const MIN_REVIEWS_PER_VEHICLE = 4;
 const MAX_REVIEWS_PER_VEHICLE = 7;
 
@@ -67,7 +67,8 @@ const db = getFirestore(DATABASE_ID);
  * sí es volumen (usuarios, reseñas, likes, seguidores).
  *
  * El 8 (Ford Ranger) se queda sin reseñas a propósito, para comprobar que el
- * detalle muestra calificación 0 y 0 reseñas.
+ * detalle muestra calificación 0 y 0 reseñas. Los ids "9".."29" amplían el
+ * catálogo para que el feed personalizado tenga de dónde escoger.
  */
 const VEHICLES = [
   {
@@ -110,25 +111,151 @@ const VEHICLES = [
     imageUrl: "https://imagenes.portafolio.co/files/image_600_455/uploads/2021/01/29/6014dcacba87b.jpeg",
     potencia: "210 hp", aceleracion: "10.3 s", velocidadMaxima: "180 km/h", traccion: "4x4",
   },
+  // 9-29: ampliación para que la personalización del feed (onboarding) se
+  // note. Marcas comunes en Colombia, ~6 por categoría. Fotos de Wikimedia
+  // Commons (licencias libres), en el tamaño de miniatura estándar de 1280 px.
+  {
+    id: "9", brand: "Mazda", model: "MX-5", year: 2023, category: "Deportivo",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Mazda_Roadster_%28MX-5%29_by_Negawa_Bridge_%28cropped%29.jpg/1280px-Mazda_Roadster_%28MX-5%29_by_Negawa_Bridge_%28cropped%29.jpg",
+    potencia: "181 hp", aceleracion: "6.5 s", velocidadMaxima: "219 km/h", traccion: "RWD",
+  },
+  {
+    id: "10", brand: "BMW", model: "M2", year: 2024, category: "Deportivo",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/BMW_G87_M2_1X7A1838.jpg/1280px-BMW_G87_M2_1X7A1838.jpg",
+    potencia: "453 hp", aceleracion: "4.1 s", velocidadMaxima: "250 km/h", traccion: "RWD",
+  },
+  {
+    id: "11", brand: "Toyota", model: "GR86", year: 2023, category: "Deportivo",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/2022_Toyota_GR86_Premium_in_Halo%2C_Front_Right%2C_04-10-2022.jpg/1280px-2022_Toyota_GR86_Premium_in_Halo%2C_Front_Right%2C_04-10-2022.jpg",
+    potencia: "228 hp", aceleracion: "6.3 s", velocidadMaxima: "226 km/h", traccion: "RWD",
+  },
+  {
+    id: "12", brand: "Nissan", model: "Z", year: 2023, category: "Deportivo",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Nissan_FAIRLADY_Z_%28Z34%29_Version_ST%2C_2022%2C_left-front.jpg/1280px-Nissan_FAIRLADY_Z_%28Z34%29_Version_ST%2C_2022%2C_left-front.jpg",
+    potencia: "400 hp", aceleracion: "4.5 s", velocidadMaxima: "250 km/h", traccion: "RWD",
+  },
+  {
+    id: "13", brand: "Mazda", model: "CX-5", year: 2024, category: "SUV",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/2024_Mazda_CX-5_2.5_S_Select_in_Platinum_Quartz_Metallic%2C_front_right.jpg/1280px-2024_Mazda_CX-5_2.5_S_Select_in_Platinum_Quartz_Metallic%2C_front_right.jpg",
+    potencia: "187 hp", aceleracion: "9.3 s", velocidadMaxima: "200 km/h", traccion: "AWD",
+  },
+  {
+    id: "14", brand: "Renault", model: "Duster", year: 2024, category: "SUV",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Dacia_Duster_TCe_130_Extreme_%28III%29_%E2%80%93_f_13102024.jpg/1280px-Dacia_Duster_TCe_130_Extreme_%28III%29_%E2%80%93_f_13102024.jpg",
+    potencia: "130 hp", aceleracion: "11.2 s", velocidadMaxima: "185 km/h", traccion: "FWD",
+  },
+  {
+    id: "15", brand: "Kia", model: "Sportage", year: 2024, category: "SUV",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/2025_Kia_Sportage_S_front_only.jpg/1280px-2025_Kia_Sportage_S_front_only.jpg",
+    potencia: "187 hp", aceleracion: "9.5 s", velocidadMaxima: "190 km/h", traccion: "AWD",
+  },
+  {
+    id: "16", brand: "Chevrolet", model: "Tracker", year: 2024, category: "SUV",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/2024_Chevrolet_Trax_2RS%2C_front_left%2C_12-10-2023.jpg/1280px-2024_Chevrolet_Trax_2RS%2C_front_left%2C_12-10-2023.jpg",
+    potencia: "137 hp", aceleracion: "10.4 s", velocidadMaxima: "180 km/h", traccion: "FWD",
+  },
+  {
+    id: "17", brand: "Renault", model: "4", year: 1985, category: "Clásico",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/1984_Renault_4_GTL%2C_front_left_%28Germany%29.jpg/1280px-1984_Renault_4_GTL%2C_front_left_%28Germany%29.jpg",
+    potencia: "34 hp", aceleracion: "23.0 s", velocidadMaxima: "120 km/h", traccion: "FWD",
+  },
+  {
+    id: "18", brand: "Chevrolet", model: "Bel Air '57", year: 1957, category: "Clásico",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/2/2a/57_Chevy_BelAir.jpg",
+    potencia: "220 hp", aceleracion: "9.5 s", velocidadMaxima: "175 km/h", traccion: "RWD",
+  },
+  {
+    id: "19", brand: "Mercedes-Benz", model: "280 SL", year: 1969, category: "Clásico",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4e/1969_Mercedes_280_SL_Pagoda.jpg",
+    potencia: "168 hp", aceleracion: "9.3 s", velocidadMaxima: "200 km/h", traccion: "RWD",
+  },
+  {
+    id: "20", brand: "Toyota", model: "Land Cruiser FJ40", year: 1982, category: "Clásico",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/1982_Toyota_Land_Cruiser_FJ40_in_Freeborn_Red%2C_front_right.jpg/1280px-1982_Toyota_Land_Cruiser_FJ40_in_Freeborn_Red%2C_front_right.jpg",
+    potencia: "135 hp", aceleracion: "16.0 s", velocidadMaxima: "135 km/h", traccion: "4x4",
+  },
+  {
+    id: "21", brand: "BYD", model: "Dolphin", year: 2024, category: "Eléctrico",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/2021_BYD_Dolphin_EV_%28front%29.jpg/1280px-2021_BYD_Dolphin_EV_%28front%29.jpg",
+    potencia: "201 hp", aceleracion: "7.0 s", velocidadMaxima: "160 km/h", traccion: "FWD",
+  },
+  {
+    id: "22", brand: "BYD", model: "Seal", year: 2024, category: "Eléctrico",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/2022_BYD_Seal.jpg/1280px-2022_BYD_Seal.jpg",
+    potencia: "308 hp", aceleracion: "5.9 s", velocidadMaxima: "180 km/h", traccion: "RWD",
+  },
+  {
+    id: "23", brand: "Hyundai", model: "Ioniq 5", year: 2024, category: "Eléctrico",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Hyundai_Ioniq_5_AWD_Techniq-Paket_%E2%80%93_f_31122024.jpg/1280px-Hyundai_Ioniq_5_AWD_Techniq-Paket_%E2%80%93_f_31122024.jpg",
+    potencia: "320 hp", aceleracion: "5.1 s", velocidadMaxima: "185 km/h", traccion: "AWD",
+  },
+  {
+    id: "24", brand: "Kia", model: "EV6", year: 2024, category: "Eléctrico",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/2021_Kia_EV6_GT-Line_S.jpg/1280px-2021_Kia_EV6_GT-Line_S.jpg",
+    potencia: "320 hp", aceleracion: "5.2 s", velocidadMaxima: "185 km/h", traccion: "AWD",
+  },
+  {
+    id: "25", brand: "Toyota", model: "Hilux", year: 2024, category: "Pickup",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg/1280px-2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg",
+    potencia: "201 hp", aceleracion: "10.8 s", velocidadMaxima: "175 km/h", traccion: "4x4",
+  },
+  {
+    id: "26", brand: "Chevrolet", model: "Colorado", year: 2024, category: "Pickup",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/2024_Chevrolet_Colorado_Z71%2C_front_left%2C_09-28-2024.jpg/1280px-2024_Chevrolet_Colorado_Z71%2C_front_left%2C_09-28-2024.jpg",
+    potencia: "310 hp", aceleracion: "7.0 s", velocidadMaxima: "180 km/h", traccion: "4x4",
+  },
+  {
+    id: "27", brand: "Nissan", model: "Frontier", year: 2023, category: "Pickup",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/1/11/2021_Nissan_Navara_facelift_%28cropped%29.jpg",
+    potencia: "190 hp", aceleracion: "10.5 s", velocidadMaxima: "180 km/h", traccion: "4x4",
+  },
+  {
+    id: "28", brand: "Ford", model: "F-150", year: 2023, category: "Pickup",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/2018_Ford_F-150_XLT_Crew_Cab%2C_front_11.10.19.jpg/1280px-2018_Ford_F-150_XLT_Crew_Cab%2C_front_11.10.19.jpg",
+    potencia: "400 hp", aceleracion: "6.1 s", velocidadMaxima: "180 km/h", traccion: "4x4",
+  },
+  {
+    id: "29", brand: "Mitsubishi", model: "L200", year: 2023, category: "Pickup",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Mitsubishi_Triton_LC_2.4_GLS_2WD_Blade_Silver_Metallic_%28cropped%29.jpg/1280px-Mitsubishi_Triton_LC_2.4_GLS_2WD_Blade_Silver_Metallic_%28cropped%29.jpg",
+    potencia: "181 hp", aceleracion: "11.0 s", velocidadMaxima: "175 km/h", traccion: "4x4",
+  },
 ];
+
+/** El Ranger se queda sin reseñas a propósito (ver comentario de VEHICLES). */
+const VEHICLE_WITHOUT_REVIEWS = "8";
 
 const CITIES = [
   "Bogotá", "Medellín", "Cali", "Barranquilla", "Bucaramanga",
   "Cartagena", "Pereira", "Manizales",
 ];
 
-// Faker no tiene frases de carros (faker.lorem sale en latín y se ve falso),
-// así que las bios y los comentarios se arman combinando pedazos propios.
-const BIO_PARTS = [
-  "Fan de los deportivos y los track days.",
-  "Clásicos los domingos, eléctrico entre semana.",
-  "Si tiene 4x4, lo saco a trocha.",
-  "Mecánico de garaje los fines de semana.",
-  "Colecciono motores viejos y ruidosos.",
-  "Más kilómetros que fotos en la galería.",
-  "Me gusta más el camino que el destino.",
-  "Primero la suspensión, después el rin.",
+/**
+ * Gustos de los usuarios semilla: categorías favoritas por posición. Sirven
+ * para que cada uno reseñe sobre todo lo que le gusta (un fan de los SUV
+ * reseña SUV) y así las sugerencias del onboarding tengan sentido.
+ */
+const TASTES = [
+  ["Deportivo"], ["SUV"], ["Clásico"], ["Eléctrico"], ["Pickup"],
+  ["Deportivo", "Clásico"], ["SUV", "Pickup"], ["Eléctrico", "Deportivo"],
+  ["Clásico", "SUV"], ["Pickup", "SUV"], ["Deportivo"], ["Eléctrico", "SUV"],
+  ["Clásico"], ["Deportivo", "Eléctrico"], ["SUV"],
 ];
+
+/** Bio acorde con la primera categoría favorita. */
+const BIO_BY_CATEGORY = {
+  Deportivo: "Fan de los deportivos y los track days.",
+  SUV: "Si tiene 4x4, lo saco a trocha.",
+  Clásico: "Clásicos los domingos, restaurando el resto de la semana.",
+  Eléctrico: "Eléctrico entre semana, silencioso y sin tanqueo.",
+  Pickup: "Pickup para el trabajo y para el paseo de fin de semana.",
+};
+
+/** Probabilidad de que un autor reseñe en su propia ciudad. */
+const OWN_CITY_REVIEW_PROBABILITY = 0.7;
+
+// Faker no tiene frases de carros (faker.lorem sale en latín y se ve falso),
+// así que las bios (BIO_BY_CATEGORY) y los comentarios se arman con pedazos
+// propios.
 
 const COMMENT_OPENERS = [
   "Lo manejé toda la semana y",
@@ -157,20 +284,36 @@ const COMMENT_GRIPE = [
   "aunque encontrar repuestos toma su tiempo",
 ];
 
-/** Factoría de usuario: Faker rellena nombre, correo y ciudad. */
+/**
+ * Factoría de usuario: Faker rellena nombre y correo. La ciudad y los gustos
+ * salen de la posición, así cada ciudad y categoría tienen sus usuarios.
+ * preferences tiene la misma forma que guarda el onboarding de la app.
+ */
 function makeUser(index) {
   const fullName = faker.person.fullName();
   const username = faker.internet
     .username({ firstName: fullName.split(" ")[0] })
     .toLowerCase();
+  const city = CITIES[index % CITIES.length];
+  const categories = TASTES[index % TASTES.length];
 
   return {
     id: `seed_user_${index + 1}`,
     fullName,
     email: `${username}@motormates.com`,
     username,
-    location: `${faker.helpers.arrayElement(CITIES)}, Colombia`,
-    bio: faker.helpers.arrayElement(BIO_PARTS),
+    location: `${city}, Colombia`,
+    bio: BIO_BY_CATEGORY[categories[0]],
+    preferences: {
+      categories,
+      brands: [],
+      interests: [],
+      city,
+      car: null,
+      completed: true,
+      skipped: false,
+      updatedAt: Date.now(),
+    },
     avatarUrl: null,
     coverUrl: null,
     followersCount: 0,
@@ -209,7 +352,7 @@ function makeReview(index, author, vehicle, isRecent = false) {
     user: { fullName: author.fullName, avatarUrl: author.avatarUrl },
     vehicle: { brand: vehicle.brand, model: vehicle.model },
     // Dónde se publicó, para el mapa de reseñas recientes.
-    location: randomReviewLocation(index),
+    location: randomReviewLocation(index, author.preferences.city),
   };
 }
 
@@ -235,6 +378,21 @@ const REVIEW_HOTSPOTS = [
 ];
 
 /**
+ * Un sitio por ciudad para las reseñas que el autor hace en su propia
+ * ciudad: así "Popular en tu ciudad" del feed tiene datos en todas.
+ */
+const CITY_SPOTS = {
+  Bogotá: { lat: 4.6766, lng: -74.0482, placeName: "Parque 93, Bogotá" },
+  Medellín: { lat: 6.2088, lng: -75.5670, placeName: "El Poblado, Medellín" },
+  Cali: { lat: 3.4570, lng: -76.5340, placeName: "Granada, Cali" },
+  Barranquilla: { lat: 11.0012, lng: -74.8113, placeName: "Alto Prado, Barranquilla" },
+  Bucaramanga: { lat: 7.1193, lng: -73.1227, placeName: "Cabecera, Bucaramanga" },
+  Cartagena: { lat: 10.4236, lng: -75.5485, placeName: "Bocagrande, Cartagena" },
+  Pereira: { lat: 4.8133, lng: -75.6961, placeName: "Circunvalar, Pereira" },
+  Manizales: { lat: 5.0567, lng: -75.4840, placeName: "El Cable, Manizales" },
+};
+
+/**
  * Un punto exacto que se repite (como varias reseñas desde el mismo centro
  * comercial). Ningún zoom lo separa: sirve para probar la lista del cluster.
  */
@@ -245,14 +403,18 @@ const SAME_SPOT_EVERY = 9;
 /** ~0.003 grados son unos 300 m: lo bastante cerca para agruparse, lejos para separarse al acercar. */
 const HOTSPOT_JITTER_DEGREES = 0.003;
 
-function randomReviewLocation(index) {
+function randomReviewLocation(index, authorCity) {
   if (index % SAME_SPOT_EVERY === SAME_SPOT_EVERY / 3) {
     return { ...SAME_SPOT };
   }
 
-  const hotspot = faker.helpers.weightedArrayElement(
-    REVIEW_HOTSPOTS.map((spot) => ({ weight: spot.weight, value: spot }))
-  );
+  const ownCity = CITY_SPOTS[authorCity] &&
+    faker.datatype.boolean({ probability: OWN_CITY_REVIEW_PROBABILITY });
+  const hotspot = ownCity
+    ? CITY_SPOTS[authorCity]
+    : faker.helpers.weightedArrayElement(
+      REVIEW_HOTSPOTS.map((spot) => ({ weight: spot.weight, value: spot }))
+    );
   // Suma de dos uniformes: los puntos se cargan hacia el centro de la zona
   // en vez de llenar un cuadrado parejo.
   const jitter = () =>
@@ -400,13 +562,18 @@ function buildData() {
   const users = Array.from({ length: USERS_COUNT }, (_, i) => makeUser(i));
 
   const reviews = [];
-  // El último vehículo se deja sin reseñas (ver comentario de VEHICLES).
-  VEHICLES.slice(0, -1).forEach((vehicle) => {
-    // arrayElements no repite, así que nadie reseña dos veces el mismo carro.
-    const authors = faker.helpers.arrayElements(users, {
-      min: MIN_REVIEWS_PER_VEHICLE,
-      max: MAX_REVIEWS_PER_VEHICLE,
-    });
+  // El Ranger se deja sin reseñas (ver comentario de VEHICLES).
+  VEHICLES.filter((vehicle) => vehicle.id !== VEHICLE_WITHOUT_REVIEWS).forEach((vehicle) => {
+    // Primero los fans de la categoría y luego el resto, sin repetir: nadie
+    // reseña dos veces el mismo carro y cada uno reseña sobre todo lo suyo.
+    const count = faker.number.int({ min: MIN_REVIEWS_PER_VEHICLE, max: MAX_REVIEWS_PER_VEHICLE });
+    const fans = faker.helpers.shuffle(
+      users.filter((user) => user.preferences.categories.includes(vehicle.category))
+    );
+    const others = faker.helpers.shuffle(
+      users.filter((user) => !user.preferences.categories.includes(vehicle.category))
+    );
+    const authors = [...fans.slice(0, count - 1), ...others].slice(0, count);
     // La primera de cada vehículo siempre es reciente, para que el mapa nunca
     // salga vacío; de las demás, la mayoría también.
     authors.forEach((author, i) => {
