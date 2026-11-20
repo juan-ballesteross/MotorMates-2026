@@ -93,6 +93,7 @@ class StoryRepositoryImpl @Inject constructor(
         val sinceMillis = System.currentTimeMillis() - ACTIVE_WINDOW_MS
         return storyDataSource.observeActiveStories(sinceMillis)
             .map { dtos -> dtos.map { it.toDomain() }.groupedByUser() }
+            .map { it.withLiveAvatars() }
             .catch { emit(emptyList()) }
     }
 
@@ -101,6 +102,16 @@ class StoryRepositoryImpl @Inject constructor(
         return byUser.keys
             .sortedByDescending { uid -> byUser.getValue(uid).maxOf { it.createdAt.orEmpty() } }
             .flatMap { uid -> byUser.getValue(uid).sortedBy { it.createdAt.orEmpty() } }
+    }
+
+    private suspend fun List<Story>.withLiveAvatars(): List<Story> = coroutineScope {
+        val profilesByUser = map { it.userId }.distinct().associateWith { uid ->
+            async { runCatching { userDataSource.getUser(uid) }.getOrNull() }
+        }
+        map { story ->
+            val profile = profilesByUser.getValue(story.userId).await()
+            if (profile != null) story.copy(userAvatarUrl = profile.avatarUrl) else story
+        }
     }
 
     override suspend fun likeStory(storyId: String, storyOwnerId: String): Result<Unit> {
