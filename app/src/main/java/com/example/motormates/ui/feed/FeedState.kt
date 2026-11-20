@@ -34,6 +34,8 @@ data class FeedUiState(
     val suggestions: List<SuggestedUser> = emptyList(),
     /** Reseñas de los gustos del usuario para completar Siguiendo cuando es corta. */
     val featuredReviews: List<FeedReviewUi> = emptyList(),
+    /** Su carro (del garaje, con foto) para "Modifica tu …" en Herramientas AI. */
+    val myCarForTuning: FeedVehicleUi? = null,
 
     // Variables de estado para Noticias
     val newsArticles: List<NewsArticleUi> = emptyList(),

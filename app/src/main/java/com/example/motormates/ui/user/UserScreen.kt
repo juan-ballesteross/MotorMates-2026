@@ -32,6 +32,8 @@ fun UserScreen(
     onLoggedOut: () -> Unit = {},
     onPublishVehicleClick: () -> Unit = {},
     onUserClick: (String) -> Unit = {},
+    onEventClick: (String) -> Unit = {},
+    onCreateEventClick: () -> Unit = {},
     reloadSignal: Boolean = false,
     onReloadHandled: () -> Unit = {},
     viewModel: UserViewModel = hiltViewModel(),
@@ -69,6 +71,13 @@ fun UserScreen(
     }
 
     UserScreenContent(
+        myEvents = uiState.myEvents,
+        isEventsLoading = uiState.isEventsLoading,
+        eventsError = uiState.eventsError,
+        nowMillis = uiState.nowMillis,
+        onEventClick = onEventClick,
+        onRetryEvents = viewModel::loadMyEvents,
+        onCreateEventClick = onCreateEventClick,
         profile = uiState.profile,
         profileImageUrl = uiState.profileImageUrl,
         coverImageUrl = uiState.coverImageUrl,

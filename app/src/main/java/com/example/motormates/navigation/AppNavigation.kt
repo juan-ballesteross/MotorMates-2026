@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.motormates.data.model.NotificationType
+import com.example.motormates.navigateToBottomTab
 import com.example.motormates.ui.aiTuning.AiTuningScreen
 import com.example.motormates.ui.alerts.AlertsScreen
 import com.example.motormates.ui.buildDetail.BuildDetailScreen
@@ -30,6 +33,7 @@ import com.example.motormates.ui.compare.CompareScreen
 import com.example.motormates.ui.editProfile.EditProfileScreen
 import com.example.motormates.ui.eventDetail.EventDetailScreen
 import com.example.motormates.ui.feed.FeedScreen
+import com.example.motormates.ui.findPart.FindPartScreen
 import com.example.motormates.ui.followlist.FollowListScreen
 import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.ui.login.LoginScreen
@@ -46,6 +50,17 @@ import com.example.motormates.ui.story.StoryScreen
 import com.example.motormates.ui.user.UserScreen
 import com.example.motormates.ui.vehicleDetail.VehicleDetailScreen
 
+/** Vuelve al feed y descarta todo lo que había encima (botones "Terminar"). */
+internal fun NavHostController.goHome() {
+    navigate(ScreenRoute.Feed.route) {
+        popUpTo(ScreenRoute.Feed.route) { inclusive = false }
+        launchSingleTop = true
+    }
+}
+
+/** La lupa del feed le pide a Explorar que abra con el teclado listo. */
+private const val FOCUS_SEARCH = "focusSearch"
+
 @Composable
 fun AppNavigation(
     navController: NavHostController,
@@ -59,6 +74,24 @@ fun AppNavigation(
             navController.navigate(ScreenRoute.Profile.route)
         } else {
             navController.navigate(ScreenRoute.PublicProfileFirebase.createRoute(userId))
+        }
+    }
+
+    // Tocar una notificación de AI deja una ruta pendiente. Se navega en
+    // cuanto el usuario está dentro de la app (no en splash, login u onboarding).
+    val pendingRoute by sessionViewModel.pendingRoute.collectAsStateWithLifecycle()
+    val currentEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentEntry?.destination?.route
+    LaunchedEffect(pendingRoute, currentRoute) {
+        if (pendingRoute == null || currentRoute == null) return@LaunchedEffect
+        val outsideApp = currentRoute == ScreenRoute.Splash.route ||
+            currentRoute == ScreenRoute.Login.route ||
+            currentRoute == ScreenRoute.Register.route ||
+            currentRoute.startsWith("onboarding")
+        if (!outsideApp) {
+            sessionViewModel.consumePendingRoute()?.let { route ->
+                navController.navigate(route) { launchSingleTop = true }
+            }
         }
     }
 
@@ -149,6 +182,14 @@ fun AppNavigation(
                 },
                 onAuthorClick = ::openAuthor,
                 onAlertsClick = { navController.navigate(ScreenRoute.Alerts.route) },
+                onAiTuningClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.AiTuning.createRoute(vehicleId))
+                },
+                onFindPartClick = { navController.navigate(ScreenRoute.FindPart.route) },
+                onSearchClick = {
+                    navController.navigateToBottomTab(ScreenRoute.Explore.route)
+                    navController.currentBackStackEntry?.savedStateHandle?.set(FOCUS_SEARCH, true)
+                },
                 onEventDetailClick = { eventId ->
                     navController.navigate(ScreenRoute.EventDetail.createRoute(eventId))
                 },
@@ -160,8 +201,12 @@ fun AppNavigation(
                 }
             )
         }
-        composable(ScreenRoute.Explore.route) {
+        composable(ScreenRoute.Explore.route) { entry ->
+            val focusSearch by entry.savedStateHandle.getStateFlow(FOCUS_SEARCH, false)
+                .collectAsStateWithLifecycle()
             SearchScreen(
+                focusSearch = focusSearch,
+                onFocusHandled = { entry.savedStateHandle[FOCUS_SEARCH] = false },
                 onCarClick = { car ->
                     navController.navigate(ScreenRoute.VehicleDetail.createRoute(car.id))
                 },
@@ -217,6 +262,8 @@ fun AppNavigation(
                 },
                 onPublishVehicleClick = { navController.navigate(ScreenRoute.Post.route) },
                 onUserClick = ::openAuthor,
+                onEventClick = { eventId -> navController.navigate(ScreenRoute.EventDetail.createRoute(eventId)) },
+                onCreateEventClick = { navController.navigate(ScreenRoute.NewEvent.createRoute()) },
                 reloadSignal = reviewsChanged || profileChanged,
                 onReloadHandled = {
                     entry.clearReviewsChanged()
@@ -357,16 +404,29 @@ fun AppNavigation(
         composable(
             route = ScreenRoute.AiTuning.route,
             arguments = listOf(
-                navArgument(ScreenRoute.AiTuning.ARG_VEHICLE_ID) { type = NavType.StringType }
+                navArgument(ScreenRoute.AiTuning.ARG_VEHICLE_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
             )
         ) { entry ->
-            val vehicleId = entry.arguments?.getString(ScreenRoute.AiTuning.ARG_VEHICLE_ID).orEmpty()
+            val vehicleId = entry.arguments?.getString(ScreenRoute.AiTuning.ARG_VEHICLE_ID)
             AiTuningScreen(
                 vehicleId = vehicleId,
                 onBackClick = { navController.popBackStack() },
                 onOpenBuild = { buildId ->
                     navController.navigate(ScreenRoute.BuildDetail.createRoute(buildId))
-                }
+                },
+                onFinished = { navController.goHome() }
+            )
+        }
+        composable(ScreenRoute.FindPart.route) {
+            FindPartScreen(
+                onBack = { navController.popBackStack() },
+                // La pieza va a AI Tuning sin carro: allí se elige cuál.
+                onTuneWithPart = { navController.navigate(ScreenRoute.AiTuning.createRoute()) },
+                onFinished = { navController.goHome() }
             )
         }
         composable(
@@ -583,6 +643,7 @@ fun AppNavigation(
         composable(ScreenRoute.ChatList.route) {
             ChatListScreen(
                 onBackClick = { navController.popBackStack() },
+                onUserClick = ::openAuthor,
                 onChatClick = { otherUid ->
                     navController.navigate(ScreenRoute.Chat.createRoute(otherUid))
                 }

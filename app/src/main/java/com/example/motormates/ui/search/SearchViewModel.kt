@@ -2,11 +2,12 @@ package com.example.motormates.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.motormates.data.mock.SearchMocks
 import com.example.motormates.data.model.SearchCategoryKey
+import com.example.motormates.data.model.toCarListing
 import com.example.motormates.data.model.toUserSearchResult
 import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.UserRepository
+import com.example.motormates.data.repository.VehicleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,15 +18,38 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val vehicleRepository: VehicleRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState
 
     init {
-        _uiState.update { it.copy(allCars = SearchMocks.sampleSearchCars).filterCars() }
+        loadCars()
         loadUsers()
+    }
+
+    /** El catálogo real (los mismos vehículos del feed), no los de prueba. */
+    fun loadCars() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingCars = true, carsError = null) }
+            vehicleRepository.getVehicles().fold(
+                onSuccess = { vehicles ->
+                    _uiState.update {
+                        it.copy(
+                            allCars = vehicles.map { vehicle -> vehicle.toCarListing() },
+                            isLoadingCars = false
+                        ).filterCars()
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(isLoadingCars = false, carsError = error.message ?: "No se pudieron cargar los carros")
+                    }
+                }
+            )
+        }
     }
 
     /** Usuarios reales registrados con Firebase, para el buscador. */
@@ -65,7 +89,8 @@ class SearchViewModel @Inject constructor(
             val matchesQuery = searchQuery.isBlank() ||
                 car.brand.contains(searchQuery, ignoreCase = true) ||
                 car.model.contains(searchQuery, ignoreCase = true) ||
-                car.ownerName.contains(searchQuery, ignoreCase = true)
+                car.ownerName.orEmpty().contains(searchQuery, ignoreCase = true) ||
+                car.categoryLabel.contains(searchQuery, ignoreCase = true)
             matchesCategory && matchesQuery
         }
         return copy(filteredCars = filtered)

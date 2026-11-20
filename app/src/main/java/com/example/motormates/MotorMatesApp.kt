@@ -95,7 +95,15 @@ fun MotorMatesApp(modifier: Modifier = Modifier) {
                 showPublishSheet = false
                 navController.navigate(ScreenRoute.NewEvent.createRoute())
             },
-            onDismiss = { showPublishSheet = false }
+            onDismiss = { showPublishSheet = false },
+            onAiTuningClick = {
+                showPublishSheet = false
+                navController.navigate(ScreenRoute.AiTuning.createRoute())
+            },
+            onFindPartClick = {
+                showPublishSheet = false
+                navController.navigate(ScreenRoute.FindPart.route)
+            }
         )
     }
 }
@@ -108,7 +116,8 @@ private fun String?.toMainBottomDestination(): MainBottomDestination = when (thi
     else -> MainBottomDestination.FEED
 }
 
-private fun NavHostController.navigateToBottomTab(route: String) {
+/** Igual que tocar una pestaña de la barra inferior (también lo usa la lupa del feed). */
+internal fun NavHostController.navigateToBottomTab(route: String) {
     navigate(route) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true

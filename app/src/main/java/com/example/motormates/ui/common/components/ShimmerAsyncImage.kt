@@ -10,15 +10,21 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import androidx.compose.ui.unit.dp
 
 @Composable
 private fun shimmerBrush(): Brush {
@@ -56,8 +62,24 @@ fun ShimmerAsyncImage(
             contentScale = contentScale,
             modifier = Modifier.fillMaxSize()
         )
-        if (painter.state is AsyncImagePainter.State.Loading) {
-            Box(modifier = Modifier.fillMaxSize().background(shimmerBrush()))
+        when (painter.state) {
+            is AsyncImagePainter.State.Loading ->
+                Box(modifier = Modifier.fillMaxSize().background(shimmerBrush()))
+            // Sin foto o con una URL que falla: un respaldo en vez de un hueco en blanco.
+            is AsyncImagePainter.State.Error, is AsyncImagePainter.State.Empty -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DirectionsCar,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+            else -> Unit
         }
     }
 }

@@ -11,8 +11,12 @@ import com.example.motormates.data.model.TuningPackage
 import com.example.motormates.data.model.TuningSummary
 import com.example.motormates.data.model.Vehicle
 
-/** CONFIGURING: eligiendo piezas. GENERATING: esperando a la AI. RESULT: antes/después. */
-enum class TuningPhase { CONFIGURING, GENERATING, RESULT }
+/**
+ * PICK_VEHICLE: eligiendo qué carro modificar (se entró sin carro).
+ * CONFIGURING: eligiendo piezas. GENERATING: esperando a la AI.
+ * RESULT: antes/después.
+ */
+enum class TuningPhase { PICK_VEHICLE, CONFIGURING, GENERATING, RESULT }
 
 /** Estado de una búsqueda con Google (precio en vivo o identificación de pieza). */
 data class GroundedUi(
@@ -30,6 +34,16 @@ data class AiTuningState(
     val message: String? = null,
     val vehicle: Vehicle? = null,
     val isOwner: Boolean = false,
+    val currentUserId: String? = null,
+
+    // --- elegir vehículo (cuando se entra sin carro) ---
+    /** Se entró sin carro: se puede volver a elegir otro desde el configurador. */
+    val canChangeVehicle: Boolean = false,
+    val pickerVehicles: List<Vehicle> = emptyList(),
+    val pickerQuery: String = "",
+    val pickerCategory: String? = null,
+    val isPickerLoading: Boolean = false,
+    val pickerError: String? = null,
 
     // --- configurador ---
     /** Solo las piezas compatibles con este vehículo. */
@@ -65,8 +79,28 @@ data class AiTuningState(
     val livePrices: Map<String, GroundedUi> = emptyMap(),
     val remainingGenerations: Int? = null,
     val isSaving: Boolean = false,
-    val savedBuild: Build? = null
+    val savedBuild: Build? = null,
+
+    // --- terminar ---
+    /** "¿Salir sin guardar?" al tocar Terminar con un resultado sin guardar. */
+    val showFinishConfirm: Boolean = false,
+    /** Terminó: la pantalla vuelve al inicio. */
+    val isFinished: Boolean = false,
+    /** Otro carro se está modificando ahora (una modificación a la vez). */
+    val busyWithVehicleName: String? = null
 ) {
+    /** Carros del usuario primero ("Mis carros"), con el filtro aplicado. */
+    val myPickerVehicles: List<Vehicle>
+        get() = pickerVehicles.filter { currentUserId != null && it.ownerId == currentUserId }
+            .filterForPicker(pickerQuery, pickerCategory)
+
+    val otherPickerVehicles: List<Vehicle>
+        get() = pickerVehicles.filterNot { currentUserId != null && it.ownerId == currentUserId }
+            .filterForPicker(pickerQuery, pickerCategory)
+
+    val pickerCategories: List<String>
+        get() = pickerVehicles.map { it.category }.distinct().sorted()
+
     /** En el orden de los chips, no en el orden en que se tocaron. */
     val selectedParts: List<Part>
         get() = PartCategory.entries.mapNotNull { category ->
@@ -85,7 +119,7 @@ data class AiTuningState(
             TuningMode.CATALOG -> selection.isNotEmpty()
             TuningMode.OWN_PART -> ownPartImage != null
             TuningMode.FREE -> freeIdea.isNotBlank()
-        } && remainingGenerations != 0
+        } && remainingGenerations != 0 && busyWithVehicleName == null
 
     val hasNoGenerationsLeft: Boolean get() = remainingGenerations == 0
 }

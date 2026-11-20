@@ -50,7 +50,8 @@ data class GeneratedImage(
     val image: TuningImage,
     val prompt: String,
     /** Generaciones que le quedan hoy al usuario. */
-    val remainingToday: Int
+    /** Imágenes que le quedan hoy; null = sin límite. */
+    val remainingToday: Int?
 )
 
 /** Error con mensaje listo para mostrar. */
@@ -174,7 +175,8 @@ class AiTuningRepositoryImpl @Inject constructor(
     override suspend fun remainingGenerations(): Int? {
         val uid = authRepository.getCurrentUser()?.id ?: return null
         return runCatching {
-            (config.dailyGenerationLimit() - usage.usedToday(uid, today())).coerceAtLeast(0)
+            val limit = config.dailyGenerationLimit() ?: return null
+            (limit - usage.usedToday(uid, today())).coerceAtLeast(0)
         }.getOrNull()
     }
 
@@ -184,10 +186,11 @@ class AiTuningRepositoryImpl @Inject constructor(
         return dto.toDomain()
     }
 
-    private suspend fun consumeGeneration(): Int {
+    /** Cuenta una generación. Sin límite configurado no toca aiUsage y devuelve null. */
+    private suspend fun consumeGeneration(): Int? {
         val uid = authRepository.getCurrentUser()?.id
             ?: throw TuningException("Debes iniciar sesión para usar AI Tuning")
-        val limit = config.dailyGenerationLimit()
+        val limit = config.dailyGenerationLimit() ?: return null
         val consumed = usage.tryConsume(uid, today(), limit)
         if (!consumed) {
             throw TuningException("Llegaste al límite de $limit imágenes por hoy. Vuelve mañana.")

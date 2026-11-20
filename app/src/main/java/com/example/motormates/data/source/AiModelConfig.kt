@@ -20,7 +20,8 @@ interface AiModelConfig {
 
     /** Se usa cuando el modelo de texto principal está saturado (503). */
     suspend fun textFallbackModel(): String
-    suspend fun dailyGenerationLimit(): Int
+    /** Imágenes por usuario al día; null = sin límite (mientras se desarrolla). */
+    suspend fun dailyGenerationLimit(): Int?
 
     /** true: Vertex AI Gemini API; false: Gemini Developer API. */
     suspend fun useVertexAi(): Boolean
@@ -43,8 +44,8 @@ class RemoteConfigAiModelConfig @Inject constructor(
     override suspend fun textFallbackModel(): String =
         ensureFetched().getString(KEY_TEXT_FALLBACK_MODEL).ifBlank { DEFAULT_TEXT_FALLBACK_MODEL }
 
-    override suspend fun dailyGenerationLimit(): Int =
-        ensureFetched().getLong(KEY_DAILY_LIMIT).toInt().takeIf { it > 0 } ?: DEFAULT_DAILY_LIMIT
+    override suspend fun dailyGenerationLimit(): Int? =
+        ensureFetched().getLong(KEY_DAILY_LIMIT).toInt().takeIf { it > 0 }
 
     override suspend fun useVertexAi(): Boolean =
         ensureFetched().getString(KEY_BACKEND).ifBlank { DEFAULT_BACKEND } != BACKEND_GOOGLE_AI
@@ -85,7 +86,8 @@ class RemoteConfigAiModelConfig @Inject constructor(
         const val DEFAULT_IMAGE_MODEL = "gemini-3.1-flash-image"
         const val DEFAULT_TEXT_MODEL = "gemini-3.8-flash"
         const val DEFAULT_TEXT_FALLBACK_MODEL = "gemini-3.5-flash-lite"
-        const val DEFAULT_DAILY_LIMIT = 5
+        /** 0 = sin límite. Para volver a limitar, poner ai_daily_limit en Remote Config. */
+        const val DEFAULT_DAILY_LIMIT = 0
         const val DEFAULT_BACKEND = BACKEND_VERTEX_AI
 
         private const val FETCH_INTERVAL_SECONDS = 3600L

@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,7 +30,8 @@ import com.example.motormates.ui.theme.MotorMatesTheme
 import com.example.motormates.ui.theme.Spacing
 
 /**
- * Qué se va a publicar: una publicación o un evento.
+ * Qué se quiere hacer: publicar (publicación o evento) o usar las
+ * herramientas AI (modificar un carro o encontrar una pieza).
  *
  * Aparece al tocar el "+" de la barra inferior, que antes iba directo a la
  * pantalla de publicación. Es un toque más, a cambio de que crear un evento
@@ -39,7 +42,9 @@ import com.example.motormates.ui.theme.Spacing
 fun PublishSheet(
     onPostClick: () -> Unit,
     onEventClick: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onAiTuningClick: () -> Unit = {},
+    onFindPartClick: () -> Unit = {}
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -64,6 +69,21 @@ fun PublishSheet(
                 description = stringResource(R.string.publish_sheet_event_description),
                 testTag = "publishSheetEvent",
                 onClick = onEventClick
+            )
+            // Las herramientas AI, a mano desde cualquier pestaña.
+            PublishOption(
+                icon = Icons.Filled.AutoAwesome,
+                label = stringResource(R.string.publish_sheet_ai_tuning),
+                description = stringResource(R.string.publish_sheet_ai_tuning_description),
+                testTag = "publishSheetAiTuning",
+                onClick = onAiTuningClick
+            )
+            PublishOption(
+                icon = Icons.Filled.ImageSearch,
+                label = stringResource(R.string.publish_sheet_find_part),
+                description = stringResource(R.string.publish_sheet_find_part_description),
+                testTag = "publishSheetFindPart",
+                onClick = onFindPartClick
             )
         }
     }

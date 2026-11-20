@@ -90,4 +90,14 @@ class PartsCatalogFileTest {
         assertThat(electrico.parts.map { it.category })
             .containsNoneOf(PartCategory.ESCAPE, PartCategory.ADMISION, PartCategory.ECU)
     }
+
+    @Test
+    fun `las fotos de piezas son https y las de colores no llevan foto`() {
+        val withPhoto = catalog.parts.filter { it.imageUrl != null }
+
+        assertThat(withPhoto).isNotEmpty()
+        withPhoto.forEach { part -> assertThat(part.imageUrl).startsWith("https://") }
+        // El color se pinta como muestra; una foto de otro carro confundiría a la AI.
+        assertThat(catalog.parts.filter { it.category == PartCategory.COLOR }.all { it.imageUrl == null }).isTrue()
+    }
 }

@@ -26,6 +26,7 @@ import com.example.motormates.data.model.FeedTab
 import com.example.motormates.data.model.FeedVehicleUi
 import com.example.motormates.data.model.StoryUser
 import com.example.motormates.data.util.SuggestedUser
+import com.example.motormates.ui.feed.components.AiToolsCard
 import com.example.motormates.ui.feed.components.FeedSectionHeader
 import com.example.motormates.ui.feed.components.FollowSuggestionsSection
 import com.example.motormates.ui.feed.components.ForYouCarousel
@@ -65,7 +66,10 @@ fun FeedScreenContent(
     featuredReviews: List<FeedReviewUi> = emptyList(),
     showFollowingDiscovery: Boolean = false,
     onPersonalizeClick: () -> Unit = {},
-    onFollowSuggested: (String) -> Unit = {}
+    onFollowSuggested: (String) -> Unit = {},
+    myCarForTuning: FeedVehicleUi? = null,
+    onAiTuningClick: (vehicleId: String?) -> Unit = {},
+    onFindPartClick: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -97,6 +101,14 @@ fun FeedScreenContent(
                                 .clickable(onClick = onDismissStoryError)
                         )
                     }
+                }
+
+                item(key = "aiTools") {
+                    AiToolsCard(
+                        myCarName = myCarForTuning?.let { "${it.brand} ${it.model}" },
+                        onTuneClick = { onAiTuningClick(myCarForTuning?.id) },
+                        onFindPartClick = onFindPartClick
+                    )
                 }
 
                 // Quien saltó el onboarding (o no marcó nada) recibe la invitación.

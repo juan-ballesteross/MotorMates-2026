@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <!-- Desde Android 13 (API 33) las notificaciones no se muestran si el usuario no da este permiso -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- AiTaskService: mantiene viva la app mientras la AI genera o busca (servicio corto) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <!-- Para guardar dónde se publicó una reseña y poder pintarla en el mapa.
          Es opcional: si el usuario lo niega, la reseña se publica sin ubicación
          y simplemente no aparece en el mapa.
@@ -48,6 +50,11 @@
         </activity>
 
         <!-- Recibe los mensajes que manda la Cloud Function por FCM -->
+        <service
+            android:name=".notifications.AiTaskService"
+            android:exported="false"
+            android:foregroundServiceType="shortService" />
+
         <service
             android:name=".notifications.MotorMatesMessagingService"
             android:exported="false">

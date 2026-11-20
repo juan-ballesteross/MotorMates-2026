@@ -78,6 +78,8 @@
     {
       "id": "rin_18_5radios_negro", "name": "Rin 18\" 5 radios dobles negro mate", "brand": "Aleación flow-formed (tipo Enkei / OZ)",
       "category": "RINES",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/McLaren_Senna_prototype_wheel.jpg/960px-McLaren_Senna_prototype_wheel.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:McLaren_Senna_prototype_wheel.jpg",
       "priceMinCop": 4500000, "priceMaxCop": 7500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": -6, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo", "Eléctrico", "Clásico"], "visible": true,
@@ -96,6 +98,8 @@
     {
       "id": "rin_17_offroad_negro", "name": "Rin 17\" off-road negro con llanta AT", "brand": "Aleación off-road (tipo Method / Fuel)",
       "category": "RINES",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/Jeep_Wheel_with_BFGoodrich_Mud-Terrain_TA_Tire.jpg/960px-Jeep_Wheel_with_BFGoodrich_Mud-Terrain_TA_Tire.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Jeep_Wheel_with_BFGoodrich_Mud-Terrain_TA_Tire.jpg",
       "priceMinCop": 6000000, "priceMaxCop": 11000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 20, "heightDeltaMm": 20,
       "compatibleCategories": ["SUV", "Pickup"], "visible": true,
@@ -105,6 +109,8 @@
     {
       "id": "rin_15_clasico_cromo", "name": "Rin 15\" clásico cromado", "brand": "Rin estilo vintage (tipo Cragar)",
       "category": "RINES",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/28/Jaguar_XK_Flute_%289x18%22%2C_chromed%29_alloy_wheel.jpg/960px-Jaguar_XK_Flute_%289x18%22%2C_chromed%29_alloy_wheel.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Jaguar_XK_Flute_(9x18%22,_chromed)_alloy_wheel.jpg",
       "priceMinCop": 3000000, "priceMaxCop": 5500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 2, "heightDeltaMm": 0,
       "compatibleCategories": ["Clásico"], "visible": true,
@@ -115,6 +121,8 @@
     {
       "id": "aero_lip_spoiler", "name": "Lip spoiler en fibra de carbono", "brand": "Fibra de carbono",
       "category": "AERO",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/2014_Chevy_Corvette_Stingray_front_lip_spoiler.jpg/960px-2014_Chevy_Corvette_Stingray_front_lip_spoiler.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:2014_Chevy_Corvette_Stingray_front_lip_spoiler.jpg",
       "priceMinCop": 800000, "priceMaxCop": 1800000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 1, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo", "Eléctrico", "Clásico"], "visible": true,
@@ -133,6 +141,8 @@
     {
       "id": "aero_kit_splitter_difusor", "name": "Splitter delantero + difusor trasero", "brand": "Fibra de carbono / ABS",
       "category": "AERO",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Diffuser_Toyota.jpg/960px-Diffuser_Toyota.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Diffuser_Toyota.jpg",
       "priceMinCop": 1800000, "priceMaxCop": 4000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 3, "heightDeltaMm": -10,
       "compatibleCategories": ["Deportivo", "Eléctrico"], "visible": true,
@@ -208,6 +218,8 @@
     {
       "id": "admision_aire_frio", "name": "Admisión de aire frío (cold air intake)", "brand": "Tipo AEM / Injen",
       "category": "ADMISION",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/2008-04-01_Cold_air_intake_tube_with_filter.jpg/960px-2008-04-01_Cold_air_intake_tube_with_filter.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:2008-04-01_Cold_air_intake_tube_with_filter.jpg",
       "priceMinCop": 1500000, "priceMaxCop": 3500000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 3, "torqueDeltaPct": 2, "weightDeltaKg": -1, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo", "SUV", "Clásico", "Pickup"], "visible": false,
@@ -218,6 +230,8 @@
     {
       "id": "ecu_stage1", "name": "Reprogramación Stage 1", "brand": "Software de ECU (tipo APR / Cobb)",
       "category": "ECU",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/ECU_and_wire_bundles.JPG/960px-ECU_and_wire_bundles.JPG",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:ECU_and_wire_bundles.JPG",
       "priceMinCop": 2500000, "priceMaxCop": 5000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 15, "torqueDeltaPct": 20, "weightDeltaKg": 0, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo", "SUV", "Pickup"], "visible": false,

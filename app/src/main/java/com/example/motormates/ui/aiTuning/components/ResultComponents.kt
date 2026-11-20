@@ -76,7 +76,8 @@ private val GENERATING_MESSAGES = listOf(
 
 /** Espera de 10-20 s mientras Gemini edita la foto: foto original "respirando" + mensajes. */
 @Composable
-fun GeneratingView(baseImageUrl: String?, onCancel: () -> Unit, modifier: Modifier = Modifier) {
+fun GeneratingView(baseImageUrl: String?, onCancel: () -> Unit,
+    onLeave: () -> Unit = {}, modifier: Modifier = Modifier) {
     var messageIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -144,8 +145,19 @@ fun GeneratingView(baseImageUrl: String?, onCancel: () -> Unit, modifier: Modifi
             fontSize = 12.sp,
             textAlign = TextAlign.Center
         )
+        Spacer(Modifier.height(12.dp))
+        // No hace falta esperar aquí: la tarea sigue y llega una notificación.
+        Text(
+            "Puedes salir y seguir usando la app: te avisamos con una notificación cuando esté lista.",
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = 13.sp,
+            textAlign = TextAlign.Center
+        )
         Spacer(Modifier.height(16.dp))
-        TextButton(onClick = onCancel) { Text("Cancelar") }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            TextButton(onClick = onCancel, modifier = Modifier.testTag("cancelGenerationButton")) { Text("Cancelar") }
+            Button(onClick = onLeave, modifier = Modifier.testTag("leaveWhileGeneratingButton")) { Text("Seguir usando la app") }
+        }
     }
 }
 

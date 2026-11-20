@@ -10,8 +10,18 @@ está lo que quedó implementado, cómo configurarlo y cómo probarlo.
 
 ## 1. Qué hace
 
-Desde el detalle de un vehículo, el botón **"Modificar con AI"** (o
-**"Imagínalo modificado"** si el carro no es tuyo) abre el configurador:
+Se entra de tres formas:
+- **Desde el detalle de un vehículo**, con el botón **"Modificar con AI"** (o
+  **"Imagínalo modificado"** si el carro no es tuyo). Se modifica ese carro.
+- **Desde el menú "+"** (**"Modificar con AI"**).
+- **Desde la tarjeta "Herramientas AI"** de Explorar. Si tienes un carro con
+  foto en tu garaje, el botón dice "Modifica tu …" y entra con ese carro.
+
+Por el menú o la tarjeta sin carro, la pantalla empieza en **"¿Qué carro quieres
+modificar?"**: tus carros arriba y los de la comunidad debajo, con buscador y
+filtro por tipo. En el configurador queda un botón **"Cambiar carro"**.
+
+En el configurador hay tres modos:
 
 | Modo | Qué elige el usuario | Qué genera |
 |---|---|---|
@@ -22,7 +32,38 @@ Desde el detalle de un vehículo, el botón **"Modificar con AI"** (o
 En el resultado hay:
 - un **deslizador antes/después** sobre la foto,
 - **ajustes conversacionales** ("más bajo", "otro color") sobre la misma imagen,
-- y los botones **Guardar** (privado) o **Publicar** (visible para la comunidad).
+- los botones **Guardar** (privado) o **Publicar** (visible para la comunidad),
+- y **"Terminar e ir al inicio"**. Si el build no está guardado, pregunta
+  antes de salir.
+
+### En segundo plano, con notificación
+
+La imagen, los ajustes, el precio en Google y la identificación de piezas
+corren en `AiTaskManager`, no en la pantalla:
+- **Se puede salir mientras genera.** La pantalla lo dice ("Puedes salir y
+  seguir usando la app") y trae el botón "Seguir usando la app". Atrás ya no
+  cancela; para eso queda un botón **"Cancelar"**.
+- **Mientras trabaja**, un servicio corto en primer plano (`AiTaskService`,
+  tipo `shortService`, hasta ~3 min) muestra "Modificando tu …". Sin él,
+  Android congela la app en segundo plano y la tarea se detiene hasta volver.
+- **Al terminar**, si no estás mirando la pantalla, llega la notificación
+  **"¡Tu build está listo!"** con la imagen. Al tocarla se abre el resultado.
+  Las búsquedas avisan con "Encontramos tu pieza" o "Precio actual de …".
+- **Si vuelves** (desde la notificación o entrando otra vez), el resultado
+  sigue ahí. La ficha técnica se pide al volver, porque en segundo plano
+  Android corta la red.
+
+### Encontrar pieza
+
+Pantalla aparte (menú "+" o Herramientas AI) que solo busca. El flujo:
+1. Foto con la cámara o de la galería. ML Kit le quita el fondo.
+2. Descripción opcional.
+3. **Buscar en Google**, también en segundo plano y con notificación.
+4. Con el resultado puedes:
+   - **"Ponerla en un carro con AI"**: abre AI Tuning en modo "Tu pieza" con la
+     foto cargada, y eliges el carro;
+   - **"Buscar otra pieza"**;
+   - **"Terminar"**.
 
 Los **Builds** guardados aparecen:
 - en la pestaña **Builds** del perfil (con candado o globo según sean privados o públicos),
@@ -77,7 +118,7 @@ Llamadas a Gemini (Firebase AI Logic, backend Gemini Developer API):
    | `ai_image_model` | String | `gemini-3.1-flash-image` |
    | `ai_text_model` | String | `gemini-3.8-flash` |
    | `ai_text_fallback_model` | String | `gemini-3.5-flash-lite` |
-   | `ai_daily_limit` | Number | `5` |
+   | `ai_daily_limit` | Number | `0` (sin límite; ponle un número para limitar) |
    | `ai_backend` | String | `vertex_ai` (o `google_ai` para la Gemini Developer API) |
 
    Con `vertex_ai` el uso se cobra a la cuenta de facturación de Google Cloud
@@ -113,7 +154,17 @@ Llamadas a Gemini (Firebase AI Logic, backend Gemini Developer API):
   sustentación conviene reemplazarlos por datos reales de tiendas colombianas:
   `priceMinCop`, `priceMaxCop`, `sourceUrl`, `priceCheckedAt` y
   `priceSource: "referencia"`.
-- **Fotos:** guarda cada una en `seed/parts/images/<id>.jpg|png|webp` y corre:
+- **Fotos incluidas:** 7 piezas ya traen `imageUrl`:
+  - 3 rines (18" negro, 17" off-road, 15" cromado),
+  - el lip spoiler y el difusor,
+  - la admisión de aire frío y la ECU.
+
+  Son miniaturas de Wikimedia Commons, y `imageSourceUrl` apunta a la página del
+  archivo para el crédito. Solo se usaron fotos **de la pieza sola**: una foto de
+  un carro completo confundiría a Gemini, que la recibe como referencia. Por eso
+  el ala GT, los escapes, las luces, el polarizado y la suspensión siguen con su
+  ícono.
+- **Para agregar o cambiar una foto,** guárdala en `seed/parts/images/<id>.jpg|png|webp` y corre:
   ```bash
   node seed.js --parts
   ```
@@ -129,7 +180,7 @@ Llamadas a Gemini (Firebase AI Logic, backend Gemini Developer API):
 ```bash
 ./gradlew :app:testDebugUnitTest
 ```
-Son 73 pruebas nuevas en la JVM:
+Las pruebas propias de AI Tuning (además de las del resto de la app):
 
 | Prueba | Pruebas |
 |---|---|
@@ -141,7 +192,8 @@ Son 73 pruebas nuevas en la JVM:
 | AiTuningRepository | 16 |
 | PartsCatalogRepository | 5 |
 | BuildRepository | 6 |
-| AiTuningViewModel | 16 |
+| AiTuningViewModel | 26 (selector de carro, segundo plano, Terminar, sin límite) |
+| AiTaskManager | 6 (notificaciones, cancelar, entrega de la pieza) |
 
 ```bash
 ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.example.motormates.ui.aiTuning.AiTuningContentTest
@@ -164,8 +216,11 @@ configurador, la selección, los clics y la pantalla de resultado.
   Builds.
 - **"Tu pieza":** apunta la cámara a un carro de juguete o a una foto en el
   proyector; luego **Identificar pieza y precio**.
-- El límite diario (5 por defecto) se puede subir para la demo con
-  `ai_daily_limit` en Remote Config. Las reglas imponen un techo duro de 50.
+- **Sin límite diario mientras se desarrolla** (`ai_daily_limit` = 0). Para
+  limitar, pon un número en Remote Config. Con límite, las reglas imponen un
+  techo duro de 50.
+- **Para mostrar el segundo plano:** genera, sal al feed y espera la
+  notificación con la imagen.
 
 ## 7. Limitaciones conocidas
 
@@ -173,8 +228,12 @@ configurador, la selección, los clics y la pantalla de resultado.
   pueden salir deformados, y no garantiza compatibilidad física de la pieza.
 - El peso base y el 0-100 son **estimados**: el catálogo de vehículos no
   guarda el peso.
-- El límite diario se cuenta en el cliente, con reglas que solo permiten
-  subirlo de a uno. Para algo en producción habría que moverlo a una Cloud
-  Function.
+- **Límite diario:** cuando está activo, se cuenta en el cliente, con reglas que
+  solo permiten subirlo de a uno. Para algo en producción habría que moverlo a
+  una Cloud Function.
+- **Una modificación a la vez.** Si hay otra en curso con otro carro, la
+  pantalla lo avisa y no deja generar.
+- **Si Android mata el proceso** (poca memoria, o pasan más de ~3 min), la tarea
+  en curso se pierde. Los trabajos de 10-20 s no llegan a eso.
 - Los vehículos del seed no tienen `ownerId`, así que el botón dice
   "Imagínalo modificado" para todos.

@@ -20,4 +20,5 @@ data class GarageCar(
     val categoryLabel: String = ""
 )
 
-enum class ProfileTab { REVIEWS, GARAGE, BUILDS, ACTIVITY }
+/** EVENTS solo existe en el perfil propio (ver ProfileTabsRow.tabs). */
+enum class ProfileTab { REVIEWS, GARAGE, BUILDS, EVENTS, ACTIVITY }

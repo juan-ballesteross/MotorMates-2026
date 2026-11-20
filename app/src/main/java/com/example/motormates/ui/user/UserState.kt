@@ -1,5 +1,7 @@
 package com.example.motormates.ui.user
 
+import com.example.motormates.data.model.MyEvent
+
 import com.example.motormates.data.model.ActivityUi
 import com.example.motormates.data.model.Build
 import com.example.motormates.data.model.GarageVehicleUi
@@ -32,5 +34,11 @@ data class UserUiState(
     val activityError: String? = null,
     /** Mis builds de AI Tuning (publicados y privados). */
     val builds: List<Build> = emptyList(),
-    val isBuildsLoading: Boolean = false
+    val isBuildsLoading: Boolean = false,
+    /** Pestaña Eventos: los que organizo y a los que voy o me interesan. */
+    val myEvents: List<MyEvent> = emptyList(),
+    val isEventsLoading: Boolean = false,
+    val eventsError: String? = null,
+    /** Para separar próximos de pasados. */
+    val nowMillis: Long = 0L
 )

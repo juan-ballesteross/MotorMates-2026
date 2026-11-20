@@ -3,6 +3,7 @@ package com.example.motormates
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,13 +13,18 @@ import androidx.core.content.ContextCompat
 import com.example.motormates.di.ACTIVE_BACKEND
 import com.example.motormates.di.DataBackend
 import com.example.motormates.ui.theme.MotorMatesTheme
+import com.example.motormates.navigation.PendingNavigation
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 // String literal porque la constante Manifest.permission puede no existir en el SDK de compilación
 private const val ACCESS_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var pendingNavigation: PendingNavigation
 
     private val localNetworkPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -29,6 +35,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Abierta desde una notificación de AI: al entrar se va al resultado.
+        pendingNavigation.offer(intent?.getStringExtra(PendingNavigation.EXTRA_ROUTE))
         requestLocalNetworkPermissionIfNeeded()
         requestNotificationPermissionIfNeeded()
         setContent {
@@ -36,6 +44,13 @@ class MainActivity : ComponentActivity() {
                 MotorMatesApp()
             }
         }
+    }
+
+    /** La app ya estaba abierta y se tocó una notificación. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        pendingNavigation.offer(intent.getStringExtra(PendingNavigation.EXTRA_ROUTE))
     }
 
     /**

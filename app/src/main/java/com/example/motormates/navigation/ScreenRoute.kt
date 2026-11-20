@@ -104,10 +104,19 @@ sealed class ScreenRoute(val route: String) {
     }
 
     /** Configurador de AI Tuning de un vehículo. */
-    object AiTuning : ScreenRoute("aiTuning/{vehicleId}") {
+    /**
+     * AI Tuning. vehicleId es opcional: desde el detalle de un carro llega
+     * ese carro; desde el menú "+" o la tarjeta del feed no llega y la
+     * pantalla arranca pidiendo elegir uno.
+     */
+    object AiTuning : ScreenRoute("aiTuning?vehicleId={vehicleId}") {
         const val ARG_VEHICLE_ID = "vehicleId"
-        fun createRoute(vehicleId: String) = "aiTuning/$vehicleId"
+        fun createRoute(vehicleId: String? = null) =
+            if (vehicleId == null) "aiTuning" else "aiTuning?vehicleId=$vehicleId"
     }
+
+    /** Encontrar una pieza con una foto y Google (sin modificar ningún carro). */
+    object FindPart : ScreenRoute("findPart")
 
     /** Un Build guardado (imagen modificada + ficha). */
     object BuildDetail : ScreenRoute("build/{buildId}") {

@@ -32,6 +32,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.platform.testTag
+import com.example.motormates.data.model.UserSearchResult
 import com.example.motormates.R
 import com.example.motormates.data.model.ChatPreview
 import com.example.motormates.ui.theme.Radius
@@ -156,6 +164,79 @@ fun ChatPreviewRow(chat: ChatPreview, onClick: () -> Unit, modifier: Modifier = 
                 text = chat.timeAgo,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp
+            )
+        }
+    }
+}
+
+/**
+ * Una persona encontrada al buscar en Mensajes: escribirle (aunque no haya
+ * chat todavía) o seguirla sin salir de la lista.
+ */
+@Composable
+fun ChatPersonRow(
+    person: UserSearchResult,
+    isFollowing: Boolean,
+    onClick: () -> Unit,
+    onMessage: () -> Unit,
+    onToggleFollow: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.gutter, vertical = Spacing.xs)
+            .testTag("chatPerson_${person.uid}"),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (person.avatarUrl != null) {
+            AsyncImage(
+                model = person.avatarUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(44.dp).clip(CircleShape)
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(person.name.firstOrNull()?.uppercase() ?: "?", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+            }
+        }
+        Spacer(modifier = Modifier.width(Spacing.sm))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                person.name,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(person.handle, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp, maxLines = 1)
+        }
+        if (isFollowing) {
+            OutlinedButton(
+                onClick = onToggleFollow,
+                contentPadding = PaddingValues(horizontal = Spacing.sm),
+                modifier = Modifier.height(34.dp).testTag("chatPersonFollow_${person.uid}")
+            ) { Text("Siguiendo", fontSize = 13.sp) }
+        } else {
+            Button(
+                onClick = onToggleFollow,
+                contentPadding = PaddingValues(horizontal = Spacing.sm),
+                modifier = Modifier.height(34.dp).testTag("chatPersonFollow_${person.uid}")
+            ) { Text("Seguir", fontSize = 13.sp) }
+        }
+        IconButton(onClick = onMessage, modifier = Modifier.testTag("chatPersonMessage_${person.uid}")) {
+            Icon(
+                Icons.AutoMirrored.Filled.Send,
+                contentDescription = "Enviar mensaje a ${person.name}",
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }

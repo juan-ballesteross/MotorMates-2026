@@ -38,6 +38,11 @@ fun FeedScreen(
     onCreateEventClick: () -> Unit = {},
     /** "Personaliza tu feed": abre el onboarding para editar gustos. */
     onPersonalizeClick: () -> Unit = {},
+    /** La lupa de arriba: abre Explorar con el buscador listo para escribir. */
+    onSearchClick: () -> Unit = {},
+    /** Herramientas AI: null = elegir carro; con id, se modifica ese. */
+    onAiTuningClick: (String?) -> Unit = {},
+    onFindPartClick: () -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -87,7 +92,7 @@ fun FeedScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        FeedTopBar(onAlertsClick = onAlertsClick)
+        FeedTopBar(onAlertsClick = onAlertsClick, onSearchClick = onSearchClick)
         FeedTabsRow(
             selectedTab = uiState.selectedTab,
             onTabClick = viewModel::updateSelectedTab
@@ -136,7 +141,10 @@ fun FeedScreen(
             featuredReviews = uiState.featuredReviews,
             showFollowingDiscovery = uiState.showFollowingDiscovery,
             onPersonalizeClick = onPersonalizeClick,
-            onFollowSuggested = viewModel::followSuggested
+            onFollowSuggested = viewModel::followSuggested,
+            myCarForTuning = uiState.myCarForTuning,
+            onAiTuningClick = onAiTuningClick,
+            onFindPartClick = onFindPartClick
         )
     }
 }

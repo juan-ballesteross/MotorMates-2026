@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,7 +26,9 @@ import com.example.motormates.R
 @Composable
 fun FeedTopBar(
     onAlertsClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Lleva al buscador de Explorar (el mismo de la barra inferior). */
+    onSearchClick: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
@@ -41,7 +44,14 @@ fun FeedTopBar(
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.weight(1f)
         )
-        Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.feed_search_cd), tint = MaterialTheme.colorScheme.onBackground)
+        Icon(
+            Icons.Filled.Search,
+            contentDescription = stringResource(R.string.feed_search_cd),
+            tint = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier
+                .clickable(onClick = onSearchClick)
+                .testTag("feedSearchButton")
+        )
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
             Icons.Filled.Notifications,

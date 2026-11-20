@@ -255,4 +255,16 @@ class AiTuningRepositoryImplTest {
 
         assertThat(repository.remainingGenerations()).isEqualTo(2)
     }
+
+    @Test
+    fun `sin limite configurado no se cuenta nada y no hay restantes`() = runTest {
+        coEvery { config.dailyGenerationLimit() } returns null
+        coEvery { session.send(any(), any()) } returns resultImage
+
+        val generated = repository.generate(TuningRequest(porsche, TuningMode.CATALOG, parts = listOf(wheel))).getOrThrow()
+
+        assertThat(generated.remainingToday).isNull()
+        assertThat(repository.remainingGenerations()).isNull()
+        coVerify(exactly = 0) { usage.tryConsume(any(), any(), any()) }
+    }
 }

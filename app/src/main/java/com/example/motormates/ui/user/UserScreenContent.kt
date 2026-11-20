@@ -29,6 +29,7 @@ import com.example.motormates.R
 import com.example.motormates.data.model.ActivityUi
 import com.example.motormates.data.model.Build
 import com.example.motormates.data.model.GarageVehicleUi
+import com.example.motormates.data.model.MyEvent
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
 import com.example.motormates.data.model.UserReviewUi
@@ -42,6 +43,7 @@ import com.example.motormates.ui.user.components.ProfileHeader
 import com.example.motormates.ui.user.components.ProfileInfoSection
 import com.example.motormates.ui.user.components.ProfileReviewCard
 import com.example.motormates.ui.user.components.ProfileStatsRow
+import com.example.motormates.ui.user.components.ProfileEventCard
 import com.example.motormates.ui.user.components.ProfileTabsRow
 import com.example.motormates.ui.theme.Spacing
 
@@ -78,7 +80,14 @@ fun UserScreenContent(
     builds: List<Build> = emptyList(),
     isBuildsLoading: Boolean = false,
     onBuildClick: (String) -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    myEvents: List<MyEvent> = emptyList(),
+    isEventsLoading: Boolean = false,
+    eventsError: String? = null,
+    nowMillis: Long = 0L,
+    onEventClick: (String) -> Unit = {},
+    onRetryEvents: () -> Unit = {},
+    onCreateEventClick: () -> Unit = {}
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -107,7 +116,8 @@ fun UserScreenContent(
             )
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
-            ProfileTabsRow(selected = selectedTab, onSelect = onSelectTab)
+            // El perfil propio tiene además la pestaña Eventos.
+            ProfileTabsRow(selected = selectedTab, onSelect = onSelectTab, tabs = ProfileTab.entries)
         }
         when (selectedTab) {
             // Todo lo que hice, de lo más reciente a lo más viejo, agrupado
@@ -202,6 +212,52 @@ fun UserScreenContent(
                         onEditClick = onEditReviewClick,
                         onDeleteClick = onDeleteReviewClick
                     )
+                }
+            }
+            // Los que organizo o a los que dije "voy" / "me interesa".
+            ProfileTab.EVENTS -> when {
+                isEventsLoading -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(Modifier.fillMaxWidth().padding(Spacing.xl), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                eventsError != null && myEvents.isEmpty() -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.lg),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = eventsError, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+                        TextButton(onClick = onRetryEvents) { Text("Reintentar") }
+                    }
+                }
+                myEvents.isEmpty() -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(Spacing.lg),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Aún no tienes eventos. Márcate \"Voy\" o \"Me interesa\" en uno del mapa, o crea el tuyo.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                        TextButton(onClick = onCreateEventClick) { Text("Crear un evento") }
+                    }
+                }
+                else -> {
+                    val (upcoming, past) = myEvents.partition { (it.event.endAt ?: it.event.startAt) >= nowMillis }
+                    if (upcoming.isNotEmpty()) {
+                        item(key = "events_upcoming", span = { GridItemSpan(maxLineSpan) }) { ActivitySectionHeader(title = "Próximos") }
+                        gridItems(upcoming, key = { "event_${it.event.id}" }, span = { GridItemSpan(maxLineSpan) }) { item ->
+                            ProfileEventCard(item = item, isPast = false, onClick = { onEventClick(item.event.id) })
+                        }
+                    }
+                    if (past.isNotEmpty()) {
+                        item(key = "events_past", span = { GridItemSpan(maxLineSpan) }) { ActivitySectionHeader(title = "Pasados") }
+                        // Los más recientes primero.
+                        gridItems(past.reversed(), key = { "event_${it.event.id}" }, span = { GridItemSpan(maxLineSpan) }) { item ->
+                            ProfileEventCard(item = item, isPast = true, onClick = { onEventClick(item.event.id) })
+                        }
+                    }
                 }
             }
             // Mis builds de AI Tuning, públicos y privados.

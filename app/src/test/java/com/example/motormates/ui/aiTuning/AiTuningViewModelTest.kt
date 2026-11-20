@@ -27,7 +27,13 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import com.example.motormates.data.model.GroundedAnswer
+import com.example.motormates.notifications.AiNotifier
+import com.example.motormates.notifications.AppForegroundState
+import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -45,6 +51,9 @@ class AiTuningViewModelTest {
     private lateinit var aiTuningRepository: AiTuningRepository
     private lateinit var buildRepository: BuildRepository
     private lateinit var authRepository: AuthRepository
+    private lateinit var notifier: AiNotifier
+    private lateinit var foreground: AppForegroundState
+    private lateinit var taskManager: AiTaskManager
     private lateinit var viewModel: AiTuningViewModel
 
     private val porsche = Vehicle(
@@ -79,8 +88,20 @@ class AiTuningViewModelTest {
         coEvery { aiTuningRepository.remainingGenerations() } returns 5
         every { authRepository.getCurrentUser() } returns AuthUser("u1", null, "Ana")
 
-        viewModel = AiTuningViewModel(vehicleRepository, catalogRepository, aiTuningRepository, buildRepository, authRepository)
+        notifier = mockk(relaxed = true)
+        foreground = AppForegroundState()
+        // El manager corre en el mismo reloj de prueba que el ViewModel.
+        taskManager = AiTaskManager(
+            aiTuningRepository, notifier, foreground,
+            CoroutineScope(SupervisorJob() + mainDispatcherRule.testDispatcher)
+        )
+        viewModel = newViewModel()
     }
+
+    /** Como en la app: la pantalla avisa que está a la vista al abrirse. */
+    private fun newViewModel() = AiTuningViewModel(
+        vehicleRepository, catalogRepository, aiTuningRepository, buildRepository, authRepository, taskManager
+    ).also { it.setScreenVisible(true) }
 
     private suspend fun loaded() {
         viewModel.load("1")
@@ -344,5 +365,152 @@ class AiTuningViewModelTest {
         assertThat(state.phase).isEqualTo(TuningPhase.CONFIGURING)
         assertThat(state.resultParts.map { it.id }).containsExactly("escape")
         assertThat(state.selection).hasSize(2)
+    }
+
+    // ---------- elegir carro (entrar sin carro) ----------
+
+    @Test
+    fun `sin carro abre el selector con mis carros primero`() = runTest {
+        val tesla = porsche.copy(id = "4", brand = "Tesla", model = "Model 3", category = "Eléctrico", ownerId = "otro")
+        coEvery { vehicleRepository.getVehicles() } returns Result.success(listOf(tesla, porsche))
+
+        viewModel.start(null); advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertThat(state.phase).isEqualTo(TuningPhase.PICK_VEHICLE)
+        assertThat(state.canChangeVehicle).isTrue()
+        assertThat(state.myPickerVehicles.map { it.id }).containsExactly("1")
+        assertThat(state.otherPickerVehicles.map { it.id }).containsExactly("4")
+
+        viewModel.updatePickerQuery("tes")
+        assertThat(viewModel.state.value.otherPickerVehicles.map { it.id }).containsExactly("4")
+        assertThat(viewModel.state.value.myPickerVehicles).isEmpty()
+    }
+
+    @Test
+    fun `elegir un carro carga el configurador de ese carro`() = runTest {
+        coEvery { vehicleRepository.getVehicles() } returns Result.success(listOf(porsche))
+        viewModel.start(null); advanceUntilIdle()
+
+        viewModel.pickVehicle("1"); advanceUntilIdle()
+
+        assertThat(viewModel.state.value.phase).isEqualTo(TuningPhase.CONFIGURING)
+        assertThat(viewModel.state.value.vehicle?.id).isEqualTo("1")
+        assertThat(viewModel.state.value.canChangeVehicle).isTrue()
+    }
+
+    @Test
+    fun `desde el detalle de un carro no se ofrece cambiar de carro`() = runTest {
+        viewModel.start("1"); advanceUntilIdle()
+
+        assertThat(viewModel.state.value.phase).isEqualTo(TuningPhase.CONFIGURING)
+        assertThat(viewModel.state.value.canChangeVehicle).isFalse()
+    }
+
+    // ---------- segundo plano ----------
+
+    @Test
+    fun `la generacion sigue aunque se cierre la pantalla y al volver esta el resultado`() = runTest {
+        coEvery { aiTuningRepository.generate(any()) } returns Result.success(GeneratedImage(result, "p", null))
+        coEvery { aiTuningRepository.explain(any(), any(), any()) } returns Result.success(TuningInsights())
+        loaded(); advanceUntilIdle()
+        viewModel.togglePart("rin18")
+        viewModel.generate()
+        // Sale de la pantalla antes de que termine: nadie la mira.
+        viewModel.setScreenVisible(false)
+        advanceUntilIdle()
+
+        // Vuelve (p. ej. desde la notificación): pantalla nueva, mismo resultado.
+        val reopened = newViewModel()
+        reopened.start(null); advanceUntilIdle()
+
+        val state = reopened.state.value
+        assertThat(state.phase).isEqualTo(TuningPhase.RESULT)
+        assertThat(state.resultImage).isEqualTo(result)
+        assertThat(state.selection).containsExactly(PartCategory.RINES, "rin18")
+        verify { notifier.showDone(AiTaskManager.TUNING_NOTIFICATION_ID, any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `mirando la pantalla con la app abierta no llega notificacion`() = runTest {
+        coEvery { aiTuningRepository.generate(any()) } returns Result.success(GeneratedImage(result, "p", null))
+        coEvery { aiTuningRepository.explain(any(), any(), any()) } returns Result.success(TuningInsights())
+        foreground.onActivityStarted(mockk(relaxed = true))
+        viewModel.setScreenVisible(true)
+        loaded(); advanceUntilIdle()
+        viewModel.togglePart("rin18")
+
+        viewModel.generate(); advanceUntilIdle()
+
+        assertThat(viewModel.state.value.phase).isEqualTo(TuningPhase.RESULT)
+        verify(exactly = 0) { notifier.showDone(any(), any(), any(), any(), any()) }
+        // El servicio "trabajando" se suelta al terminar.
+        verify { notifier.stopKeepAlive() }
+    }
+
+    @Test
+    fun `el precio en google corre en el manager y llega al estado`() = runTest {
+        val answer = GroundedAnswer("Desde 2 millones", emptyList(), null)
+        coEvery { aiTuningRepository.livePrice(any()) } returns Result.success(answer)
+        loaded(); advanceUntilIdle()
+
+        viewModel.requestLivePrice("rin18"); advanceUntilIdle()
+
+        assertThat(viewModel.state.value.livePrices["rin18"]?.answer).isEqualTo(answer)
+    }
+
+    // ---------- terminar ----------
+
+    @Test
+    fun `terminar con un resultado sin guardar pide confirmacion y luego limpia`() = runTest {
+        coEvery { aiTuningRepository.generate(any()) } returns Result.success(GeneratedImage(result, "p", null))
+        coEvery { aiTuningRepository.explain(any(), any(), any()) } returns Result.success(TuningInsights())
+        loaded(); advanceUntilIdle()
+        viewModel.togglePart("rin18")
+        viewModel.generate(); advanceUntilIdle()
+
+        viewModel.requestFinish()
+        assertThat(viewModel.state.value.showFinishConfirm).isTrue()
+        assertThat(viewModel.state.value.isFinished).isFalse()
+
+        viewModel.finish()
+        assertThat(viewModel.state.value.isFinished).isTrue()
+        assertThat(taskManager.tuningTask.value).isNull()
+    }
+
+    @Test
+    fun `terminar sin resultado sale de una vez`() = runTest {
+        loaded(); advanceUntilIdle()
+
+        viewModel.requestFinish()
+
+        assertThat(viewModel.state.value.isFinished).isTrue()
+        assertThat(viewModel.state.value.showFinishConfirm).isFalse()
+    }
+
+    @Test
+    fun `sin limite diario se puede generar`() = runTest {
+        coEvery { aiTuningRepository.remainingGenerations() } returns null
+        loaded(); advanceUntilIdle()
+        viewModel.togglePart("rin18")
+
+        assertThat(viewModel.state.value.remainingGenerations).isNull()
+        assertThat(viewModel.state.value.canGenerate).isTrue()
+    }
+
+    @Test
+    fun `si la imagen termina fuera de la pantalla la ficha se pide al volver`() = runTest {
+        coEvery { aiTuningRepository.generate(any()) } returns Result.success(GeneratedImage(result, "p", null))
+        coEvery { aiTuningRepository.explain(any(), any(), any()) } returns Result.success(TuningInsights(summary = "ok"))
+        loaded(); advanceUntilIdle()
+        viewModel.togglePart("rin18")
+        viewModel.generate()
+        viewModel.setScreenVisible(false)
+        advanceUntilIdle()
+        coVerify(exactly = 0) { aiTuningRepository.explain(any(), any(), any()) }
+
+        viewModel.setScreenVisible(true); advanceUntilIdle()
+
+        assertThat(viewModel.state.value.insights?.summary).isEqualTo("ok")
     }
 }

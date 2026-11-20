@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Brush
+import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -36,7 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import com.example.motormates.ui.common.components.ShimmerAsyncImage
 import com.example.motormates.data.model.FeedVehicleUi
 import com.example.motormates.data.util.SuggestedUser
 import com.example.motormates.ui.onboarding.components.SuggestedUserRow
@@ -76,10 +79,9 @@ private fun ForYouCard(vehicle: FeedVehicleUi, onClick: () -> Unit) {
             .testTag("forYou_${vehicle.id}")
     ) {
         if (vehicle.imageUrl != null) {
-            AsyncImage(
+            ShimmerAsyncImage(
                 model = vehicle.imageUrl,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
         } else {
@@ -211,5 +213,83 @@ private fun SectionHeader(
         if (subtitle != null) {
             Text(text = subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
         }
+    }
+}
+
+/**
+ * Herramientas AI a mano en Explorar: modificar un carro (el propio si hay
+ * uno en el garaje) o encontrar una pieza con una foto.
+ */
+@Composable
+fun AiToolsCard(
+    myCarName: String?,
+    onTuneClick: () -> Unit,
+    onFindPartClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.gutter)
+            .clip(RoundedCornerShape(Radius.lg))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(Spacing.md)
+            .testTag("feedAiTools")
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary)
+            Spacer(modifier = Modifier.width(Spacing.xs))
+            Text("Herramientas AI", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        }
+        Spacer(modifier = Modifier.height(Spacing.sm))
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            AiToolButton(
+                icon = Icons.Default.Brush,
+                title = if (myCarName != null) "Modifica tu $myCarName" else "Modificar con AI",
+                subtitle = "Rines, color, aero…",
+                onClick = onTuneClick,
+                testTag = "feedAiTune",
+                modifier = Modifier.weight(1f)
+            )
+            AiToolButton(
+                icon = Icons.Default.ImageSearch,
+                title = "Encontrar pieza",
+                subtitle = "Con una foto",
+                onClick = onFindPartClick,
+                testTag = "feedAiFindPart",
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun AiToolButton(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    testTag: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(Radius.md))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .clickable(onClick = onClick)
+            .padding(Spacing.sm)
+            .testTag(testTag)
+    ) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Spacer(modifier = Modifier.height(Spacing.xxs))
+        Text(
+            title,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 14.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
     }
 }

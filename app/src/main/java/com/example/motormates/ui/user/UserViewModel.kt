@@ -10,6 +10,8 @@ import com.example.motormates.data.model.toUserProfile
 import com.example.motormates.data.model.toUserReviewUi
 import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.BuildRepository
+import com.example.motormates.data.repository.EventRepository
+import com.example.motormates.data.util.TimeSource
 import com.example.motormates.data.repository.ProfileImageRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.UserRepository
@@ -31,7 +33,9 @@ class UserViewModel @Inject constructor(
     private val vehicleRepository: VehicleRepository,
     private val authRepository: AuthRepository,
     private val activityRepository: ActivityRepository,
-    private val buildRepository: BuildRepository
+    private val buildRepository: BuildRepository,
+    private val eventRepository: EventRepository,
+    private val timeSource: TimeSource
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserUiState())
@@ -145,6 +149,23 @@ class UserViewModel @Inject constructor(
         // La actividad se consulta cada vez que se abre la pestaña: así
         // aparece lo que hice desde la última vez sin tener que recargar.
         if (tab == ProfileTab.ACTIVITY) loadActivity()
+        if (tab == ProfileTab.EVENTS) loadMyEvents()
+    }
+
+    /** Se consulta cada vez que se abre la pestaña: así sale lo que marqué hace poco. */
+    fun loadMyEvents() {
+        viewModelScope.launch {
+            val now = timeSource.nowMillis()
+            _uiState.update { it.copy(isEventsLoading = it.myEvents.isEmpty(), eventsError = null, nowMillis = now) }
+            eventRepository.getMyEvents(now).fold(
+                onSuccess = { events -> _uiState.update { it.copy(isEventsLoading = false, myEvents = events) } },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(isEventsLoading = false, eventsError = error.message ?: "No se pudieron cargar tus eventos")
+                    }
+                }
+            )
+        }
     }
 
     fun loadActivity() {

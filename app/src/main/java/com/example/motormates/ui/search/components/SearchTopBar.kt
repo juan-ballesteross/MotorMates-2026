@@ -16,6 +16,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -26,8 +31,18 @@ import com.example.motormates.ui.theme.Radius
 fun SearchTopBar(
     query: String,
     onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** true: se abrió desde la lupa del feed; el campo toma el foco y sale el teclado. */
+    focusOnOpen: Boolean = false,
+    onFocusHandled: () -> Unit = {}
 ) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(focusOnOpen) {
+        if (focusOnOpen) {
+            focusRequester.requestFocus()
+            onFocusHandled()
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -44,7 +59,10 @@ fun SearchTopBar(
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester)
+                .testTag("searchField"),
             placeholder = { Text(stringResource(R.string.search_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant) },
             leadingIcon = {
                 Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)

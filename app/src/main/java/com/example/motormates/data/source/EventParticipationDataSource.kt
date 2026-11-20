@@ -42,6 +42,9 @@ interface EventParticipationDataSource {
     ): ParticipationChange
 
     fun observeMyParticipation(eventId: String, userId: String): Flow<ParticipationStatus?>
+
+    /** Una sola lectura (la pestaña "Eventos" del perfil revisa varios a la vez). */
+    suspend fun getParticipation(eventId: String, userId: String): ParticipationStatus?
 }
 
 class FirestoreEventParticipationDataSource @Inject constructor(
@@ -103,6 +106,16 @@ class FirestoreEventParticipationDataSource @Inject constructor(
             }
         }.await()
     }
+
+    override suspend fun getParticipation(eventId: String, userId: String): ParticipationStatus? =
+        firestore.collection(EVENTS_COLLECTION)
+            .document(eventId)
+            .collection(PARTICIPANTS_COLLECTION)
+            .document(userId)
+            .get()
+            .await()
+            .getString("status")
+            ?.toParticipationStatusOrNull()
 
     /** Mismo molde que observeLikeExists en FirestoreLikeDataSource. */
     override fun observeMyParticipation(

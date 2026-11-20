@@ -100,6 +100,8 @@ fun PublicProfileScreenContent(
         }
         when (selectedTab) {
             // El backend no modela la actividad de otros usuarios.
+            // Los eventos de alguien más no se muestran: la pestaña no aparece.
+            ProfileTab.EVENTS -> Unit
             ProfileTab.ACTIVITY -> {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     ProfileEmptyTabState()

@@ -29,6 +29,8 @@ import com.example.motormates.ui.theme.MotorMatesTheme
 fun SearchScreen(
     onCarClick: (CarListing) -> Unit = {},
     onUserClick: (UserSearchResult) -> Unit = {},
+    focusSearch: Boolean = false,
+    onFocusHandled: () -> Unit = {},
     viewModel: SearchViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -43,7 +45,9 @@ fun SearchScreen(
     ) {
         SearchTopBar(
             query = uiState.searchQuery,
-            onQueryChange = viewModel::updateSearchQuery
+            onQueryChange = viewModel::updateSearchQuery,
+            focusOnOpen = focusSearch,
+            onFocusHandled = onFocusHandled
         )
         SearchScreenContent(
             categories = categories,

@@ -1,5 +1,6 @@
 package com.example.motormates.data.repository
 
+import com.example.motormates.data.model.MyEventRole
 import com.example.motormates.data.dto.EventFirestoreDto
 import com.example.motormates.data.dto.ReviewLocationSnapshot
 import com.example.motormates.data.dto.ReviewUserSnapshot
@@ -459,4 +460,41 @@ class EventRepositoryImplTest {
         location = location,
         startAt = inicio
     )
+
+    // ---------- Mis eventos (pestaña del perfil) ----------
+
+    @Test
+    fun `mis eventos junta los que organizo y a los que voy o me interesan`() = runTest {
+        every { authDataSource.getCurrentUser() } returns beto
+        every { eventDataSource.observeEventsBetween(any(), any()) } returns flowOf(
+            listOf(
+                dto(id = "propio", userId = "uid-beto"),
+                dto(id = "voy"),
+                dto(id = "interesa"),
+                dto(id = "nada")
+            )
+        )
+        coEvery { participationDataSource.getParticipation("voy", "uid-beto") } returns ParticipationStatus.GOING
+        coEvery { participationDataSource.getParticipation("interesa", "uid-beto") } returns ParticipationStatus.INTERESTED
+        coEvery { participationDataSource.getParticipation("nada", "uid-beto") } returns null
+
+        val result = repository.getMyEvents(inicio).getOrThrow()
+
+        assertThat(result.associate { it.event.id to it.role }).containsExactly(
+            "propio", MyEventRole.ORGANIZER,
+            "voy", MyEventRole.GOING,
+            "interesa", MyEventRole.INTERESTED
+        )
+        // El propio no consulta participación: se sabe por el organizador.
+        coVerify(exactly = 0) { participationDataSource.getParticipation("propio", any()) }
+    }
+
+    @Test
+    fun `mis eventos sin sesion falla con mensaje`() = runTest {
+        every { authDataSource.getCurrentUser() } returns null
+
+        val result = repository.getMyEvents(inicio)
+
+        assertThat(result.exceptionOrNull()?.message).isEqualTo("Debes iniciar sesión para ver tus eventos")
+    }
 }

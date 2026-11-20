@@ -4,6 +4,8 @@ import com.example.motormates.MainDispatcherRule
 import com.example.motormates.data.model.SearchCategoryKey
 import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.UserRepository
+import com.example.motormates.data.repository.VehicleRepository
+import com.example.motormates.data.util.OnboardingTestData.vehicle
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every
@@ -17,8 +19,8 @@ import org.junit.Test
 
 /**
  * SearchViewModel: los filtros de categoría y búsqueda deben partir siempre
- * del catálogo completo. Los carros salen de SearchMocks
- * (ids "1" a "8"), que coinciden con los vehículos semilla de Firestore.
+ * del catálogo completo. Los carros salen de VehicleRepository (el catálogo
+ * real de Firestore); aquí se simula con cuatro vehículos.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SearchViewModelTest {
@@ -34,14 +36,24 @@ class SearchViewModelTest {
         val authRepository: AuthRepository = mockk()
         coEvery { userRepository.getAllRegisteredUsers() } returns Result.success(emptyList())
         every { authRepository.getCurrentUser() } returns null
+        val vehicleRepository: VehicleRepository = mockk()
+        coEvery { vehicleRepository.getVehicles() } returns Result.success(
+            listOf(
+                vehicle("1", "Porsche", "Deportivo"),
+                vehicle("2", "Toyota", "SUV"),
+                vehicle("4", "Tesla", "Eléctrico"),
+                vehicle("5", "Chevrolet", "Deportivo")
+            )
+        )
 
-        viewModel = SearchViewModel(userRepository, authRepository)
+        viewModel = SearchViewModel(userRepository, authRepository, vehicleRepository)
     }
 
     // ---------- Filtros ----------
 
     @Test
-    fun `volver a Todos despues de filtrar muestra otra vez todos los carros`() {
+    fun `volver a Todos despues de filtrar muestra otra vez todos los carros`() = runTest {
+        advanceUntilIdle()
         val total = viewModel.uiState.value.filteredCars.size
 
         viewModel.updateSelectedCategory(SearchCategoryKey.SPORT)
@@ -53,12 +65,13 @@ class SearchViewModelTest {
 
     @Test
     fun `borrar la busqueda devuelve todos los carros de la categoria`() = runTest {
+        advanceUntilIdle()
         viewModel.updateSearchQuery("tesla")
         advanceUntilIdle()
         assertThat(viewModel.uiState.value.filteredCars.map { it.brand }).containsExactly("Tesla")
 
         viewModel.updateSearchQuery("")
         advanceUntilIdle()
-        assertThat(viewModel.uiState.value.filteredCars).hasSize(8)
+        assertThat(viewModel.uiState.value.filteredCars).hasSize(4)
     }
 }

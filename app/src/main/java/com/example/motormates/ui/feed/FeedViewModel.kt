@@ -220,6 +220,16 @@ class FeedViewModel @Inject constructor(
                     item.vehicle.toFeedVehicleUi().copy(reason = item.reason?.vehicleLabel())
                 },
                 hasPreferences = preferences.hasTaste,
+                myCarForTuning = vehicles
+                    .filter { it.ownerId != null && it.ownerId == currentUserId && it.imageUrl != null }
+                    // El que dijo en el onboarding, si está en el garaje.
+                    .sortedByDescending { vehicle ->
+                        preferences.car?.let { car ->
+                            vehicle.brand.equals(car.brand, true) && vehicle.model.equals(car.model, true)
+                        } == true
+                    }
+                    .firstOrNull()
+                    ?.toFeedVehicleUi(),
                 suggestions = UserSuggester.suggest(
                     reviews = reviews,
                     vehicles = vehicles,

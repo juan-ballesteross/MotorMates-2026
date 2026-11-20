@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -33,6 +34,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +66,7 @@ import com.example.motormates.ui.aiTuning.components.SpecsComparisonCard
 import com.example.motormates.ui.aiTuning.components.TuningCard
 import com.example.motormates.ui.aiTuning.components.TuningImageView
 import com.example.motormates.ui.aiTuning.components.TuningModeSelector
+import com.example.motormates.ui.aiTuning.components.VehiclePickerContent
 import com.example.motormates.ui.theme.Radius
 
 /** Callbacks del configurador, agrupados para no pasar veinte lambdas sueltas. */
@@ -87,7 +91,14 @@ data class AiTuningActions(
     val onLivePrice: (String) -> Unit = {},
     val onSave: (Boolean) -> Unit = {},
     val onOpenBuild: (String) -> Unit = {},
-    val onBackToConfigurator: () -> Unit = {}
+    val onBackToConfigurator: () -> Unit = {},
+    // --- elegir carro y terminar ---
+    val onPickerQueryChange: (String) -> Unit = {},
+    val onPickerCategory: (String) -> Unit = {},
+    val onPickVehicle: (String) -> Unit = {},
+    val onRetryPicker: () -> Unit = {},
+    val onChangeVehicle: () -> Unit = {},
+    val onFinish: () -> Unit = {}
 )
 
 /** Todo el estado llega del padre; aquí solo se pinta. */
@@ -104,8 +115,14 @@ fun AiTuningContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TuningTopBar(
-                title = state.vehicle?.let { TuningPromptBuilder.vehicleName(it) } ?: "AI Tuning",
-                onBack = if (state.phase == TuningPhase.RESULT) actions.onBackToConfigurator else actions.onBack
+                title = if (state.phase == TuningPhase.PICK_VEHICLE) "Elige un carro"
+                else state.vehicle?.let { TuningPromptBuilder.vehicleName(it) } ?: "AI Tuning",
+                // Atrás retrocede un paso: resultado → piezas → (si se eligió) carros → salir.
+                onBack = when {
+                    state.phase == TuningPhase.RESULT -> actions.onBackToConfigurator
+                    state.phase == TuningPhase.CONFIGURING && state.canChangeVehicle -> actions.onChangeVehicle
+                    else -> actions.onBack
+                }
             )
         },
         bottomBar = {
@@ -123,11 +140,25 @@ fun AiTuningContent(
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when {
+                state.phase == TuningPhase.PICK_VEHICLE -> VehiclePickerContent(
+                    myVehicles = state.myPickerVehicles,
+                    otherVehicles = state.otherPickerVehicles,
+                    categories = state.pickerCategories,
+                    query = state.pickerQuery,
+                    selectedCategory = state.pickerCategory,
+                    isLoading = state.isPickerLoading,
+                    error = state.pickerError,
+                    onQueryChange = actions.onPickerQueryChange,
+                    onSelectCategory = actions.onPickerCategory,
+                    onPick = actions.onPickVehicle,
+                    onRetry = actions.onRetryPicker
+                )
                 state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 state.loadError != null -> LoadError(state.loadError, actions.onRetryLoad, actions.onBack)
                 state.phase == TuningPhase.GENERATING -> GeneratingView(
                     baseImageUrl = state.vehicle?.imageUrl,
-                    onCancel = actions.onCancelGeneration
+                    onCancel = actions.onCancelGeneration,
+                    onLeave = actions.onBack
                 )
                 state.phase == TuningPhase.RESULT -> ResultContent(state, actions)
                 else -> ConfiguratorContent(state, actions)
@@ -185,17 +216,40 @@ private fun ConfiguratorContent(state: AiTuningState, actions: AiTuningActions) 
         contentPadding = PaddingValues(bottom = 24.dp)
     ) {
         item {
-            AsyncImage(
-                model = vehicle.imageUrl,
-                contentDescription = TuningPromptBuilder.vehicleName(vehicle),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .fillMaxWidth()
-                    .height(190.dp)
-                    .clip(RoundedCornerShape(Radius.lg))
-                    .background(MaterialTheme.colorScheme.surface)
-            )
+            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                AsyncImage(
+                    model = vehicle.imageUrl,
+                    contentDescription = TuningPromptBuilder.vehicleName(vehicle),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(190.dp)
+                        .clip(RoundedCornerShape(Radius.lg))
+                        .background(MaterialTheme.colorScheme.surface)
+                )
+                // Se entró sin carro: se puede cambiar sin salir de la pantalla.
+                if (state.canChangeVehicle) {
+                    FilledTonalButton(
+                        onClick = actions.onChangeVehicle,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .testTag("changeVehicleButton")
+                    ) {
+                        Icon(Icons.Filled.SwapHoriz, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Cambiar carro")
+                    }
+                }
+            }
+            state.busyWithVehicleName?.let { name ->
+                Text(
+                    "Ya se está modificando tu $name. Cuando termine podrás generar esta.",
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp)
+                )
+            }
             Spacer(Modifier.height(14.dp))
             TuningModeSelector(
                 selected = state.mode,
@@ -358,6 +412,16 @@ private fun ResultContent(state: AiTuningState, actions: AiTuningActions) {
                 Icon(Icons.Filled.Tune, null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
                 Text("Cambiar piezas")
+            }
+            Spacer(Modifier.height(8.dp))
+            // Salir del todo, sin tener que darle "atrás" varias veces.
+            TextButton(
+                onClick = actions.onFinish,
+                modifier = Modifier.fillMaxWidth().testTag("finishTuningButton")
+            ) {
+                Icon(Icons.Filled.Home, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Terminar e ir al inicio")
             }
         }
     }

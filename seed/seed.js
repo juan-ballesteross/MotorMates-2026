@@ -680,11 +680,10 @@ async function seedParts() {
   let withImage = 0;
 
   for (const { id, ...data } of catalog.parts) {
+    // Una foto local (seed/parts/images) gana sobre la URL del catálogo.
     const imageUrl = await uploadPartImage(id);
-    if (imageUrl) {
-      data.imageUrl = imageUrl;
-      withImage += 1;
-    }
+    if (imageUrl) data.imageUrl = imageUrl;
+    if (data.imageUrl) withImage += 1;
     writes.push({ ref: db.collection("parts").doc(id), data });
   }
   catalog.packages.forEach(({ id, ...data }) => {

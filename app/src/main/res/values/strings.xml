@@ -89,10 +89,10 @@
     <!-- Chat -->
     <string name="chat_list_title">Mensajes</string>
     <string name="chat_list_back_cd">Volver</string>
-    <string name="chat_list_empty">No tienes conversaciones todavía. Escríbele a alguien desde su perfil.</string>
+    <string name="chat_list_empty">No tienes conversaciones todavía. Busca a alguien arriba para escribirle.</string>
     <string name="chat_list_no_messages">Inicia la conversación</string>
-    <string name="chat_list_search_placeholder">Buscar conversación</string>
-    <string name="chat_list_no_search_results">No encontramos conversaciones con ese nombre</string>
+    <string name="chat_list_search_placeholder">Buscar chats o personas</string>
+    <string name="chat_list_no_search_results">No encontramos chats ni personas con ese nombre</string>
     <string name="chat_back_cd">Volver</string>
     <string name="chat_input_placeholder">Escribe un mensaje…</string>
     <string name="chat_send_cd">Enviar</string>
@@ -213,11 +213,15 @@
     <string name="event_cancel_dialog_confirm">Sí, cancelarlo</string>
 
     <!-- Hoja de "publicar" del botón + -->
-    <string name="publish_sheet_title">¿Qué quieres publicar?</string>
+    <string name="publish_sheet_title">¿Qué quieres hacer?</string>
     <string name="publish_sheet_post">Publicación</string>
     <string name="publish_sheet_post_description">Una foto de tu carro</string>
     <string name="publish_sheet_event">Evento</string>
     <string name="publish_sheet_event_description">Un Car Meet o un pique</string>
+    <string name="publish_sheet_ai_tuning">Modificar con AI</string>
+    <string name="publish_sheet_ai_tuning_description">Elige un carro y míralo con otras piezas</string>
+    <string name="publish_sheet_find_part">Encontrar pieza</string>
+    <string name="publish_sheet_find_part_description">Toma una foto y búscala en Google</string>
 
     <!-- Formulario de evento -->
     <string name="new_event_title_create">Crear evento</string>
@@ -350,4 +354,5 @@
     <string name="car_detail_ai_tuning_owner">Modificar con AI</string>
     <string name="car_detail_ai_tuning_visitor">Imagínalo modificado</string>
     <string name="user_tab_builds">Builds</string>
+    <string name="user_tab_events">Eventos</string>
 </resources>

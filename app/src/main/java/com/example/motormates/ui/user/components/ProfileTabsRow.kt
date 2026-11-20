@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,24 +31,29 @@ import com.example.motormates.ui.theme.Spacing
 fun ProfileTabsRow(
     selected: ProfileTab,
     onSelect: (ProfileTab) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Por defecto sin "Eventos": esa pestaña solo la ve el dueño del perfil. */
+    tabs: List<ProfileTab> = ProfileTab.entries - ProfileTab.EVENTS
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         // Cada pestaña ocupa la misma fracción del ancho; el divisor gris de abajo
         // y el indicador rojo de la seleccionada quedan alineados.
         Row(modifier = Modifier.fillMaxWidth()) {
-            ProfileTab.entries.forEach { tab ->
+            tabs.forEach { tab ->
                 val label = when (tab) {
                     ProfileTab.REVIEWS -> stringResource(R.string.user_tab_reviews)
                     ProfileTab.GARAGE -> stringResource(R.string.user_tab_garage)
                     ProfileTab.BUILDS -> stringResource(R.string.user_tab_builds)
+                    ProfileTab.EVENTS -> stringResource(R.string.user_tab_events)
                     ProfileTab.ACTIVITY -> stringResource(R.string.user_tab_activity)
                 }
                 ProfileTabItem(
                     label = label,
                     isSelected = tab == selected,
                     onClick = { onSelect(tab) },
-                    modifier = Modifier.weight(1f)
+                    // Con cinco pestañas, letra un poco menor para que quepan.
+                    compact = tabs.size > 4,
+                    modifier = Modifier.weight(1f).testTag("profileTab_${tab.name.lowercase()}")
                 )
             }
         }
@@ -65,7 +71,8 @@ private fun ProfileTabItem(
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    compact: Boolean = false
 ) {
     Column(
         modifier = modifier.clickable(onClick = onClick),
@@ -74,7 +81,7 @@ private fun ProfileTabItem(
         Text(
             text = label,
             color = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp,
+            fontSize = if (compact) 13.sp else 14.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             maxLines = 1,
             modifier = Modifier.padding(vertical = Spacing.sm)

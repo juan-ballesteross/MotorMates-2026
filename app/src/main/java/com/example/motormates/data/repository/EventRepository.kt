@@ -4,6 +4,8 @@ import android.net.Uri
 import com.example.motormates.data.model.Event
 import com.example.motormates.data.model.EventFeature
 import com.example.motormates.data.model.EventType
+import com.example.motormates.data.model.MyEvent
+import com.example.motormates.data.model.MyEventRole
 import com.example.motormates.data.model.NewEvent
 import com.example.motormates.data.model.NotificationType
 import com.example.motormates.data.model.ParticipationChange
@@ -16,7 +18,11 @@ import com.example.motormates.data.source.UserDataSource
 import com.google.firebase.firestore.FirebaseFirestoreException
 import java.io.IOException
 import javax.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -54,6 +60,12 @@ interface EventRepository {
 
     /** status null quita la participación. */
     suspend fun setParticipation(eventId: String, status: ParticipationStatus?): Result<Unit>
+
+    /**
+     * Los eventos que organizo o a los que dije "voy" / "me interesa", de
+     * los últimos 90 días a los próximos 180, ordenados por fecha.
+     */
+    suspend fun getMyEvents(nowMillis: Long): Result<List<MyEvent>>
 }
 
 /**
@@ -89,6 +101,37 @@ class EventRepositoryImpl @Inject constructor(
         eventDataSource.observeEventsBetween(fromMillis, toMillis)
             .map { dtos -> Result.success(dtos.mapNotNull { it.toDomain() }) }
             .catch { emit(Result.failure(Exception(LOAD_FAILED))) }
+
+    /**
+     * Sin índices nuevos: se leen los eventos de la ventana (la misma
+     * consulta del mapa) y, de cada uno, mi documento de participación, en
+     * paralelo. Con los eventos de un proyecto de clase el costo es bajo.
+     */
+    override suspend fun getMyEvents(nowMillis: Long): Result<List<MyEvent>> {
+        val uid = authDataSource.getCurrentUser()?.id
+            ?: return Result.failure(Exception(NOT_SIGNED_IN_MY_EVENTS))
+        return safeCall(notFound = LOAD_FAILED, fallback = LOAD_FAILED) {
+            val events = eventDataSource.observeEventsBetween(nowMillis - MY_EVENTS_PAST_MS, nowMillis + MY_EVENTS_FUTURE_MS)
+                .first()
+                .mapNotNull { it.toDomain() }
+            coroutineScope {
+                events.map { event ->
+                    async {
+                        val role = if (event.organizerId == uid) {
+                            MyEventRole.ORGANIZER
+                        } else {
+                            when (runCatching { participationDataSource.getParticipation(event.id, uid) }.getOrNull()) {
+                                ParticipationStatus.GOING -> MyEventRole.GOING
+                                ParticipationStatus.INTERESTED -> MyEventRole.INTERESTED
+                                null -> null
+                            }
+                        }
+                        role?.let { MyEvent(event, it) }
+                    }
+                }.awaitAll().filterNotNull().sortedBy { it.event.startAt }
+            }
+        }
+    }
 
     override suspend fun getEventById(eventId: String): Result<Event> =
         safeCall(notFound = EVENT_NOT_FOUND, fallback = LOAD_FAILED) {
@@ -242,6 +285,10 @@ class EventRepositoryImpl @Inject constructor(
     private companion object {
         const val EVENT_NOT_FOUND = "Este evento ya no existe"
         const val LOAD_FAILED = "No se pudieron cargar los eventos"
+        const val NOT_SIGNED_IN_MY_EVENTS = "Debes iniciar sesión para ver tus eventos"
+        private const val DAY_MS = 24L * 60 * 60 * 1000
+        const val MY_EVENTS_PAST_MS = 90 * DAY_MS
+        const val MY_EVENTS_FUTURE_MS = 180 * DAY_MS
         const val SAVE_FAILED = "No se pudo guardar el evento"
         const val NOT_SIGNED_IN = "Debes iniciar sesión para publicar un evento"
         const val NOT_ORGANIZER = "Solo el organizador puede editar este evento"

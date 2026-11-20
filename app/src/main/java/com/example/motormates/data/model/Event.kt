@@ -57,6 +57,11 @@ data class EventOrganizer(
 
 enum class EventType { CAR_MEET, PIQUE }
 
+/** Qué tengo que ver con un evento, para la pestaña "Eventos" del perfil. */
+enum class MyEventRole { ORGANIZER, GOING, INTERESTED }
+
+data class MyEvent(val event: Event, val role: MyEventRole)
+
 /**
  * Solo dos valores, y eso es deliberado: no hay FINISHED.
  *

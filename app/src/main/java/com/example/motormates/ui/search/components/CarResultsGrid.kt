@@ -5,31 +5,20 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import com.example.motormates.R
 import com.example.motormates.data.model.CarListing
+import com.example.motormates.ui.common.components.ShimmerAsyncImage
 import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.pressScaleClickable
@@ -76,10 +66,9 @@ private fun CarResultCard(
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.lg))
             .pressScaleClickable(onClick = onClick)
     ) {
-        Image(
-            painter = painterResource(id = car.imageResId),
+        ShimmerAsyncImage(
+            model = car.imageUrl,
             contentDescription = stringResource(R.string.search_car_title, car.brand, car.model),
-            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(110.dp)
@@ -94,22 +83,13 @@ private fun CarResultCard(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = stringResource(R.string.search_car_year_owner, car.year, car.ownerName),
+                // Con dueño: "2024 · Rodrigo"; del catálogo: "2024 · Deportivo".
+                text = stringResource(R.string.search_car_year_owner, car.year, car.ownerName ?: car.categoryLabel),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(6.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "${car.rating}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                Spacer(modifier = Modifier.width(12.dp))
-                Icon(Icons.Filled.FavoriteBorder, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "${car.likes}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-            }
         }
     }
 }

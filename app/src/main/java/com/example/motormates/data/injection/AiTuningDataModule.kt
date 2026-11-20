@@ -23,6 +23,8 @@ import com.example.motormates.data.source.TuningImageSource
 import com.google.firebase.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.remoteConfig
+import com.example.motormates.notifications.AiNotifier
+import com.example.motormates.notifications.AndroidAiNotifier
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -37,6 +39,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AiTuningDataModule {
+
+    /** Notificaciones de las tareas de AI en segundo plano. */
+    @Binds
+    @Singleton
+    abstract fun bindAiNotifier(impl: AndroidAiNotifier): AiNotifier
 
     @Binds
     @Singleton

@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.motormates.ui.common.components.ShimmerAsyncImage
 import com.example.motormates.data.model.Interest
 import com.example.motormates.data.repository.CarModelOption
 import com.example.motormates.data.repository.CarModelSource
@@ -114,10 +115,9 @@ private fun CategoryCard(
             .testTag("onboardingCategory_$category")
     ) {
         if (imageUrl != null) {
-            AsyncImage(
+            ShimmerAsyncImage(
                 model = imageUrl,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
         } else {
