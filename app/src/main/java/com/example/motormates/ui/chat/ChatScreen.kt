@@ -35,6 +35,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.motormates.ui.chat.components.ChatInputBar
 import com.example.motormates.ui.chat.components.ChatTopBar
+import com.example.motormates.ui.chat.components.FullScreenImageDialog
 import com.example.motormates.ui.chat.components.MessageBubble
 import com.example.motormates.ui.review.components.PhotoSourceDialog
 import java.io.File
@@ -53,6 +54,7 @@ fun ChatScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
     var showPhotoSourceDialog by remember { mutableStateOf(false) }
+    var fullScreenImageUrl by remember { mutableStateOf<String?>(null) }
 
     val imageGalleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -140,7 +142,8 @@ fun ChatScreen(
                         isMine = message.isMine,
                         isStoryReply = message.storyReply != null,
                         storyImageUrl = message.storyReply?.imageUrl,
-                        imageUrl = message.imageUrl
+                        imageUrl = message.imageUrl,
+                        onImageClick = { url -> fullScreenImageUrl = url }
                     )
                 }
             }
@@ -157,6 +160,14 @@ fun ChatScreen(
             )
         }
         SnackbarHost(hostState = snackbarHostState)
+    }
+
+    val imageToShow = fullScreenImageUrl
+    if (imageToShow != null) {
+        FullScreenImageDialog(
+            imageUrl = imageToShow,
+            onDismiss = { fullScreenImageUrl = null }
+        )
     }
 }
 

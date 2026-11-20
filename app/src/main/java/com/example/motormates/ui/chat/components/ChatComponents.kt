@@ -3,6 +3,7 @@ package com.example.motormates.ui.chat.components
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,12 +34,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.example.motormates.R
 import com.example.motormates.ui.common.components.ShimmerAsyncImage
@@ -119,7 +123,8 @@ fun MessageBubble(
     modifier: Modifier = Modifier,
     imageUrl: String? = null,
     storyImageUrl: String? = null,
-    isStoryReply: Boolean = false
+    isStoryReply: Boolean = false,
+    onImageClick: (String) -> Unit = {}
 ) {
     val bubbleColor = if (isMine) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
     val textColor = if (isMine) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
@@ -158,6 +163,10 @@ fun MessageBubble(
                         .heightIn(max = 260.dp)
                         .clip(RoundedCornerShape(Radius.md))
                         .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { onImageClick(imageUrl) }
                 )
             }
             if (text.isNotBlank()) {
@@ -253,6 +262,46 @@ fun ChatInputBar(
                     imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = stringResource(R.string.chat_send_cd),
                     tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FullScreenImageDialog(imageUrl: String, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.95f))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) { onDismiss() }
+        ) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = stringResource(R.string.chat_image_cd),
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
+            )
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .navigationBarsPadding()
+                    .padding(Spacing.sm)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.chat_remove_image_cd),
+                    tint = Color.White
                 )
             }
         }
