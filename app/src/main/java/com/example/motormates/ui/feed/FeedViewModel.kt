@@ -13,6 +13,7 @@ import com.example.motormates.data.repository.LikeRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.StoryRepository
 import com.example.motormates.data.repository.VehicleRepository
+import com.example.motormates.data.repository.news.NewsRepository
 import com.example.motormates.data.seed.FirestoreSeeder
 import com.example.motormates.ui.common.LikedReviewsState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +38,7 @@ class FeedViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val likeRepository: LikeRepository,
     private val storyRepository: StoryRepository,
+    private val newsRepository: NewsRepository,
     private val firestoreSeeder: FirestoreSeeder
 ) : ViewModel() {
 
@@ -65,6 +67,7 @@ class FeedViewModel @Inject constructor(
             runCatching { firestoreSeeder.seedIfEmpty() }
             runCatching { firestoreSeeder.backfillVehicleOwners() }
             loadVehicles()
+            loadNews()
         }
         observeFollowingReviews()
     }
@@ -123,6 +126,29 @@ class FeedViewModel @Inject constructor(
                         current.copy(
                             isLoading = false,
                             errorMessage = error.message ?: "No se pudieron cargar los vehículos"
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    private fun loadNews() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isNewsLoading = true, newsErrorMessage = null) }
+            val result = newsRepository.getLatestNews()
+            _uiState.update { current ->
+                result.fold(
+                    onSuccess = { articles ->
+                        current.copy(
+                            isNewsLoading = false,
+                            newsArticles = articles
+                        )
+                    },
+                    onFailure = { error ->
+                        current.copy(
+                            isNewsLoading = false,
+                            newsErrorMessage = error.message ?: "No se pudieron cargar las noticias"
                         )
                     }
                 )

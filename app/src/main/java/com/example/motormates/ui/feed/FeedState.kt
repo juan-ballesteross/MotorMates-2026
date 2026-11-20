@@ -5,6 +5,8 @@ import com.example.motormates.data.model.FeedTab
 import com.example.motormates.data.model.FeedVehicleUi
 import com.example.motormates.data.model.StoryUser
 
+import com.example.motormates.data.model.news.NewsArticleUi
+
 /**
  * Las dos pestañas guardan su estado por separado (cargando y error
  * propios) porque se alimentan de fuentes distintas: los vehículos de una
@@ -21,4 +23,8 @@ data class FeedUiState(
     val followingErrorMessage: String? = null,
     val isPostingStory: Boolean = false,
     val storyErrorMessage: String? = null,
+    // Variables de estado para Noticias
+    val newsArticles: List<NewsArticleUi> = emptyList(),
+    val isNewsLoading: Boolean = false,
+    val newsErrorMessage: String? = null
 )
