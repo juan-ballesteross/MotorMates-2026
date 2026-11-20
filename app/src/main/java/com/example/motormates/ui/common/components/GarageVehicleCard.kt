@@ -1,5 +1,8 @@
 package com.example.motormates.ui.common.components
 
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material.icons.filled.Add
@@ -46,13 +49,15 @@ import com.example.motormates.ui.theme.rememberPressScale
 /**
  * Un carro del garaje, en la grilla de dos columnas del perfil. En el perfil
  * de otro usuario lleva "Comparar con el mío"; en el propio no (onCompareWithMineClick = null).
+ * En el propio, onEditClick pone un lápiz sobre la foto que abre Editar vehículo.
  */
 @Composable
 fun GarageVehicleCard(
     car: GarageVehicleUi,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onCompareWithMineClick: (() -> Unit)? = null
+    onCompareWithMineClick: (() -> Unit)? = null,
+    onEditClick: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier
@@ -68,19 +73,42 @@ fun GarageVehicleCard(
             .fillMaxWidth()
             .height(100.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant)
-        if (car.imageUrl != null) {
-            ShimmerAsyncImage(
-                model = car.imageUrl,
-                contentDescription = car.title,
-                modifier = imageModifier
-            )
-        } else {
-            Box(modifier = imageModifier, contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Filled.DirectionsCar,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+        Box {
+            if (car.imageUrl != null) {
+                ShimmerAsyncImage(
+                    model = car.imageUrl,
+                    contentDescription = car.title,
+                    modifier = imageModifier
                 )
+            } else {
+                Box(modifier = imageModifier, contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Filled.DirectionsCar,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            if (onEditClick != null) {
+                // Círculo oscuro translúcido: se lee sobre cualquier foto.
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.55f))
+                        .clickable(onClickLabel = "Editar vehículo", onClick = onEditClick)
+                        .testTag("garageEdit_${car.id}"),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Editar ${car.title}",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
         }
         Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 10.dp)) {

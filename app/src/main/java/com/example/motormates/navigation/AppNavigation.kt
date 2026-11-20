@@ -261,6 +261,9 @@ fun AppNavigation(
                     }
                 },
                 onPublishVehicleClick = { navController.navigate(ScreenRoute.Post.route) },
+                onEditVehicleClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.EditVehicle.createRoute(vehicleId))
+                },
                 onUserClick = ::openAuthor,
                 onEventClick = { eventId -> navController.navigate(ScreenRoute.EventDetail.createRoute(eventId)) },
                 onCreateEventClick = { navController.navigate(ScreenRoute.NewEvent.createRoute()) },

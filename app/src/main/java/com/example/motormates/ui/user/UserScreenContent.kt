@@ -72,6 +72,7 @@ fun UserScreenContent(
     onFollowingClick: () -> Unit = {},
     onLogOutClick: () -> Unit = {},
     onGarageCarClick: (String) -> Unit = {},
+    onGarageCarEditClick: (String) -> Unit = {},
     onPublishVehicleClick: () -> Unit = {},
     activity: List<ActivityUi> = emptyList(),
     isActivityLoading: Boolean = false,
@@ -301,7 +302,11 @@ fun UserScreenContent(
                     AddGarageVehicleButton(onClick = onPublishVehicleClick)
                 }
                 gridItems(cars, key = { "garage_${it.id}" }) { car ->
-                    GarageVehicleCard(car = car, onClick = { onGarageCarClick(car.id) })
+                    GarageVehicleCard(
+                        car = car,
+                        onClick = { onGarageCarClick(car.id) },
+                        onEditClick = { onGarageCarEditClick(car.id) }
+                    )
                 }
             }
         }
