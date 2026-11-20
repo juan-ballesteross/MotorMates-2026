@@ -9,20 +9,31 @@ plugins {
 }
 
 /**
- * La API key de Google Maps vive en local.properties (que está en .gitignore),
- * no en el repo: cada quien pone la suya. Si falta, el placeholder queda vacío,
- * el build NO se rompe y el mapa se ve gris con un "Authorization failure" en
- * logcat.
+ * Las API keys de Google viven en local.properties (que está en .gitignore),
+ * no en el repo: cada quien pone la suya. Si faltan, el build NO se rompe; el
+ * mapa se ve gris con un "Authorization failure" en logcat y la capa de
+ * gasolineras simplemente no se ofrece.
  *
  * No se usa el secrets-gradle-plugin que recomienda Google: sigue en 2.0.1
  * (2023) y se configura con la Variant API vieja, que AGP 9 ya eliminó.
  */
-val mapsApiKey: String = Properties().apply {
+val localProperties: Properties = Properties().apply {
     rootProject.file("local.properties")
         .takeIf { it.exists() }
         ?.inputStream()
         ?.use { load(it) }
-}.getProperty("MAPS_API_KEY", "")
+}
+
+val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY", "")
+
+/**
+ * La llave de Places API (New), que es la que consulta las gasolineras.
+ *
+ * Cae en la de Maps si no está definida: son productos distintos de Google
+ * Cloud, pero se pueden habilitar los dos sobre la MISMA llave, y en ese caso
+ * no tiene sentido obligar a pegarla dos veces en local.properties.
+ */
+val placesApiKey: String = localProperties.getProperty("PLACES_API_KEY", mapsApiKey)
 
 android {
     namespace = "com.example.motormates"
@@ -40,6 +51,11 @@ android {
         testInstrumentationRunner = "com.example.motormates.e2e.EmulatorTestRunner"
         // Se agrego para que funcione en la tablet
         buildConfigField("boolean", "CONNECT_TO_FIREBASE_EMULATOR", "false")
+
+        // A diferencia de la de Maps, esta llave la necesita el CÓDIGO (viaja
+        // en el header X-Goog-Api-Key de cada consulta), no el manifest, así
+        // que entra por BuildConfig y no como placeholder.
+        buildConfigField("String", "PLACES_API_KEY", "\"$placesApiKey\"")
 
         // La llave de Maps entra al manifest como ${MAPS_API_KEY}. Se usa
         // .put() y no la asignación con corchetes porque según la versión de

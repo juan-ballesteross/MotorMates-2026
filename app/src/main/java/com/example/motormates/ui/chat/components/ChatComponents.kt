@@ -1,5 +1,6 @@
 package com.example.motormates.ui.chat.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -90,19 +91,48 @@ fun ChatTopBar(
 }
 
 @Composable
-fun MessageBubble(text: String, isMine: Boolean, modifier: Modifier = Modifier) {
+fun MessageBubble(
+    text: String,
+    isMine: Boolean,
+    modifier: Modifier = Modifier,
+    storyImageUrl: String? = null,
+    isStoryReply: Boolean = false
+) {
     val bubbleColor = if (isMine) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
     val textColor = if (isMine) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
     val alignment = if (isMine) Alignment.CenterEnd else Alignment.CenterStart
 
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = alignment) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 260.dp)
-                .background(bubbleColor, RoundedCornerShape(Radius.md))
-                .padding(horizontal = Spacing.sm, vertical = Spacing.xs)
-        ) {
-            Text(text = text, color = textColor, fontSize = 15.sp)
+        Column(horizontalAlignment = if (isMine) Alignment.End else Alignment.Start) {
+            // Respuesta a una historia: arriba se ve cuál, como en otras apps.
+            if (isStoryReply) {
+                Text(
+                    text = if (isMine) "Respondiste a su historia" else "Respondió a tu historia",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                if (storyImageUrl != null) {
+                    AsyncImage(
+                        model = storyImageUrl,
+                        contentDescription = "Historia",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .padding(bottom = 4.dp)
+                            .size(width = 96.dp, height = 150.dp)
+                            .clip(RoundedCornerShape(Radius.md))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .widthIn(max = 260.dp)
+                    .background(bubbleColor, RoundedCornerShape(Radius.md))
+                    .padding(horizontal = Spacing.sm, vertical = Spacing.xs)
+            ) {
+                Text(text = text, color = textColor, fontSize = 15.sp)
+            }
         }
     }
 }

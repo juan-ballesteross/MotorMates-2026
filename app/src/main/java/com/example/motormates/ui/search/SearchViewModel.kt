@@ -24,7 +24,7 @@ class SearchViewModel @Inject constructor(
     val uiState: StateFlow<SearchUiState> = _uiState
 
     init {
-        _uiState.update { it.copy(filteredCars = SearchMocks.sampleSearchCars) }
+        _uiState.update { it.copy(allCars = SearchMocks.sampleSearchCars).filterCars() }
         loadUsers()
     }
 
@@ -60,7 +60,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun SearchUiState.filterCars(): SearchUiState {
-        val filtered = filteredCars.filter { car ->
+        val filtered = allCars.filter { car ->
             val matchesCategory = selectedCategory == SearchCategoryKey.ALL || car.category == selectedCategory
             val matchesQuery = searchQuery.isBlank() ||
                 car.brand.contains(searchQuery, ignoreCase = true) ||

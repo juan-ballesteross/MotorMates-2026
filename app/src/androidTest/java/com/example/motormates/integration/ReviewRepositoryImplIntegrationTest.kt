@@ -6,6 +6,7 @@ import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.repository.NotificationRepositoryImpl
 import com.example.motormates.data.repository.ReviewRepositoryImpl
 import com.example.motormates.data.source.FirebaseAuthDataSource
+import com.example.motormates.data.source.FirestoreEventDataSource
 import com.example.motormates.data.source.FirestoreNotificationDataSource
 import com.example.motormates.data.source.FirestoreReviewDataSource
 import com.example.motormates.data.source.FirestoreReviewRealtimeDataSource
@@ -45,7 +46,14 @@ class ReviewRepositoryImplIntegrationTest {
         vehicleDataSource = vehicleDataSource,
         userDataSource = userDataSource,
         authDataSource = authDataSource,
-        notificationRepository = NotificationRepositoryImpl(notificationDataSource, userDataSource, vehicleDataSource)
+        notificationRepository = NotificationRepositoryImpl(
+            notificationDataSource,
+            userDataSource,
+            vehicleDataSource,
+            // Pieza real como el resto del armado, aunque una notificación de
+            // reseña nunca la usa: solo se consulta si la fila trae eventId.
+            FirestoreEventDataSource(firestore, FirebaseEmulator.storage)
+        )
     )
 
     private lateinit var uid: String

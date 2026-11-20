@@ -17,5 +17,13 @@ data class ChatMessage(
     val senderId: String,
     val text: String,
     val createdAt: String?,
-    val isMine: Boolean
+    val isMine: Boolean,
+    /** No null cuando el mensaje es una respuesta a una historia. */
+    val storyReply: StoryReplyRef? = null
+)
+
+/** La historia a la que responde un mensaje. */
+data class StoryReplyRef(
+    val storyId: String,
+    val imageUrl: String?
 )

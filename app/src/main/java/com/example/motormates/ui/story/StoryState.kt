@@ -14,5 +14,10 @@ data class StoryUiState(
     val showLikers: Boolean = false,
     val isLoadingLikers: Boolean = false,
     val likers: List<UserSearchResult> = emptyList(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    // Responder (solo historias de otros): el texto, si se está enviando y
+    // el aviso corto de "Enviado" que se muestra un momento.
+    val replyText: String = "",
+    val isSendingReply: Boolean = false,
+    val replySentTo: String? = null
 )

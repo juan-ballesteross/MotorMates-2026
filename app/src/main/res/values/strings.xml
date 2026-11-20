@@ -120,6 +120,11 @@
     <string name="edit_profile_add_vehicle_button">+ Agregar vehículo</string>
     <string name="edit_profile_edit_vehicle_cd">Editar vehículo</string>
     <string name="edit_profile_logout_button">Cerrar sesión</string>
+    <string name="edit_profile_delete_account_button">Eliminar cuenta</string>
+    <string name="edit_profile_delete_account_dialog_title">Eliminar cuenta</string>
+    <string name="edit_profile_delete_account_dialog_message">Se borrará tu perfil, tus reseñas, tus carros publicados, tus historias y tus seguidores. Esta acción no se puede deshacer.</string>
+    <string name="edit_profile_delete_account_confirm">Eliminar</string>
+    <string name="edit_profile_delete_account_cancel">Cancelar</string>
 
     <string-array name="search_categories">
         <item>Todos</item>
@@ -131,7 +136,7 @@
     </string-array>
 
     <!-- Post -->
-    <string name="post_top_bar_title">Nueva publicación</string>
+    <string name="post_top_bar_title">Publicar vehículo</string>
     <string name="post_cancel_button">Cancelar</string>
     <string name="post_publish_button">Publicar</string>
     <string name="post_caption_placeholder">Escribe una descripción para tu publicación...</string>
@@ -180,7 +185,122 @@
 
     <!-- Mapa de reseñas recientes -->
     <string name="reviews_map_empty">Nadie ha publicado reseñas con ubicación en las últimas 24 horas</string>
+    <string name="reviews_map_empty_filters">No hay nada que mostrar con los filtros activos</string>
     <string name="reviews_map_retry">Reintentar</string>
+
+    <!-- Car Meets y piques -->
+    <string name="event_type_car_meet">Car Meet</string>
+    <string name="event_type_pique">Pique</string>
+    <string name="event_cancelled_label">Cancelado</string>
+    <string name="event_finished_label">Ya pasó</string>
+    <string name="event_see_detail">Ver evento</string>
+    <string name="event_create_cd">Crear un evento</string>
+
+    <!-- Detalle del evento -->
+    <string name="event_detail_title">Evento</string>
+    <string name="event_detail_organized_by">Organiza</string>
+    <string name="event_detail_edit">Editar evento</string>
+    <string name="event_detail_cancel">Cancelar evento</string>
+    <string name="event_detail_load_error">No se pudo cargar el evento</string>
+    <string name="event_interested_action">Me interesa</string>
+    <string name="event_going_action">Voy a asistir</string>
+    <string name="event_cancel_dialog_title">¿Cancelar el evento?</string>
+    <string name="event_cancel_dialog_body">Seguirá visible marcado como cancelado, para que quienes dijeron que iban se enteren. Esto no se puede deshacer.</string>
+    <string name="event_cancel_dialog_confirm">Sí, cancelarlo</string>
+
+    <!-- Hoja de "publicar" del botón + -->
+    <string name="publish_sheet_title">¿Qué quieres publicar?</string>
+    <string name="publish_sheet_post">Publicación</string>
+    <string name="publish_sheet_post_description">Una foto de tu carro</string>
+    <string name="publish_sheet_event">Evento</string>
+    <string name="publish_sheet_event_description">Un Car Meet o un pique</string>
+
+    <!-- Formulario de evento -->
+    <string name="new_event_title_create">Crear evento</string>
+    <string name="new_event_title_edit">Editar evento</string>
+    <string name="new_event_type_label">Tipo de evento</string>
+    <string name="new_event_name_label">Título</string>
+    <string name="new_event_name_placeholder">Encuentro de clásicos en el Parque de la 93</string>
+    <string name="new_event_description_label">Descripción</string>
+    <string name="new_event_description_placeholder">Cuéntale a la gente de qué va el evento</string>
+    <string name="new_event_venue_label">Nombre del lugar</string>
+    <string name="new_event_venue_placeholder">Parque de la 93</string>
+    <string name="new_event_address_label">Dirección</string>
+    <string name="new_event_address_placeholder">Calle 93 #13-50</string>
+    <string name="new_event_location_label">Ubicación en el mapa</string>
+    <string name="new_event_pick_location">Elegir en el mapa</string>
+    <string name="new_event_location_picked">Punto elegido en el mapa</string>
+    <string name="new_event_start_label">Inicio</string>
+    <string name="new_event_end_label">Fin (opcional)</string>
+    <string name="new_event_pick_datetime">Elegir fecha y hora</string>
+    <string name="new_event_clear_end">Quitar la hora de fin</string>
+    <string name="new_event_features_car_meet">¿Qué va a haber?</string>
+    <string name="new_event_features_pique">Requisitos y seguridad</string>
+    <string name="new_event_photo_label">Imagen (opcional)</string>
+    <string name="new_event_add_photo">Agregar imagen</string>
+    <string name="new_event_change_photo">Cambiar imagen</string>
+    <string name="new_event_publish">Publicar evento</string>
+    <string name="new_event_save">Guardar cambios</string>
+    <string name="new_event_load_error">No se pudo cargar el evento</string>
+    <string name="new_event_next">Siguiente</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_done">Listo</string>
+
+    <!-- Características de los eventos -->
+    <string name="event_feature_exhibicion">Exhibición de vehículos</string>
+    <string name="event_feature_zona_fotos">Zona de fotos</string>
+    <string name="event_feature_food_trucks">Food trucks</string>
+    <string name="event_feature_musica">Música</string>
+    <string name="event_feature_premiacion">Premiación</string>
+    <string name="event_feature_apto_familias">Apto para familias</string>
+    <string name="event_feature_parqueadero">Parqueadero</string>
+    <string name="event_feature_entrada_libre">Entrada libre</string>
+    <string name="event_feature_cronometraje">Cronometraje</string>
+    <string name="event_feature_pista_cerrada">Pista cerrada al público</string>
+    <string name="event_feature_casco">Casco obligatorio</string>
+    <string name="event_feature_arnes">Arnés obligatorio</string>
+    <string name="event_feature_extintor">Extintor a bordo</string>
+    <string name="event_feature_jaula">Jaula antivuelco</string>
+    <string name="event_feature_ambulancia">Ambulancia en sitio</string>
+    <string name="event_feature_inscripcion">Inscripción previa</string>
+
+    <!-- Elegir el punto del evento en el mapa -->
+    <string name="pick_location_hint">Arrastra el mapa para poner el pin donde será el evento</string>
+    <string name="pick_location_confirm">Usar este punto</string>
+    <string name="pick_location_crosshair_cd">Pin del lugar elegido</string>
+    <string name="pick_location_back_cd">Volver sin elegir</string>
+    <string name="event_close_card_cd">Cerrar el evento</string>
+    <string name="event_photo_cd">Foto de %1$s</string>
+    <string name="event_avatar_cd">Foto de %1$s</string>
+    <plurals name="event_going_count">
+        <item quantity="one">%1$d asistente</item>
+        <item quantity="other">%1$d asistentes</item>
+    </plurals>
+    <plurals name="event_interested_count">
+        <item quantity="one">%1$d interesado</item>
+        <item quantity="other">%1$d interesados</item>
+    </plurals>
+    <plurals name="reviews_map_event_count">
+        <item quantity="one">%1$d evento</item>
+        <item quantity="other">%1$d eventos</item>
+    </plurals>
+    <plurals name="reviews_map_event_cluster_title">
+        <item quantity="one">%1$d evento en este lugar</item>
+        <item quantity="other">%1$d eventos en este lugar</item>
+    </plurals>
+
+    <!-- Filtros de capas del mapa -->
+    <string name="reviews_map_filter_reviews">Posts y reseñas</string>
+    <string name="reviews_map_filter_events">Car Meets y piques</string>
+    <string name="reviews_map_filter_fuel">Gasolineras</string>
+    <string name="reviews_map_filter_charging">Carga eléctrica</string>
+
+    <!-- Capas de estaciones: gasolineras y puntos de carga -->
+    <string name="station_open_in_maps">Abrir en mapas</string>
+    <string name="station_no_maps_app">No encontramos una app de mapas en el teléfono</string>
+    <string name="reviews_map_fuel_zoom_hint">Acércate para ver las gasolineras</string>
+    <string name="reviews_map_charging_zoom_hint">Acércate para ver los puntos de carga</string>
+    <string name="reviews_map_stations_zoom_hint">Acércate para ver las estaciones</string>
     <string name="reviews_map_marker_cd">Reseña de %1$s en %2$s</string>
     <string name="reviews_map_close_card_cd">Cerrar la reseña</string>
     <string name="reviews_map_rating_cd">%1$d de 5 estrellas</string>

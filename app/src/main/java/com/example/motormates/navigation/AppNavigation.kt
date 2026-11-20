@@ -2,6 +2,8 @@ package com.example.motormates.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -17,10 +19,15 @@ import com.example.motormates.ui.alerts.AlertsScreen
 import com.example.motormates.ui.chat.ChatListScreen
 import com.example.motormates.ui.chat.ChatScreen
 import com.example.motormates.ui.comments.CommentsScreen
+import com.example.motormates.ui.compare.CompareScreen
 import com.example.motormates.ui.editProfile.EditProfileScreen
+import com.example.motormates.ui.eventDetail.EventDetailScreen
 import com.example.motormates.ui.feed.FeedScreen
 import com.example.motormates.ui.followlist.FollowListScreen
+import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.ui.login.LoginScreen
+import com.example.motormates.ui.newEvent.NewEventScreen
+import com.example.motormates.ui.pickLocation.PickLocationScreen
 import com.example.motormates.ui.post.PostScreen
 import com.example.motormates.ui.publicProfile.PublicProfileScreen
 import com.example.motormates.ui.register.RegisterScreen
@@ -93,7 +100,13 @@ fun AppNavigation(
                     navController.navigate(ScreenRoute.Story.createRoute(index))
                 },
                 onAuthorClick = ::openAuthor,
-                onAlertsClick = { navController.navigate(ScreenRoute.Alerts.route) }
+                onAlertsClick = { navController.navigate(ScreenRoute.Alerts.route) },
+                onEventDetailClick = { eventId ->
+                    navController.navigate(ScreenRoute.EventDetail.createRoute(eventId))
+                },
+                onCreateEventClick = {
+                    navController.navigate(ScreenRoute.NewEvent.createRoute())
+                }
             )
         }
         composable(ScreenRoute.Explore.route) {
@@ -109,9 +122,10 @@ fun AppNavigation(
         composable(ScreenRoute.Post.route) {
             PostScreen(
                 onCancelClick = { navController.popBackStack() },
-                onPublishClick = { _ ->
-                    navController.navigate(ScreenRoute.Feed.route) {
-                        popUpTo(ScreenRoute.Feed.route) { inclusive = true }
+                // Recién publicado se abre su detalle; "atrás" ya no vuelve al formulario.
+                onPublished = { vehicleId ->
+                    navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId)) {
+                        popUpTo(ScreenRoute.Post.route) { inclusive = true }
                     }
                 }
             )
@@ -147,6 +161,8 @@ fun AppNavigation(
                         popUpTo(0) { inclusive = true }
                     }
                 },
+                onPublishVehicleClick = { navController.navigate(ScreenRoute.Post.route) },
+                onUserClick = ::openAuthor,
                 reloadSignal = reviewsChanged || profileChanged,
                 onReloadHandled = {
                     entry.clearReviewsChanged()
@@ -156,9 +172,27 @@ fun AppNavigation(
         }
         composable(ScreenRoute.Alerts.route) {
             AlertsScreen(
+                // else y no un when exhaustivo: la mitad de los tipos no lleva
+                // a ninguna parte, y listarlos sería siete ramas vacías.
                 onNotificationClick = { notification ->
-                    if (notification.type == NotificationType.MESSAGE) {
-                        navController.navigate(ScreenRoute.Chat.createRoute(notification.actorId))
+                    val vehicleId = notification.vehicleId
+                    when {
+                        notification.type == NotificationType.MESSAGE ->
+                            navController.navigate(ScreenRoute.Chat.createRoute(notification.actorId))
+                        // Los eventos van antes que la rama de vehicleId: una
+                        // notificación de evento podría traer los dos ids, y el
+                        // destino que corresponde es el detalle del evento.
+                        notification.type == NotificationType.EVENT_INTERESTED ||
+                            notification.type == NotificationType.EVENT_GOING ->
+                            notification.eventId?.let {
+                                navController.navigate(ScreenRoute.EventDetail.createRoute(it))
+                            }
+                        // Reseñas y likes (incluido REVIEW_ON_MY_CAR): se abre
+                        // el carro del que se trata.
+                        vehicleId != null ->
+                            navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
+                        notification.type == NotificationType.FOLLOW -> openAuthor(notification.actorId)
+                        else -> Unit
                     }
                 }
             )
@@ -166,6 +200,10 @@ fun AppNavigation(
         composable(ScreenRoute.EditProfile.route) {
             EditProfileScreen(
                 onCloseClick = { navController.popBackStack() },
+                onAddVehicleClick = { navController.navigate(ScreenRoute.Post.route) },
+                onEditVehicleClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.EditVehicle.createRoute(vehicleId))
+                },
                 onSaveClick = {
                     navController.previousBackStackEntry
                         ?.savedStateHandle
@@ -177,6 +215,22 @@ fun AppNavigation(
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+        composable(
+            route = ScreenRoute.EditVehicle.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.EditVehicle.ARG_VEHICLE_ID) { type = NavType.StringType }
+            )
+        ) { entry ->
+            val vehicleId = entry.arguments?.getString(ScreenRoute.EditVehicle.ARG_VEHICLE_ID).orEmpty()
+            // Guardar o eliminar vuelve a la pantalla anterior (Editar perfil),
+            // que recarga el garaje al volver a primer plano.
+            PostScreen(
+                vehicleId = vehicleId,
+                onCancelClick = { navController.popBackStack() },
+                onPublished = { navController.popBackStack() },
+                onDeleted = { navController.popBackStack() }
             )
         }
         composable(
@@ -201,8 +255,40 @@ fun AppNavigation(
                 onEditReviewClick = { reviewId ->
                     navController.navigate(ScreenRoute.NewReview.createRoute(vehicleId, reviewId))
                 },
+                onCompareClick = {
+                    navController.navigate(ScreenRoute.Compare.createRoute(vehicleId))
+                },
                 reloadSignal = reviewsChanged,
                 onReloadHandled = { entry.clearReviewsChanged() }
+            )
+        }
+        composable(
+            route = ScreenRoute.Compare.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.Compare.ARG_LEFT_ID) { type = NavType.StringType },
+                navArgument(ScreenRoute.Compare.ARG_RIGHT_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(ScreenRoute.Compare.ARG_MINE) {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) { entry ->
+            val leftId = entry.arguments?.getString(ScreenRoute.Compare.ARG_LEFT_ID).orEmpty()
+            val rightId = entry.arguments?.getString(ScreenRoute.Compare.ARG_RIGHT_ID)
+            val compareWithMine = entry.arguments?.getBoolean(ScreenRoute.Compare.ARG_MINE) ?: false
+
+            CompareScreen(
+                leftVehicleId = leftId,
+                rightVehicleId = rightId,
+                compareWithMine = compareWithMine,
+                onBackClick = { navController.popBackStack() },
+                onVehicleClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
+                }
             )
         }
         composable(
@@ -254,6 +340,91 @@ fun AppNavigation(
             )
         }
         composable(
+            route = ScreenRoute.NewEvent.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.NewEvent.ARG_EVENT_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { entry ->
+            val eventId = entry.arguments?.getString(ScreenRoute.NewEvent.ARG_EVENT_ID)
+            // El punto lo deja aquí la pantalla del mapa antes de cerrarse.
+            val pickedLocation by entry.pickedLocationState()
+
+            NewEventScreen(
+                eventId = eventId,
+                onCloseClick = { navController.popBackStack() },
+                onSaved = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(RESULT_EVENTS_CHANGED, true)
+                    navController.popBackStack()
+                },
+                onPickLocationClick = { lat, lng ->
+                    navController.navigate(ScreenRoute.PickLocation.createRoute(lat, lng))
+                },
+                pickedLocation = pickedLocation,
+                onPickedLocationHandled = { entry.clearPickedLocation() }
+            )
+        }
+        composable(
+            route = ScreenRoute.EventDetail.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.EventDetail.ARG_EVENT_ID) { type = NavType.StringType }
+            )
+        ) { entry ->
+            val eventId = entry.arguments?.getString(ScreenRoute.EventDetail.ARG_EVENT_ID).orEmpty()
+            // Al volver de editar, el formulario deja esta bandera aquí.
+            val eventsChanged by entry.eventsChangedState()
+
+            EventDetailScreen(
+                eventId = eventId,
+                onBackClick = { navController.popBackStack() },
+                onEditClick = { id ->
+                    navController.navigate(ScreenRoute.NewEvent.createRoute(id))
+                },
+                onOrganizerClick = ::openAuthor,
+                reloadSignal = eventsChanged,
+                onReloadHandled = { entry.clearEventsChanged() }
+            )
+        }
+        composable(
+            route = ScreenRoute.PickLocation.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.PickLocation.ARG_LAT) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(ScreenRoute.PickLocation.ARG_LNG) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { entry ->
+            // Texto y luego toDoubleOrNull: NavType.FloatType perdería
+            // precisión en una coordenada.
+            val lat = entry.arguments?.getString(ScreenRoute.PickLocation.ARG_LAT)?.toDoubleOrNull()
+            val lng = entry.arguments?.getString(ScreenRoute.PickLocation.ARG_LNG)?.toDoubleOrNull()
+
+            PickLocationScreen(
+                initialLat = lat,
+                initialLng = lng,
+                onBackClick = { navController.popBackStack() },
+                onPicked = { location ->
+                    navController.previousBackStackEntry?.savedStateHandle?.apply {
+                        set(RESULT_PICKED_LAT, location.lat)
+                        set(RESULT_PICKED_LNG, location.lng)
+                        set(RESULT_PICKED_PLACE_NAME, location.placeName)
+                    }
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(
             route = ScreenRoute.Story.route,
             arguments = listOf(
                 navArgument(ScreenRoute.Story.ARG_STORY_INDEX) { type = NavType.IntType }
@@ -291,6 +462,9 @@ fun AppNavigation(
                 },
                 onMessageClick = { otherUid ->
                     navController.navigate(ScreenRoute.Chat.createRoute(otherUid))
+                },
+                onCompareWithMineClick = { vehicleId ->
+                    navController.navigate(ScreenRoute.Compare.createRoute(vehicleId, compareWithMine = true))
                 }
             )
         }
@@ -353,4 +527,45 @@ private fun NavBackStackEntry.profileChangedState(): State<Boolean> =
 
 private fun NavBackStackEntry.clearProfileChanged() {
     savedStateHandle[RESULT_PROFILE_CHANGED] = false
+}
+
+/**
+ * El punto que dejó la pantalla de elegir en el mapa.
+ *
+ * Se lee como estado y se limpia tras consumirlo (ver
+ * [clearPickedLocation]): si no, volver a entrar al formulario reaplicaría un
+ * punto viejo sobre el que el usuario pudo haber cambiado.
+ */
+@Composable
+private fun NavBackStackEntry.pickedLocationState(): State<ReviewLocation?> {
+    val lat by savedStateHandle.getStateFlow<Double?>(RESULT_PICKED_LAT, null)
+        .collectAsStateWithLifecycle()
+    val lng by savedStateHandle.getStateFlow<Double?>(RESULT_PICKED_LNG, null)
+        .collectAsStateWithLifecycle()
+    val placeName by savedStateHandle.getStateFlow<String?>(RESULT_PICKED_PLACE_NAME, null)
+        .collectAsStateWithLifecycle()
+
+    return remember(lat, lng, placeName) {
+        derivedStateOf {
+            if (lat != null && lng != null) {
+                ReviewLocation(lat = lat!!, lng = lng!!, placeName = placeName)
+            } else {
+                null
+            }
+        }
+    }
+}
+
+private fun NavBackStackEntry.clearPickedLocation() {
+    savedStateHandle[RESULT_PICKED_LAT] = null
+    savedStateHandle[RESULT_PICKED_LNG] = null
+    savedStateHandle[RESULT_PICKED_PLACE_NAME] = null
+}
+
+@Composable
+private fun NavBackStackEntry.eventsChangedState(): State<Boolean> =
+    savedStateHandle.getStateFlow(RESULT_EVENTS_CHANGED, false).collectAsStateWithLifecycle()
+
+private fun NavBackStackEntry.clearEventsChanged() {
+    savedStateHandle[RESULT_EVENTS_CHANGED] = false
 }

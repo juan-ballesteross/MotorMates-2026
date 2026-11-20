@@ -7,6 +7,7 @@ import com.example.motormates.data.source.UserDataSource
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -25,6 +26,8 @@ interface AuthRepository {
     suspend fun signUp(fullName: String, email: String, password: String): Result<AuthUser>
 
     suspend fun signOut(): Result<Unit>
+
+    suspend fun deleteAccount(): Result<Unit>
 
     fun getCurrentUser(): AuthUser?
 
@@ -99,6 +102,18 @@ class AuthRepositoryImpl @Inject constructor(
         runCatching {
             pushTokenRepository.unregisterCurrentDevice()
             authDataSource.signOut()
+        }
+
+    override suspend fun deleteAccount(): Result<Unit> =
+        try {
+            authDataSource.deleteCurrentUser()
+            Result.success(Unit)
+        } catch (e: FirebaseAuthRecentLoginRequiredException) {
+            Result.failure(Exception("Por seguridad, cierra sesión y vuelve a entrar antes de eliminar tu cuenta"))
+        } catch (e: FirebaseNetworkException) {
+            Result.failure(Exception("Sin conexión a internet, verifica tu red"))
+        } catch (e: Exception) {
+            Result.failure(Exception("No se pudo eliminar la cuenta"))
         }
 
     override fun getCurrentUser(): AuthUser? = authDataSource.getCurrentUser()

@@ -20,7 +20,9 @@ data class VehicleFirestoreDto(
     val velocidadMaxima: String? = null,
     val traccion: String? = null,
     val ownerId: String = "",
-    val owner: ReviewUserSnapshot? = null
+    val owner: ReviewUserSnapshot? = null,
+    /** Epoch en millis. Solo lo tienen los vehículos publicados desde la app. */
+    val createdAt: Long? = null
 ) : VehicleDtoGeneric {
 
     override fun toDomain(): Vehicle = Vehicle(
@@ -36,6 +38,7 @@ data class VehicleFirestoreDto(
         traccion = traccion,
         ownerId = ownerId.ifBlank { null },
         ownerName = owner?.fullName,
-        ownerAvatarUrl = owner?.avatarUrl
+        ownerAvatarUrl = owner?.avatarUrl,
+        createdAt = createdAt
     )
 }

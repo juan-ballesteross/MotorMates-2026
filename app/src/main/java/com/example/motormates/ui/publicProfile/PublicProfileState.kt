@@ -1,5 +1,6 @@
 package com.example.motormates.ui.publicProfile
 
+import com.example.motormates.data.model.GarageVehicleUi
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
 import com.example.motormates.data.model.UserReviewUi
@@ -13,5 +14,7 @@ data class PublicProfileUiState(
     // Solo se llena para usuarios reales de Firebase (ver loadProfileByUid).
     val avatarUrl: String? = null,
     val coverUrl: String? = null,
-    val isFollowedByMe: Boolean = false
+    val isFollowedByMe: Boolean = false,
+    /** Los carros que este usuario tiene a su nombre (ownerId). */
+    val garage: List<GarageVehicleUi> = emptyList()
 )

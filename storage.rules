@@ -1,0 +1,67 @@
+rules_version = '2';
+
+// Reglas del bucket por defecto. Igual que firestore.rules, este archivo es
+// la única fuente de verdad: hasta el 2026-11-18 vivieron solo en la consola
+// y por eso una ruta nueva (events/) quedaba negada sin que nada en el repo
+// lo dijera. Si editas en la consola, trae el cambio aquí.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Solo imágenes de menos de 10 MB.
+    function isImage() {
+      return request.resource.size < 10 * 1024 * 1024
+          && request.resource.contentType.matches('image/.*');
+    }
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Cualquier usuario con sesión puede ver las imágenes de la app
+    // (incluye las que suba el seed, como parts/).
+    match /{allPaths=**} {
+      allow read: if request.auth != null;
+    }
+
+    // Foto de perfil y portada: solo el dueño.
+    match /profile_images/{uid}/{file} {
+      allow write: if isOwner(uid) && isImage();
+      allow delete: if isOwner(uid);
+    }
+    match /profile_covers/{uid}/{file} {
+      allow write: if isOwner(uid) && isImage();
+      allow delete: if isOwner(uid);
+    }
+
+    // Historias: la carpeta es el uid del autor.
+    match /stories/{uid}/{file} {
+      allow write: if isOwner(uid) && isImage();
+      allow delete: if isOwner(uid);
+    }
+
+    // Builds de AI Tuning: la carpeta es el uid del autor.
+    match /builds/{uid}/{file} {
+      allow write: if isOwner(uid) && isImage();
+      allow delete: if isOwner(uid);
+    }
+
+    // Fotos de reseñas: la carpeta es el id de la reseña, no del usuario,
+    // así que solo se exige sesión iniciada.
+    match /reviews/{reviewId}/{file} {
+      allow write: if request.auth != null && isImage();
+    }
+
+    // Fotos de eventos: misma forma que reviews, y por el mismo motivo. El id
+    // del evento lo genera el cliente antes de guardar el documento (para
+    // subir la foto y escribir su URL ya resuelta en el mismo documento), así
+    // que la carpeta no lleva el uid del organizador y aquí no hay con qué
+    // comprobar la autoría. Quien manda es firestore.rules, que no deja crear
+    // un evento con userId ajeno: una foto sin documento que la apunte no se
+    // ve en ninguna parte.
+    match /events/{eventId}/{file} {
+      allow write: if request.auth != null && isImage();
+    }
+
+    // parts/ solo lo escribe el seed (Admin SDK, que no pasa por reglas).
+  }
+}

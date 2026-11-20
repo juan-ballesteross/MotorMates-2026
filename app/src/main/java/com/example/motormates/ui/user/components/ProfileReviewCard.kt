@@ -1,5 +1,7 @@
 package com.example.motormates.ui.user.components
 
+import androidx.compose.ui.platform.testTag
+import com.example.motormates.ui.common.components.CompareWithMineButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -50,7 +52,9 @@ fun ProfileReviewCard(
     onClick: (String) -> Unit = {},
     isEditable: Boolean = false,
     onEditClick: (String) -> Unit = {},
-    onDeleteClick: (String) -> Unit = {}
+    onDeleteClick: (String) -> Unit = {},
+    /** Solo en el perfil público: compara el carro reseñado contra el del usuario. */
+    onCompareWithMineClick: ((vehicleId: String) -> Unit)? = null
 ) {
     Row(
         modifier = modifier
@@ -130,6 +134,13 @@ fun ProfileReviewCard(
                     lineHeight = 18.sp,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            if (onCompareWithMineClick != null) {
+                CompareWithMineButton(
+                    onClick = { onCompareWithMineClick(review.vehicleId) },
+                    modifier = Modifier.testTag("compareWithMine_review_${review.id}")
                 )
             }
         }

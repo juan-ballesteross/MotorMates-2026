@@ -78,6 +78,7 @@ class VehicleDetailViewModel @Inject constructor(
 
     private fun observeReviews(vehicleId: String) {
         val currentUserId = authRepository.getCurrentUser()?.id
+        val isVehicleOwner = currentUserId != null && currentUserId == currentVehicle?.ownerId
 
         reviewsJob = viewModelScope.launch {
             // Compartido: lo leen la lista y la escucha de likes, con un
@@ -99,7 +100,7 @@ class VehicleDetailViewModel @Inject constructor(
                                     errorMessage = null,
                                     vehicle = currentVehicle?.toCarDetailUi(reviews),
                                     reviews = reviews.map { review ->
-                                        review.toReviewUi(currentUserId, liked)
+                                        review.toReviewUi(currentUserId, liked, isVehicleOwner)
                                     }
                                 )
                             }
