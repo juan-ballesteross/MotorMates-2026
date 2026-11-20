@@ -1,7 +1,7 @@
 package com.example.motormates.ui.user.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,14 +13,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
 import com.example.motormates.data.model.UserProfile
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.pressScaleClickable
 
 /**
  * Fila de estadísticas: reseñas, seguidores y siguiendo. Cada una ocupa un
@@ -37,8 +41,10 @@ fun ProfileStatsRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(elevation = Elevation.sm, shape = RoundedCornerShape(Radius.lg))
             .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.lg))
             .padding(vertical = Spacing.sm)
     ) {
         StatItem(
@@ -51,7 +57,7 @@ fun ProfileStatsRow(
             label = stringResource(R.string.user_stat_followers),
             modifier = Modifier
                 .weight(1f)
-                .clickable(onClick = onFollowersClick),
+                .pressScaleClickable(onClick = onFollowersClick),
             valueTestTag = "statFollowersValue"
         )
         StatItem(
@@ -59,7 +65,7 @@ fun ProfileStatsRow(
             label = stringResource(R.string.user_stat_following),
             modifier = Modifier
                 .weight(1f)
-                .clickable(onClick = onFollowingClick)
+                .pressScaleClickable(onClick = onFollowingClick)
         )
     }
 }

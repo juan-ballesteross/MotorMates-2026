@@ -1,7 +1,6 @@
 package com.example.motormates.ui.search.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.data.model.SearchCategory
 import com.example.motormates.data.model.SearchCategoryKey
+import com.example.motormates.ui.theme.pressScaleClickable
 
 @Composable
 fun CategoryChipsRow(
@@ -53,7 +53,7 @@ private fun CategoryChip(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
             .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
-            .clickable { onClick() }
+            .pressScaleClickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(

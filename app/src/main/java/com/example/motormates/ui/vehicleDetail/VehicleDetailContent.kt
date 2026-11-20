@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
@@ -53,7 +54,11 @@ import com.example.motormates.ui.vehicleDetail.components.RatingRow
 import com.example.motormates.ui.vehicleDetail.components.ReviewItem
 import com.example.motormates.ui.vehicleDetail.components.SpecStatCard
 import com.example.motormates.ui.vehicleDetail.components.VehicleImageHeader
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
+import com.example.motormates.ui.theme.rememberPressScale
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 
 /**
  * Cuántas reseñas se muestran aquí antes de mandar a la lista completa.
@@ -133,8 +138,7 @@ fun VehicleDetailContent(
                 Text(
                     text = car.modelo,
                     color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp
+                    style = MaterialTheme.typography.headlineSmall
                 )
                 Text(
                     text = "${car.anio} · ${car.categoria}",
@@ -202,13 +206,22 @@ fun VehicleDetailContent(
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Spacer(modifier = Modifier.height(20.dp))
 
+                val writeReviewInteractionSource = remember { MutableInteractionSource() }
+                val writeReviewScale = rememberPressScale(writeReviewInteractionSource)
                 Button(
                     onClick = onWriteReviewClick,
+                    interactionSource = writeReviewInteractionSource,
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = Elevation.sm,
+                        pressedElevation = Elevation.xs,
+                        disabledElevation = Elevation.none
+                    ),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(Radius.md),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
+                        .scale(writeReviewScale)
                 ) {
                     Text(
                         text = stringResource(R.string.car_detail_write_review),
@@ -250,12 +263,16 @@ fun VehicleDetailContent(
 
                 // Abre el comparador con este carro a la izquierda; el
                 // segundo se elige allá mismo.
+                val compareInteractionSource = remember { MutableInteractionSource() }
+                val compareScale = rememberPressScale(compareInteractionSource)
                 OutlinedButton(
                     onClick = onCompareClick,
+                    interactionSource = compareInteractionSource,
                     shape = RoundedCornerShape(Radius.md),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
+                        .scale(compareScale)
                         .testTag("compareButton")
                 ) {
                     Icon(
@@ -307,8 +324,7 @@ fun VehicleDetailContent(
                     Text(
                         text = "Reseñas de la comunidad",
                         color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     // Solo tiene sentido ofrecer "ver todas" si hay más de las
                     // que caben aquí.

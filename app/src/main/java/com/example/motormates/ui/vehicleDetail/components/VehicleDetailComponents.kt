@@ -1,7 +1,11 @@
 package com.example.motormates.ui.vehicleDetail.components
 
 import java.util.Locale
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -34,12 +38,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -56,7 +64,12 @@ import coil.compose.AsyncImage
 import com.example.motormates.R
 import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.data.seed.localAvatarResFor
+import com.example.motormates.ui.common.components.ShimmerAsyncImage
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
+import com.example.motormates.ui.theme.pressScaleClickable
+import com.example.motormates.ui.theme.rememberHapticClick
+import com.example.motormates.ui.theme.rememberPressScale
 
 /**
  * Foto del vehículo con los botones de "volver" y "guardar" flotando encima.
@@ -74,10 +87,9 @@ fun VehicleImageHeader(
         // Los vehículos sembrados en el backend tienen imageUrl en null, así
         // que el placeholder es el caso normal, no la excepción.
         if (imageUrl != null) {
-            AsyncImage(
+            ShimmerAsyncImage(
                 model = imageUrl,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(320.dp)
@@ -98,6 +110,17 @@ fun VehicleImageHeader(
                 )
             }
         }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(110.dp)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Black.copy(alpha = 0.38f), Color.Transparent)
+                    )
+                )
+        )
 
         Row(
             modifier = Modifier
@@ -121,10 +144,14 @@ private fun CircleIconButton(
     contentDescription: String,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val scale = rememberPressScale(interactionSource)
     IconButton(
         onClick = onClick,
+        interactionSource = interactionSource,
         modifier = Modifier
             .size(40.dp)
+            .scale(scale)
             .clip(CircleShape)
             .background(Color.Black.copy(alpha = 0.5f))
     ) {
@@ -168,7 +195,9 @@ fun SpecStatCard(valor: String, etiqueta: String) {
     Column(
         modifier = Modifier
             .width(96.dp)
+            .shadow(elevation = Elevation.xs, shape = RoundedCornerShape(Radius.md))
             .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(Radius.md))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.md))
             .padding(vertical = 12.dp, horizontal = 8.dp)
     ) {
         Text(
@@ -205,6 +234,7 @@ fun ReviewItem(
     onDeleteClick: (String) -> Unit = {},
     onLikeClick: (String) -> Unit = {}
 ) {
+    val vibrate = rememberHapticClick()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -309,10 +339,15 @@ fun ReviewItem(
         }
 
         Spacer(modifier = Modifier.height(6.dp))
+        val likeScale by animateFloatAsState(
+            targetValue = if (review.isLikedByMe) 1.15f else 1f,
+            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+            label = "likeScale"
+        )
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .clickable { onLikeClick(review.id) }
+                .pressScaleClickable { vibrate(); onLikeClick(review.id) }
                 .testTag("likeButton_${review.id}")
         ) {
             Text(
@@ -328,7 +363,9 @@ fun ReviewItem(
                 imageVector = if (review.isLikedByMe) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 contentDescription = if (review.isLikedByMe) "Quitar like" else "Dar like",
                 tint = if (review.isLikedByMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier
+                    .size(18.dp)
+                    .scale(likeScale)
             )
         }
     }

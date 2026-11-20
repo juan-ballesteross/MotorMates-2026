@@ -1,7 +1,6 @@
 package com.example.motormates.ui.chat.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +36,7 @@ import com.example.motormates.R
 import com.example.motormates.data.model.ChatPreview
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.pressScaleClickable
 
 @Composable
 fun ChatListTopBar(
@@ -108,7 +108,7 @@ fun ChatPreviewRow(chat: ChatPreview, onClick: () -> Unit, modifier: Modifier = 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .pressScaleClickable(onClick = onClick)
             .padding(horizontal = Spacing.gutter, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm)

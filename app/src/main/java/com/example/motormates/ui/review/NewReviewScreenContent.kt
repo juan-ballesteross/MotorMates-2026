@@ -2,6 +2,7 @@ package com.example.motormates.ui.review
 
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,8 +17,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +35,9 @@ import com.example.motormates.ui.review.components.ReviewExperienceField
 import com.example.motormates.ui.review.components.ReviewLocationRow
 import com.example.motormates.ui.review.components.ReviewPhotosRow
 import com.example.motormates.ui.review.components.ReviewStarRating
+import com.example.motormates.ui.theme.Elevation
+import com.example.motormates.ui.theme.Radius
+import com.example.motormates.ui.theme.rememberPressScale
 
 /**
  * Contenido stateless de "Nueva reseña". Layout y espaciado alineados al mockup.
@@ -91,7 +97,7 @@ fun NewReviewScreenContent(
         Text(
             text = stringResource(R.string.review_experience_label),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp
+            style = MaterialTheme.typography.labelLarge
         )
         Spacer(modifier = Modifier.height(12.dp))
         ReviewExperienceField(value = experience, onValueChange = onExperienceChange)
@@ -100,7 +106,7 @@ fun NewReviewScreenContent(
         Text(
             text = stringResource(R.string.review_aspects_label),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp
+            style = MaterialTheme.typography.labelLarge
         )
         Spacer(modifier = Modifier.height(14.dp))
         ReviewAspectChips(selected = selectedAspects, onToggle = onToggleAspect)
@@ -109,7 +115,7 @@ fun NewReviewScreenContent(
         Text(
             text = stringResource(R.string.review_photos_label),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp
+            style = MaterialTheme.typography.labelLarge
         )
         Spacer(modifier = Modifier.height(14.dp))
         ReviewPhotosRow(
@@ -127,7 +133,7 @@ fun NewReviewScreenContent(
             Text(
                 text = stringResource(R.string.review_location_label),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp
+                style = MaterialTheme.typography.labelLarge
             )
             Spacer(modifier = Modifier.height(14.dp))
             ReviewLocationRow(
@@ -152,19 +158,27 @@ fun NewReviewScreenContent(
         }
 
         Spacer(modifier = Modifier.height(40.dp))
+        val publishInteractionSource = remember { MutableInteractionSource() }
+        val publishScale = rememberPressScale(publishInteractionSource)
         Button(
             onClick = onPublishClick,
             enabled = canPublish,
+            interactionSource = publishInteractionSource,
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = Elevation.sm,
+                pressedElevation = Elevation.xs
+            ),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 disabledContainerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 disabledContentColor = MaterialTheme.colorScheme.onPrimary
             ),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(Radius.md),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
+                .scale(publishScale)
         ) {
             Text(
                 text = stringResource(

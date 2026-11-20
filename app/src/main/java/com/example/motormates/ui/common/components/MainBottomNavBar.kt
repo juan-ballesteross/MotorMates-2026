@@ -1,7 +1,6 @@
 package com.example.motormates.ui.common.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Add
@@ -32,6 +32,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.R
+import com.example.motormates.ui.theme.Radius
+import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.pressScaleClickable
 
 enum class MainBottomDestination { FEED, EXPLORE, MESSAGES, PROFILE }
 
@@ -71,7 +74,7 @@ fun MainBottomNavBar(
             modifier = Modifier
                 .size(52.dp)
                 .background(MaterialTheme.colorScheme.primary, CircleShape)
-                .clickable(onClick = onPublishClick),
+                .pressScaleClickable(onClick = onPublishClick),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -107,10 +110,18 @@ private fun BottomNavItem(
 ) {
     val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
     Column(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier
+            .clip(RoundedCornerShape(Radius.md))
+            .pressScaleClickable(onClick = onClick)
+            .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(Radius.lg))
+                .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else Color.Transparent)
+                .padding(horizontal = 14.dp, vertical = 4.dp)
+        ) {
             Icon(imageVector = icon, contentDescription = label, tint = color, modifier = Modifier.size(24.dp))
             if (showBadge) {
                 Box(

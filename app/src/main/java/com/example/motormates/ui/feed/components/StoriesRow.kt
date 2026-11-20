@@ -1,7 +1,6 @@
 package com.example.motormates.ui.feed.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.motormates.data.model.StoryUser
+import com.example.motormates.ui.theme.pressScaleClickable
 
 @Composable
 fun StoriesRow(
@@ -56,7 +56,7 @@ fun StoriesRow(
 @Composable
 private fun AddStoryItem(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier.pressScaleClickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -80,7 +80,7 @@ private fun AddStoryItem(onClick: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 private fun StoryItem(story: StoryUser, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier.pressScaleClickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(

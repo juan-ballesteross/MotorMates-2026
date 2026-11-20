@@ -3,4 +3,5 @@
     <cache-path name="review_photos" path="review_photos/" />
     <cache-path name="story_photos" path="story_photos/" />
     <cache-path name="tuning_photos" path="tuning_photos/" />
+    <cache-path name="chat_photos" path="chat_photos/" />
 </paths>

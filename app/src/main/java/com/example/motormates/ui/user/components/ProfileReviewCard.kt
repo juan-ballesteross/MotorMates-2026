@@ -3,7 +3,7 @@ package com.example.motormates.ui.user.components
 import androidx.compose.ui.platform.testTag
 import com.example.motormates.ui.common.components.CompareWithMineButton
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
@@ -36,8 +37,10 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.motormates.R
 import com.example.motormates.data.model.UserReviewUi
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.pressScaleClickable
 
 /**
  * Una reseña vista desde un perfil. A diferencia de ReviewItem, acá el
@@ -59,9 +62,11 @@ fun ProfileReviewCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(elevation = Elevation.sm, shape = RoundedCornerShape(Radius.lg))
             .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable { onClick(review.vehicleId) }
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.lg))
+            .pressScaleClickable { onClick(review.vehicleId) }
             .padding(Spacing.sm),
         verticalAlignment = Alignment.Top
     ) {

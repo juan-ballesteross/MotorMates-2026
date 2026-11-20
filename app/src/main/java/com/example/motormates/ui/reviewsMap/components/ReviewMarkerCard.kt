@@ -1,7 +1,7 @@
 package com.example.motormates.ui.reviewsMap.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -44,9 +45,12 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.motormates.R
 import com.example.motormates.data.model.ReviewMapMarkerUi
+import com.example.motormates.ui.common.components.ShimmerAsyncImage
+import com.example.motormates.ui.theme.Elevation
 import com.example.motormates.ui.theme.MotorMatesTheme
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.pressScaleClickable
 
 /**
  * La información de la reseña que aparece al tocar su marcador.
@@ -67,10 +71,12 @@ fun ReviewMarkerCard(
         modifier = modifier
             .fillMaxWidth()
             .testTag("reviewMarkerCard")
+            .shadow(elevation = Elevation.sm, shape = RoundedCornerShape(Radius.lg))
             .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(Radius.lg))
             // Al tocar la tarjeta se va al detalle del vehículo reseñado.
-            .clickable { onCardClick(marker.vehicleId) }
+            .pressScaleClickable { onCardClick(marker.vehicleId) }
             .padding(Spacing.sm)
     ) {
         Row(verticalAlignment = Alignment.Top) {
@@ -205,10 +211,9 @@ private fun VehiclePhoto(imageUrl: String?, name: String, modifier: Modifier = M
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
-            AsyncImage(
+            ShimmerAsyncImage(
                 model = imageUrl,
                 contentDescription = stringResource(R.string.reviews_map_vehicle_photo_cd, name),
-                contentScale = ContentScale.Crop,
                 modifier = Modifier.size(64.dp)
             )
         }

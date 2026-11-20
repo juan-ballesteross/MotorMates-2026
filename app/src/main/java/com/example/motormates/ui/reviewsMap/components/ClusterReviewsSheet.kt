@@ -1,7 +1,6 @@
 package com.example.motormates.ui.reviewsMap.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,18 +24,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.example.motormates.R
 import com.example.motormates.data.model.ReviewMapMarkerUi
+import com.example.motormates.ui.common.components.ShimmerAsyncImage
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
+import com.example.motormates.ui.theme.pressScaleClickable
 
 /**
  * Las reseñas de un grupo que el zoom no puede separar porque están en el
@@ -81,7 +80,7 @@ private fun ClusterReviewRow(marker: ReviewMapMarkerUi, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .pressScaleClickable(onClick = onClick)
             .padding(horizontal = Spacing.md, vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -95,10 +94,9 @@ private fun ClusterReviewRow(marker: ReviewMapMarkerUi, onClick: () -> Unit) {
             if (marker.vehicleImageUrl == null) {
                 Icon(Icons.Filled.DirectionsCar, contentDescription = null)
             } else {
-                AsyncImage(
+                ShimmerAsyncImage(
                     model = marker.vehicleImageUrl,
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
                     modifier = Modifier.size(48.dp)
                 )
             }

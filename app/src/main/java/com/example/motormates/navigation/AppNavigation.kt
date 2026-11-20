@@ -1,5 +1,10 @@
 package com.example.motormates.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -60,7 +65,21 @@ fun AppNavigation(
     NavHost(
         navController = navController,
         startDestination = ScreenRoute.Splash.route,
-        modifier = modifier
+        modifier = modifier,
+        enterTransition = {
+            fadeIn(animationSpec = tween(220)) +
+                slideInHorizontally(animationSpec = tween(220)) { it / 10 }
+        },
+        exitTransition = {
+            fadeOut(animationSpec = tween(180))
+        },
+        popEnterTransition = {
+            fadeIn(animationSpec = tween(220))
+        },
+        popExitTransition = {
+            fadeOut(animationSpec = tween(180)) +
+                slideOutHorizontally(animationSpec = tween(180)) { it / 10 }
+        }
     ) {
         composable(ScreenRoute.Splash.route) {
             SplashScreen(
@@ -578,7 +597,8 @@ fun AppNavigation(
             val otherUid = entry.arguments?.getString(ScreenRoute.Chat.ARG_OTHER_UID).orEmpty()
             ChatScreen(
                 otherUid = otherUid,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onProfileClick = { uid -> navController.navigate(ScreenRoute.PublicProfileFirebase.createRoute(uid)) }
             )
         }
     }
