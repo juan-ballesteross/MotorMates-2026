@@ -6,6 +6,8 @@ import com.example.motormates.data.model.FeedVehicleUi
 import com.example.motormates.data.model.StoryUser
 import com.example.motormates.data.util.SuggestedUser
 
+import com.example.motormates.data.model.news.NewsArticleUi
+
 /**
  * Las dos pestañas guardan su estado por separado (cargando y error
  * propios) porque se alimentan de fuentes distintas: los vehículos de una
@@ -32,6 +34,11 @@ data class FeedUiState(
     val suggestions: List<SuggestedUser> = emptyList(),
     /** Reseñas de los gustos del usuario para completar Siguiendo cuando es corta. */
     val featuredReviews: List<FeedReviewUi> = emptyList(),
+
+    // Variables de estado para Noticias
+    val newsArticles: List<NewsArticleUi> = emptyList(),
+    val isNewsLoading: Boolean = false,
+    val newsErrorMessage: String? = null,
 ) {
     /** Siguiendo tiene poco: se completa con sugerencias y reseñas destacadas. */
     val showFollowingDiscovery: Boolean

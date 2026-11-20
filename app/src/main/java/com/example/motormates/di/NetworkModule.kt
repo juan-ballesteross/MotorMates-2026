@@ -16,6 +16,9 @@ import com.example.motormates.data.repository.VehicleRepositoryImpl
 import com.example.motormates.data.source.PLACES_API_KEY_NAME
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.example.motormates.data.source.news.NewsApiService
+import com.example.motormates.data.repository.news.NewsRepository
+import com.example.motormates.data.repository.news.NewsRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -112,6 +115,18 @@ object NetworkProvidersModule {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(PlacesApiService::class.java)
+
+    // Proveedor separado de Retrofit porque las noticias no usan la base URL del backend,
+    // usan la base de rss2json
+    @Provides
+    @Singleton
+    fun provideNewsApiService(client: OkHttpClient, gson: Gson): NewsApiService =
+        Retrofit.Builder()
+            .baseUrl("https://api.rss2json.com/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(NewsApiService::class.java)
 }
 
 @Module
@@ -138,4 +153,10 @@ abstract class NetworkBindingsModule {
     abstract fun bindReviewRepository(
         repository: ReviewRepositoryImpl
     ): ReviewRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNewsRepository(
+        repository: NewsRepositoryImpl
+    ): NewsRepository
 }

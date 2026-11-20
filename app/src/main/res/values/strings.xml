@@ -182,6 +182,7 @@
     <string name="feed_tab_explore">Explorar</string>
     <string name="feed_tab_following">Siguiendo</string>
     <string name="feed_tab_map">Mapa</string>
+    <string name="feed_tab_news">Noticias</string>
 
     <!-- Mapa de reseñas recientes -->
     <string name="reviews_map_empty">Nadie ha publicado reseñas con ubicación en las últimas 24 horas</string>

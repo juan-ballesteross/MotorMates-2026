@@ -17,6 +17,7 @@ import com.example.motormates.data.repository.PreferencesRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.StoryRepository
 import com.example.motormates.data.repository.VehicleRepository
+import com.example.motormates.data.repository.news.NewsRepository
 import com.example.motormates.data.seed.FirestoreSeeder
 import com.example.motormates.data.util.FeedRanker
 import com.example.motormates.data.util.TimeSource
@@ -51,7 +52,8 @@ class FeedViewModel @Inject constructor(
     private val storyRepository: StoryRepository,
     private val firestoreSeeder: FirestoreSeeder,
     private val preferencesRepository: PreferencesRepository,
-    private val timeSource: TimeSource
+    private val timeSource: TimeSource,
+    private val newsRepository: NewsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FeedUiState())
@@ -90,6 +92,7 @@ class FeedViewModel @Inject constructor(
             runCatching { firestoreSeeder.seedIfEmpty() }
             runCatching { firestoreSeeder.backfillVehicleOwners() }
             loadVehicles()
+            loadNews()
         }
         observeFollowingReviews()
         observePersonalization()
@@ -236,6 +239,29 @@ class FeedViewModel @Inject constructor(
         viewModelScope.launch {
             followRepository.followUser(currentUserId, userId).onFailure {
                 justFollowed.update { it - userId }
+            }
+        }
+    }
+
+    private fun loadNews() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isNewsLoading = true, newsErrorMessage = null) }
+            val result = newsRepository.getLatestNews()
+            _uiState.update { current ->
+                result.fold(
+                    onSuccess = { articles ->
+                        current.copy(
+                            isNewsLoading = false,
+                            newsArticles = articles
+                        )
+                    },
+                    onFailure = { error ->
+                        current.copy(
+                            isNewsLoading = false,
+                            newsErrorMessage = error.message ?: "No se pudieron cargar las noticias"
+                        )
+                    }
+                )
             }
         }
     }

@@ -43,10 +43,10 @@ data class FeedVehicleUi(
 )
 
 /**
- * Las tres vistas del Home: el catálogo de carros, lo que publica la gente que
- * sigo, o el mapa con las reseñas de las últimas 24 horas.
+ * Las vistas del Home: el catálogo de carros, lo que publica la gente que
+ * sigo, el mapa, o las últimas noticias automotrices.
  */
-enum class FeedTab { EXPLORAR, SIGUIENDO, MAPA }
+enum class FeedTab { EXPLORAR, SIGUIENDO, MAPA, NOTICIAS }
 
 /**
  * Una reseña lista para pintarse como marcador en el mapa. Vive junto a

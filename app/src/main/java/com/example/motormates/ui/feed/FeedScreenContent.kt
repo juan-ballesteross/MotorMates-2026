@@ -33,6 +33,7 @@ import com.example.motormates.ui.feed.components.PersonalizeFeedCard
 import com.example.motormates.ui.feed.components.FollowingReviewCard
 import com.example.motormates.ui.feed.components.StoriesRow
 import com.example.motormates.ui.feed.components.VehicleFeedCard
+import com.example.motormates.ui.feed.components.news.NewsCard
 import com.example.motormates.ui.theme.Spacing
 
 @Composable
@@ -45,6 +46,9 @@ fun FeedScreenContent(
     followingReviews: List<FeedReviewUi>,
     isFollowingLoading: Boolean,
     followingErrorMessage: String?,
+    newsArticles: List<com.example.motormates.data.model.news.NewsArticleUi>,
+    isNewsLoading: Boolean,
+    newsErrorMessage: String?,
     modifier: Modifier = Modifier,
     storyErrorMessage: String? = null,
     onVehicleClick: (String) -> Unit = {},
@@ -173,6 +177,19 @@ fun FeedScreenContent(
                             )
                         }
                     }
+                }
+            }
+
+            FeedTab.NOTICIAS -> feedSection(
+                isLoading = isNewsLoading,
+                errorMessage = newsErrorMessage,
+                isEmpty = newsArticles.isEmpty(),
+                emptyMessage = "No hay noticias recientes",
+                // Por ahora reusamos loadVehicles/onRetryClick principal
+                onRetryClick = onRetryClick 
+            ) {
+                items(newsArticles, key = { it.link }) { article ->
+                    NewsCard(article = article)
                 }
             }
         }

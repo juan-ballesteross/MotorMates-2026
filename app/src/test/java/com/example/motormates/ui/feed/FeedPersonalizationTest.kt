@@ -10,6 +10,7 @@ import com.example.motormates.data.repository.PreferencesRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.StoryRepository
 import com.example.motormates.data.repository.VehicleRepository
+import com.example.motormates.data.repository.news.NewsRepository
 import com.example.motormates.data.seed.FirestoreSeeder
 import com.example.motormates.data.util.OnboardingTestData
 import com.example.motormates.data.util.OnboardingTestData.review
@@ -46,6 +47,7 @@ class FeedPersonalizationTest {
     private val seeder: FirestoreSeeder = mockk(relaxed = true)
     private val preferencesRepository: PreferencesRepository = mockk()
     private val timeSource: TimeSource = mockk()
+    private val newsRepository: NewsRepository = mockk()
 
     private val preferences = MutableStateFlow(UserPreferences(categories = listOf("SUV")))
     private val following = MutableStateFlow<List<String>>(emptyList())
@@ -71,11 +73,12 @@ class FeedPersonalizationTest {
         every { likeRepository.observeLikedReviewIds(any(), any()) } returns flowOf(emptySet())
         every { storyRepository.observeActiveStories() } returns flowOf(emptyList())
         every { preferencesRepository.observeMine() } returns preferences
+        coEvery { newsRepository.getLatestNews() } returns Result.success(emptyList())
     }
 
     private fun newViewModel() = FeedViewModel(
         vehicleRepository, reviewRepository, followRepository, authRepository, likeRepository,
-        storyRepository, seeder, preferencesRepository, timeSource
+        storyRepository, seeder, preferencesRepository, timeSource, newsRepository
     )
 
     @Test

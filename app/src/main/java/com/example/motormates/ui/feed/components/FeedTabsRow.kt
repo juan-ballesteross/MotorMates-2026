@@ -50,4 +50,5 @@ private val FeedTab.labelRes: Int
         FeedTab.EXPLORAR -> R.string.feed_tab_explore
         FeedTab.SIGUIENDO -> R.string.feed_tab_following
         FeedTab.MAPA -> R.string.feed_tab_map
+        FeedTab.NOTICIAS -> R.string.feed_tab_news
     }
