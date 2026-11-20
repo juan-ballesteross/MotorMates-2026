@@ -9,6 +9,7 @@ import com.example.motormates.data.repository.ActivityRepository
 import com.example.motormates.data.model.toUserProfile
 import com.example.motormates.data.model.toUserReviewUi
 import com.example.motormates.data.repository.AuthRepository
+import com.example.motormates.data.repository.BuildRepository
 import com.example.motormates.data.repository.ProfileImageRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.UserRepository
@@ -29,7 +30,8 @@ class UserViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val vehicleRepository: VehicleRepository,
     private val authRepository: AuthRepository,
-    private val activityRepository: ActivityRepository
+    private val activityRepository: ActivityRepository,
+    private val buildRepository: BuildRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserUiState())
@@ -139,6 +141,7 @@ class UserViewModel @Inject constructor(
         if (tab == ProfileTab.GARAGE) {
             authRepository.getCurrentUser()?.id?.let(::loadVehicles)
         }
+        if (tab == ProfileTab.BUILDS) loadBuilds()
         // La actividad se consulta cada vez que se abre la pestaña: así
         // aparece lo que hice desde la última vez sin tener que recargar.
         if (tab == ProfileTab.ACTIVITY) loadActivity()
@@ -160,6 +163,18 @@ class UserViewModel @Inject constructor(
                     }
                 }
             )
+        }
+    }
+
+    /**
+     * Se piden al abrir la pestaña (y cada vez que se vuelve a ella): así un
+     * build recién guardado aparece sin tener que recargar todo el perfil.
+     */
+    fun loadBuilds() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isBuildsLoading = true) }
+            val builds = buildRepository.getMyBuilds().getOrElse { emptyList() }
+            _uiState.update { it.copy(isBuildsLoading = false, builds = builds) }
         }
     }
 

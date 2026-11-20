@@ -28,6 +28,7 @@ fun UserScreen(
     onEditReviewClick: (String, String) -> Unit = { _, _ -> },
     onFollowersClick: () -> Unit = {},
     onFollowingClick: () -> Unit = {},
+    onBuildClick: (String) -> Unit = {},
     onLoggedOut: () -> Unit = {},
     onPublishVehicleClick: () -> Unit = {},
     onUserClick: (String) -> Unit = {},
@@ -88,7 +89,6 @@ fun UserScreen(
         onFollowersClick = onFollowersClick,
         onFollowingClick = onFollowingClick,
         onLogOutClick = { viewModel.logOut(onLoggedOut) },
-        modifier = modifier,
         onGarageCarClick = onVehicleClick,
         onPublishVehicleClick = onPublishVehicleClick,
         activity = uiState.activity,
@@ -101,7 +101,11 @@ fun UserScreen(
                 item.userId != null -> onUserClick(item.userId)
             }
         },
-        onRetryActivity = viewModel::loadActivity
+        onRetryActivity = viewModel::loadActivity,
+        builds = uiState.builds,
+        isBuildsLoading = uiState.isBuildsLoading,
+        onBuildClick = onBuildClick,
+        modifier = modifier
     )
 }
 

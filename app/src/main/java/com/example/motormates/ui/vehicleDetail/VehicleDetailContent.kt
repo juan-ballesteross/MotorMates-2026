@@ -1,5 +1,6 @@
 package com.example.motormates.ui.vehicleDetail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -42,7 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.motormates.R
+import com.example.motormates.data.model.Build
 import com.example.motormates.data.model.CarDetailUi
+import com.example.motormates.data.util.CopFormat
 import com.example.motormates.data.model.ReviewUi
 import com.example.motormates.data.seed.localAvatarResFor
 import com.example.motormates.ui.vehicleDetail.components.RatingRow
@@ -86,7 +90,11 @@ fun VehicleDetailContent(
     onDeleteReviewClick: (String) -> Unit,
     onLikeClick: (String) -> Unit,
     modifier: Modifier = Modifier,
-    onCompareClick: () -> Unit = {}
+    onCompareClick: () -> Unit = {},
+    isOwner: Boolean = false,
+    communityBuilds: List<Build> = emptyList(),
+    onAiTuningClick: () -> Unit = {},
+    onBuildClick: (String) -> Unit = {}
 ) {
     val inlineReviewsLimit = inlineReviewsLimit()
     val specs = listOf(
@@ -212,6 +220,34 @@ fun VehicleDetailContent(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
+                // AI Tuning: si no es mi carro, igual puedo "imaginarlo modificado".
+                OutlinedButton(
+                    onClick = onAiTuningClick,
+                    shape = RoundedCornerShape(Radius.md),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                        .testTag("aiTuningButton")
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.AutoAwesome,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(
+                            if (isOwner) R.string.car_detail_ai_tuning_owner else R.string.car_detail_ai_tuning_visitor
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 // Abre el comparador con este carro a la izquierda; el
                 // segundo se elige allá mismo.
                 OutlinedButton(
@@ -239,6 +275,31 @@ fun VehicleDetailContent(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // Builds publicados por otros para este carro. El carrusel va
+                // a sangre, así que se cierra el Column de los 20.dp y se
+                // vuelve a abrir para las reseñas.
+                if (communityBuilds.isNotEmpty()) {
+                    Text(
+                        text = "Builds de la comunidad",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+            }
+            if (communityBuilds.isNotEmpty()) {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp)
+                ) {
+                    items(communityBuilds, key = { it.id }) { build ->
+                        CommunityBuildCard(build = build, onClick = { onBuildClick(build.id) })
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+            Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -287,6 +348,44 @@ fun VehicleDetailContent(
                     onLikeClick = onLikeClick
                 )
             }
+        }
+    }
+}
+
+/** Miniatura de un build publicado: imagen modificada, autor y costo. */
+@Composable
+private fun CommunityBuildCard(build: Build, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .width(200.dp)
+            .clip(RoundedCornerShape(Radius.md))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(onClick = onClick)
+            .testTag("communityBuild_${build.id}")
+    ) {
+        AsyncImage(
+            model = build.resultImageUrl,
+            contentDescription = "Build de ${build.ownerName ?: "un usuario"}",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+        )
+        Column(modifier = Modifier.padding(10.dp)) {
+            Text(
+                text = build.ownerName ?: "Usuario",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp,
+                maxLines = 1
+            )
+            Text(
+                text = if (build.partNames.isEmpty()) "Diseño AI"
+                else "${build.partNames.size} piezas · ${CopFormat.compact(build.summary.totalMaxCop)}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp,
+                maxLines = 1
+            )
         }
     }
 }

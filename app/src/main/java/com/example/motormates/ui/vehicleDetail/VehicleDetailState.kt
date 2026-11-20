@@ -1,5 +1,6 @@
 package com.example.motormates.ui.vehicleDetail
 
+import com.example.motormates.data.model.Build
 import com.example.motormates.data.model.CarDetailUi
 import com.example.motormates.data.model.ReviewUi
 
@@ -14,5 +15,9 @@ data class VehicleDetailState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isBookmarked: Boolean = false,
-    val pendingDeleteReviewId: String? = null
+    val pendingDeleteReviewId: String? = null,
+    /** Soy el dueño del vehículo (cambia el texto del botón de AI Tuning). */
+    val isOwner: Boolean = false,
+    /** Builds publicados por la comunidad para este vehículo. */
+    val communityBuilds: List<Build> = emptyList()
 )

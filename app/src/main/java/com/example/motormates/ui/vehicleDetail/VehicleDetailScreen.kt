@@ -25,6 +25,8 @@ fun VehicleDetailScreen(
     onAuthorClick: (String) -> Unit = {},
     onEditReviewClick: (String) -> Unit = {},
     onCompareClick: () -> Unit = {},
+    onAiTuningClick: () -> Unit = {},
+    onBuildClick: (String) -> Unit = {},
     reloadSignal: Boolean = false,
     onReloadHandled: () -> Unit = {},
     viewModel: VehicleDetailViewModel = hiltViewModel(),
@@ -94,6 +96,10 @@ fun VehicleDetailScreen(
             onCompareClick = onCompareClick,
             onDeleteReviewClick = viewModel::askDeleteReview,
             onLikeClick = viewModel::toggleLike,
+            isOwner = state.isOwner,
+            communityBuilds = state.communityBuilds,
+            onAiTuningClick = onAiTuningClick,
+            onBuildClick = onBuildClick,
             modifier = modifier
         )
     }

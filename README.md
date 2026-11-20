@@ -21,6 +21,12 @@ Jose Alejandro Villarroel Marcano
   publicada en las últimas 24 horas (`ReviewsMapScreen`). Al tocar un marcador se muestra el
   autor, el vehículo, la calificación y el comentario. Requiere configurar una API key de
   Google Maps (ver abajo).
+- **AI Tuning (Modificaciones con AI)**: desde el detalle de un vehículo se eligen piezas
+  reales de un catálogo (o una foto propia de una pieza, o una idea libre) y Gemini genera la
+  foto del carro modificado, con comparador antes/después, costo estimado en COP, cambios de
+  rendimiento calculados por la app, ficha técnica y precios en vivo con Google. Los resultados
+  se guardan como *Builds* en el perfil y se pueden publicar. Requiere el plan Blaze y
+  Firebase AI Logic: ver [docs/ai-tuning.md](docs/ai-tuning.md).
 - **Navegación** simple entre Login → Registro → Feed → Búsqueda, manejada en `MainActivity`.
 
 ## Tecnologías

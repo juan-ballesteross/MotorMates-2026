@@ -7,6 +7,8 @@
  *
  * Uso:
  *   node seed.js                 -> escribe en el proyecto real
+ *   node seed.js --parts         -> solo el catálogo de AI Tuning (piezas,
+ *                                   paquetes y sus fotos en Storage)
  *   FIRESTORE_EMULATOR_HOST=localhost:8080 node seed.js
  *                                -> escribe en el emulador (el Admin SDK
  *                                   detecta esa variable por su cuenta)
@@ -16,9 +18,11 @@
  * duplicarlos.
  */
 
+const fs = require("fs");
 const path = require("path");
 const { initializeApp, applicationDefault } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
+const { getStorage, getDownloadURL } = require("firebase-admin/storage");
 const { faker } = require("@faker-js/faker/locale/es");
 
 const serviceAccount = require("./serviceAccountKey.json");
@@ -58,6 +62,8 @@ initializeApp({
   // Con credenciales por defecto el projectId no se infiere solo; se toma
   // del mismo archivo de llave.
   projectId: serviceAccount.project_id,
+  // El bucket de app/google-services.json. Se puede cambiar con STORAGE_BUCKET.
+  storageBucket: process.env.STORAGE_BUCKET || `${serviceAccount.project_id}.firebasestorage.app`,
 });
 const db = getFirestore(DATABASE_ID);
 
@@ -465,7 +471,72 @@ async function commitInBatches(writes) {
   }
 }
 
+/**
+ * Catálogo de AI Tuning. La fuente es el mismo archivo que la app trae en
+ * assets (así nunca se desincronizan): app/src/main/assets/parts_catalog.json.
+ *
+ * Fotos de las piezas: pon cada una en seed/parts/images/<id>.(png|jpg|jpeg|webp)
+ * (por ejemplo rin_18_5radios_negro.jpg) y este script la sube a Storage en
+ * parts/<id>.<ext> y le pone su imageUrl. Las piezas sin foto se muestran con
+ * un ícono y la AI las dibuja solo a partir de su descripción.
+ */
+const CATALOG_PATH = path.join(__dirname, "..", "app", "src", "main", "assets", "parts_catalog.json");
+const PART_IMAGES_DIR = path.join(__dirname, "parts", "images");
+const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp"];
+const CONTENT_TYPES = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp" };
+
+function findPartImage(partId) {
+  for (const ext of IMAGE_EXTENSIONS) {
+    const file = path.join(PART_IMAGES_DIR, partId + ext);
+    if (fs.existsSync(file)) return { file, ext };
+  }
+  return null;
+}
+
+async function uploadPartImage(partId) {
+  const found = findPartImage(partId);
+  if (!found) return null;
+  // Con el emulador de Firestore activo no hay emulador de Storage en este
+  // proyecto: las fotos se suben igual al bucket real.
+  const destination = `parts/${partId}${found.ext}`;
+  const bucket = getStorage().bucket();
+  await bucket.upload(found.file, {
+    destination,
+    metadata: { contentType: CONTENT_TYPES[found.ext] },
+  });
+  return getDownloadURL(bucket.file(destination));
+}
+
+async function seedParts() {
+  const catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, "utf8"));
+  const writes = [];
+  let withImage = 0;
+
+  for (const { id, ...data } of catalog.parts) {
+    const imageUrl = await uploadPartImage(id);
+    if (imageUrl) {
+      data.imageUrl = imageUrl;
+      withImage += 1;
+    }
+    writes.push({ ref: db.collection("parts").doc(id), data });
+  }
+  catalog.packages.forEach(({ id, ...data }) => {
+    writes.push({ ref: db.collection("tuningPackages").doc(id), data });
+  });
+
+  await commitInBatches(writes);
+  console.log(
+    `Catálogo AI Tuning: ${catalog.parts.length} piezas (${withImage} con foto) ` +
+    `y ${catalog.packages.length} paquetes.`
+  );
+}
+
 async function main() {
+  if (process.argv.includes("--parts")) {
+    await seedParts();
+    return;
+  }
+
   const { users, reviews, likes, follows, events } = buildData();
   const writes = [];
 
@@ -507,6 +578,7 @@ async function main() {
   });
 
   await commitInBatches(writes);
+  await seedParts();
 
   const destino = process.env.FIRESTORE_EMULATOR_HOST
     ? `emulador (${process.env.FIRESTORE_EMULATOR_HOST})`
