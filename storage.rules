@@ -62,6 +62,14 @@ service firebase.storage {
       allow write: if request.auth != null && isImage();
     }
 
+    // Fotos del chat: la carpeta es el id del chat (uid1_uid2). Misma forma
+    // que reviews y events: Storage no lee la base motormatesdb para saber
+    // quiénes participan, así que aquí solo se exige sesión e imagen; quién
+    // puede mandar el mensaje que la enlaza lo decide firestore.rules.
+    match /chats/{chatId}/{file} {
+      allow write: if request.auth != null && isImage();
+    }
+
     // parts/ solo lo escribe el seed (Admin SDK, que no pasa por reglas).
   }
 }
