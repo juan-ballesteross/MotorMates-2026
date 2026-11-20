@@ -3,6 +3,7 @@ package com.example.motormates.data.source
 import com.example.motormates.data.model.AuthUser
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -24,6 +25,12 @@ class FirebaseAuthDataSource @Inject constructor(
 
     override suspend fun signIn(email: String, password: String): AuthUser {
         val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+        return requireNotNull(result.user).toAuthUser()
+    }
+
+    override suspend fun signInWithGoogle(idToken: String): AuthUser {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        val result = firebaseAuth.signInWithCredential(credential).await()
         return requireNotNull(result.user).toAuthUser()
     }
 

@@ -8,6 +8,9 @@ interface AuthDataSource {
 
     suspend fun signIn(email: String, password: String): AuthUser
 
+    /** Autentica con el idToken que dio el selector de cuentas de Google. */
+    suspend fun signInWithGoogle(idToken: String): AuthUser
+
     suspend fun signUp(fullName: String, email: String, password: String): AuthUser
 
     suspend fun signOut()

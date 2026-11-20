@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,6 +28,11 @@ fun LoginScreen(
         }
     }
 
+    // El selector de cuentas de Google necesita un contexto de Activity, así
+    // que la pantalla es la única que lo puede dar. Se lo pasa al ViewModel,
+    // que lo usa y lo suelta sin guardarlo.
+    val context = LocalContext.current
+
     LoginScreenContent(
         email = uiState.email,
         onEmailChange = viewModel::updateEmail,
@@ -38,6 +44,7 @@ fun LoginScreen(
         isLoading = uiState.isLoading,
         errorMessage = uiState.errorMessage,
         onLoginClick = viewModel::signIn,
+        onGoogleSignInClick = { viewModel.signInWithGoogle(context) },
         onRegisterClick = onRegisterClick,
         onForgotPasswordClick = onForgotPasswordClick,
         modifier = modifier
@@ -59,6 +66,7 @@ private fun LoginScreenPreview() {
             isLoading = false,
             errorMessage = null,
             onLoginClick = {},
+            onGoogleSignInClick = {},
             onRegisterClick = {},
             onForgotPasswordClick = {}
         )

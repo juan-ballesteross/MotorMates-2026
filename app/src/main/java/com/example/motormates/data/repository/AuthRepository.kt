@@ -21,6 +21,14 @@ interface AuthRepository {
 
     suspend fun signIn(email: String, password: String): Result<AuthUser>
 
+    /**
+     * Autentica en Firebase con el idToken que devolvió el selector de
+     * cuentas de Google (ver GoogleSignInDataSource). La primera vez también
+     * le crea el perfil, porque con Google no hay pantalla de registro donde
+     * pedirle el nombre.
+     */
+    suspend fun signInWithGoogle(idToken: String): Result<AuthUser>
+
     suspend fun signUp(fullName: String, email: String, password: String): Result<AuthUser>
 
     suspend fun signOut(): Result<Unit>
@@ -140,6 +148,47 @@ class AuthRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             runCatching { authDataSource.deleteCurrentUser() }
             throw e
+        }
+    }
+
+    override suspend fun signInWithGoogle(idToken: String): Result<AuthUser> {
+        return try {
+            val user = authDataSource.signInWithGoogle(idToken)
+
+            // Con Google no hay pantalla de registro, así que el perfil se
+            // crea aquí la primera vez. Es la misma comprobación que hace
+            // UserRepository.hasProfile; se usa el userDataSource que esta
+            // clase ya tiene para no sumarle otra dependencia.
+            //
+            // getOrDefault(true) si no se pudo comprobar: mismo criterio que
+            // el Splash y que LoginViewModel.signIn. La consecuencia es que
+            // sin red no se crea el perfil y tampoco se borra la cuenta; el
+            // perfil se crea en el siguiente intento con conexión.
+            val hasProfile = runCatching { userDataSource.getUser(user.id) != null }
+                .getOrDefault(true)
+            if (!hasProfile) {
+                // Google casi siempre da displayName, pero no esta garantizado
+                // (cuentas de empresa sin nombre público). El usuario lo puede
+                // cambiar despues en Editar perfil.
+                saveUserProfile(
+                    user = user,
+                    fullName = user.displayName ?: "Usuario de Google",
+                    email = user.email.orEmpty()
+                )
+            }
+            Result.success(user)
+        } catch (e: FirebaseAuthUserCollisionException) {
+            // Ese correo ya tiene cuenta con contraseña y Firebase está
+            // configurado con "una cuenta por correo".
+            Result.failure(
+                Exception("Ese correo ya tiene una cuenta con contraseña. Inicia sesión con tu contraseña.")
+            )
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Result.failure(Exception("La cuenta de Google no se pudo verificar, intenta de nuevo"))
+        } catch (e: FirebaseNetworkException) {
+            Result.failure(Exception("Sin conexión a internet, verifica tu red"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Error al iniciar sesión con Google"))
         }
     }
 }
