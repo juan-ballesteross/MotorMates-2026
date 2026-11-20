@@ -119,16 +119,7 @@ private fun AiToolCard(
             .padding(Spacing.sm)
             .testTag(testTag)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
-            Spacer(modifier = Modifier.width(Spacing.xxs))
-            Icon(
-                Icons.Default.AutoAwesome,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.size(14.dp)
-            )
-        }
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.weight(1f))
         Text(
             title,
