@@ -108,6 +108,79 @@ class AuthRepositoryImplTest {
 
         assertEquals(dataSource.authState, repository.authState)
     }
+    // ---------- signInWithGoogle ----------
+
+    @Test
+    fun signInWithGoogleCreatesProfileOnFirstSignIn() = runTest {
+        val googleUser = AuthUser(id = "uid-g", email = "ana@gmail.com", displayName = "Ana Gomez")
+        val users = FakeUserDataSource()
+        val repository = AuthRepositoryImpl(
+            FakeAuthDataSource(signInWithGoogleResult = Result.success(googleUser)),
+            users,
+            FakePushTokenRepository()
+        )
+
+        val result = repository.signInWithGoogle("id-token")
+
+        assertEquals(googleUser, result.getOrThrow())
+        val profile = users.getUser("uid-g")
+        assertEquals("Ana Gomez", profile?.fullName)
+        assertEquals("ana@gmail.com", profile?.email)
+        // El username inicial es lo que va antes de la arroba, igual que en signUp.
+        assertEquals("ana", profile?.username)
+    }
+
+    @Test
+    fun signInWithGoogleKeepsExistingProfile() = runTest {
+        val googleUser = AuthUser(id = "uid-g", email = "ana@gmail.com", displayName = "Ana Nueva")
+        val users = FakeUserDataSource(
+            listOf(UserDto(id = "uid-g", fullName = "Ana De Antes", email = "ana@gmail.com", username = "anita"))
+        )
+        val repository = AuthRepositoryImpl(
+            FakeAuthDataSource(signInWithGoogleResult = Result.success(googleUser)),
+            users,
+            FakePushTokenRepository()
+        )
+
+        val result = repository.signInWithGoogle("id-token")
+
+        assertTrue(result.isSuccess)
+        // No se pisa el perfil que ya existia: el nombre y el username siguen.
+        assertEquals("Ana De Antes", users.getUser("uid-g")?.fullName)
+        assertEquals("anita", users.getUser("uid-g")?.username)
+    }
+
+    @Test
+    fun signInWithGoogleUsesFallbackNameWhenGoogleGivesNone() = runTest {
+        val googleUser = AuthUser(id = "uid-g", email = "sin.nombre@gmail.com", displayName = null)
+        val users = FakeUserDataSource()
+        val repository = AuthRepositoryImpl(
+            FakeAuthDataSource(signInWithGoogleResult = Result.success(googleUser)),
+            users,
+            FakePushTokenRepository()
+        )
+
+        repository.signInWithGoogle("id-token")
+
+        assertEquals("Usuario de Google", users.getUser("uid-g")?.fullName)
+    }
+
+    @Test
+    fun signInWithGoogleFailureGivesAMessage() = runTest {
+        val repository = AuthRepositoryImpl(
+            FakeAuthDataSource(
+                signInWithGoogleResult = Result.failure(IllegalStateException("token vencido"))
+            ),
+            FakeUserDataSource(),
+            FakePushTokenRepository()
+        )
+
+        val result = repository.signInWithGoogle("id-token")
+
+        assertTrue(result.isFailure)
+        // El mensaje tecnico no se le muestra al usuario.
+        assertEquals("Error al iniciar sesión con Google", result.exceptionOrNull()?.message)
+    }
 }
 
 internal class FakeAuthDataSource(
@@ -118,7 +191,10 @@ internal class FakeAuthDataSource(
     private val signUpResult: Result<AuthUser> = Result.success(
         AuthUser(id = "user-2", email = "ana@example.com", displayName = "Ana")
     ),
-    private val deleteCurrentUserError: Throwable? = null
+    private val deleteCurrentUserError: Throwable? = null,
+    private val signInWithGoogleResult: Result<AuthUser> = Result.success(
+        AuthUser(id = "user-google", email = "jose@gmail.com", displayName = "Jose Google")
+    )
 ) : AuthDataSource {
 
     private val session = MutableStateFlow(currentUser)
@@ -127,6 +203,12 @@ internal class FakeAuthDataSource(
 
     override suspend fun signIn(email: String, password: String): AuthUser {
         val user = signInResult.getOrThrow()
+        session.value = user
+        return user
+    }
+
+    override suspend fun signInWithGoogle(idToken: String): AuthUser {
+        val user = signInWithGoogleResult.getOrThrow()
         session.value = user
         return user
     }

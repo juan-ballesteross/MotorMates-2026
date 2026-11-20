@@ -1,9 +1,12 @@
 package com.example.motormates.ui.login
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.motormates.data.repository.AuthRepository
 import com.example.motormates.data.repository.UserRepository
+import com.example.motormates.data.source.GoogleSignInDataSource
+import com.example.motormates.data.source.GoogleSignInException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +17,11 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    // El selector de cuentas de Google es una capacidad del teléfono, no un
+    // backend, así que entra directo como DataSource igual que
+    // DeviceLocationDataSource en ReviewsMapViewModel.
+    private val googleSignInDataSource: GoogleSignInDataSource
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -89,21 +96,41 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onGoogleSignInResult(idToken: String?) {
-        if (idToken == null) {
-            _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    // Dejamos en null para no ensuciar la pantalla si el usuario simplemente cerró
-                    // el bottom sheet de Google dándole tap afuera (cancelar).
-                    errorMessage = null
-                )
-            }
-            return
-        }
+    /**
+     * Inicio de sesión con Google, de punta a punta: abre el selector de
+     * cuentas, y con el idToken que devuelva autentica en Firebase.
+     *
+     * @param activityContext contexto de la **Activity**, que el selector
+     *   necesita para montarse (el de aplicación no sirve). Llega por
+     *   parámetro y se pasa de largo al DataSource: no se guarda en el
+     *   ViewModel, que vive más que la Activity.
+     */
+    fun signInWithGoogle(activityContext: Context) {
+        if (_uiState.value.isLoading) return
+
+        // El loading se marca aquí y no dentro del launch, por dos razones: el
+        // botón tiene que dar señal de vida mientras Google se toma su tiempo,
+        // y un segundo toque rápido tiene que ver el estado ya cambiado para
+        // que la guarda de arriba lo corte. Si se marcara dentro del launch,
+        // el cuerpo corre después y los dos toques abrirían el selector.
+        _uiState.update { it.copy(isLoading = true, errorMessage = null, isLoggedIn = false) }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null, isLoggedIn = false) }
+            val idToken = try {
+                googleSignInDataSource.idToken(activityContext)
+            } catch (e: GoogleSignInException) {
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = e.reason.toMessage(), isLoggedIn = false)
+                }
+                return@launch
+            }
+
+            // null = cerró el selector sin elegir. No es un error: se apaga el
+            // loading y la pantalla queda como estaba, sin mensaje rojo.
+            if (idToken == null) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = null) }
+                return@launch
+            }
 
             val result = authRepository.signInWithGoogle(idToken)
 
@@ -113,7 +140,8 @@ class LoginViewModel @Inject constructor(
                 } else {
                     it.copy(
                         isLoading = false,
-                        errorMessage = result.exceptionOrNull()?.message ?: "Error al iniciar sesión con Google",
+                        errorMessage = result.exceptionOrNull()?.message
+                            ?: "Error al iniciar sesión con Google",
                         isLoggedIn = false
                     )
                 }
@@ -121,12 +149,20 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onGoogleSignInError(message: String?) {
-        if (message != null) {
-            _uiState.update { it.copy(errorMessage = message, isLoading = false) }
-        } else {
-            _uiState.update { it.copy(isLoading = false) }
-        }
+    /**
+     * El motivo, en palabras para el usuario. Vive aquí y no en el
+     * repositorio porque el repositorio nunca ve esta excepción: recibe un
+     * idToken ya obtenido. Mismo criterio que ACCOUNT_WITHOUT_PROFILE.
+     */
+    private fun GoogleSignInException.Reason.toMessage(): String = when (this) {
+        GoogleSignInException.Reason.NO_ACCOUNTS ->
+            "No hay ninguna cuenta de Google en este dispositivo"
+        GoogleSignInException.Reason.MISCONFIGURED ->
+            "No se pudo iniciar sesión con Google. Avísale al equipo: la app no está bien configurada."
+        GoogleSignInException.Reason.NETWORK ->
+            "Sin conexión a internet, verifica tu red"
+        GoogleSignInException.Reason.UNKNOWN ->
+            "Error al iniciar sesión con Google"
     }
 
     private companion object {

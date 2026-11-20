@@ -27,7 +27,7 @@ class FirebaseAuthDataSource @Inject constructor(
         val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
         return requireNotNull(result.user).toAuthUser()
     }
-    
+
     override suspend fun signInWithGoogle(idToken: String): AuthUser {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         val result = firebaseAuth.signInWithCredential(credential).await()
