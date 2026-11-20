@@ -115,6 +115,19 @@ class AiTuningRepositoryImplTest {
     }
 
     @Test
+    fun `una foto de un carro entero se ve en la tarjeta pero no se manda como referencia`() = runTest {
+        val lifted = wheel.copy(id = "lift", imageUrl = "https://example.com/lifted-truck.jpg", imageIsReference = false)
+        val sent = slot<List<TuningImage>>()
+        coEvery { session.send(any(), capture(sent)) } returns resultImage
+
+        val result = repository.generate(TuningRequest(porsche, TuningMode.CATALOG, parts = listOf(lifted)))
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(sent.captured).containsExactly(baseImage)
+        coVerify(exactly = 0) { images.loadFromUrl(lifted.imageUrl!!) }
+    }
+
+    @Test
     fun `al llegar al limite diario no se llama al modelo`() = runTest {
         coEvery { usage.tryConsume(any(), any(), any()) } returns false
 

@@ -1,5 +1,6 @@
 package com.example.motormates.ui.user
 
+import com.example.motormates.ui.common.components.AddGarageVehicleButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -296,6 +297,9 @@ fun UserScreenContent(
                     )
                 }
             } else {
+                item(key = "garageAdd", span = { GridItemSpan(maxLineSpan) }) {
+                    AddGarageVehicleButton(onClick = onPublishVehicleClick)
+                }
                 gridItems(cars, key = { "garage_${it.id}" }) { car ->
                     GarageVehicleCard(car = car, onClick = { onGarageCarClick(car.id) })
                 }

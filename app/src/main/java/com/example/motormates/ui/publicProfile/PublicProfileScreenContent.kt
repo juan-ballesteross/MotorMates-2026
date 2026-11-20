@@ -39,7 +39,6 @@ import com.example.motormates.ui.theme.Spacing
 
 @Composable
 fun PublicProfileScreenContent(
-    coverResId: Int,
     coverUrl: String? = null,
     avatarResId: Int,
     avatarUrl: String? = null,
@@ -75,7 +74,6 @@ fun PublicProfileScreenContent(
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             PublicProfileHeader(
-                coverResId = coverResId,
                 coverUrl = coverUrl,
                 avatarResId = avatarResId,
                 avatarUrl = avatarUrl,

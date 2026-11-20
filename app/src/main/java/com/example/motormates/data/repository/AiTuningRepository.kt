@@ -108,10 +108,11 @@ class AiTuningRepositoryImpl @Inject constructor(
         val (prompt, references) = when (request.mode) {
             TuningMode.CATALOG -> {
                 if (request.parts.isEmpty()) throw TuningException("Elige al menos una pieza")
-                // Solo las piezas visibles con foto se mandan como referencia;
+                // Solo las piezas visibles con foto de la pieza sola se mandan
+                // como referencia (las fotos de carros enteros son solo para ver);
                 // si una foto falla, esa pieza se describe solo con texto.
                 val withImage = request.parts
-                    .filter { it.visible && it.imageUrl != null }
+                    .filter { it.visible && it.imageUrl != null && it.imageIsReference }
                     .mapNotNull { part ->
                         runCatching { part.id to images.loadFromUrl(part.imageUrl!!) }.getOrNull()
                     }

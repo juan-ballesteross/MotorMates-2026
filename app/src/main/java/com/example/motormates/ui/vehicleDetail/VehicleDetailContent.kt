@@ -85,9 +85,7 @@ private fun inlineReviewsLimit(): Int {
 fun VehicleDetailContent(
     car: CarDetailUi,
     reviews: List<ReviewUi>,
-    isBookmarked: Boolean,
     onBackClick: () -> Unit,
-    onBookmarkClick: () -> Unit,
     onWriteReviewClick: () -> Unit,
     onSeeAllReviewsClick: () -> Unit,
     onAuthorClick: (String) -> Unit,
@@ -119,9 +117,7 @@ fun VehicleDetailContent(
         item {
             VehicleImageHeader(
                 imageUrl = car.imageUrl,
-                isBookmarked = isBookmarked,
-                onBackClick = onBackClick,
-                onBookmarkClick = onBookmarkClick
+                onBackClick = onBackClick
             )
         }
 

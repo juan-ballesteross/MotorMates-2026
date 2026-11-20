@@ -33,6 +33,9 @@ enum class PartCategory(val label: String) {
  *   en las que se ofrece. Vacía = todas.
  * @property visible false para piezas que no se ven por fuera (filtro, ECU):
  *   cuentan en precio y rendimiento pero no se le pide a la AI que las dibuje.
+ * @property imageIsReference false si la foto muestra un carro entero (no la
+ *   pieza sola): se ve en la tarjeta pero no se le manda a la AI, que la
+ *   tomaría como el carro a dibujar.
  * @property visualPrompt descripción en inglés de cómo se ve instalada; es lo
  *   que se le manda al modelo de imagen.
  */
@@ -42,6 +45,7 @@ data class Part(
     val brand: String,
     val category: PartCategory,
     val imageUrl: String? = null,
+    val imageIsReference: Boolean = true,
     val sourceUrl: String? = null,
     val priceMinCop: Long,
     val priceMaxCop: Long,

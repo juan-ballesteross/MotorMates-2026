@@ -1,5 +1,12 @@
 package com.example.motormates.ui.user.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.platform.testTag
+import coil.compose.SubcomposeAsyncImage
+import com.example.motormates.ui.common.components.NeutralCover
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -33,9 +40,9 @@ import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.pressScaleClickable
 
 /**
- * Portada + avatar superpuesto + botón "Editar perfil", replicando el
- * diseño de Figma de la pantalla de usuario con las fotos reales del
- * usuario (portada, avatar).
+ * Portada + avatar superpuesto + rueda de configuración (abre Editar
+ * perfil), con las fotos reales del usuario. Sin portada subida se ve un
+ * degradado neutro, no una foto de ejemplo.
  */
 @Composable
 fun ProfileHeader(
@@ -48,18 +55,22 @@ fun ProfileHeader(
     // original se sigue midiendo y dejaba un hueco bajo el avatar. Así el
     // avatar se superpone a la portada y la altura total es la real.
     Box(modifier = modifier.fillMaxWidth()) {
-        AsyncImage(
-            model = coverImageUrl,
-            contentDescription = stringResource(R.string.user_cover_cd),
-            placeholder = painterResource(R.drawable.profile_cover),
-            error = painterResource(R.drawable.profile_cover),
-            fallback = painterResource(R.drawable.profile_cover),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(COVER_HEIGHT)
-                .clip(RoundedCornerShape(Radius.xl))
-        )
+        val coverModifier = Modifier
+            .fillMaxWidth()
+            .height(COVER_HEIGHT)
+            .clip(RoundedCornerShape(Radius.xl))
+        if (coverImageUrl != null) {
+            SubcomposeAsyncImage(
+                model = coverImageUrl,
+                contentDescription = stringResource(R.string.user_cover_cd),
+                contentScale = ContentScale.Crop,
+                loading = { NeutralCover(Modifier.fillMaxSize()) },
+                error = { NeutralCover(Modifier.fillMaxSize()) },
+                modifier = coverModifier
+            )
+        } else {
+            NeutralCover(coverModifier)
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,18 +108,18 @@ fun ProfileHeader(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            Row(
+            // La configuración de la cuenta (perfil, garaje, gustos, cerrar sesión).
+            IconButton(
+                onClick = onEditProfileClick,
                 modifier = Modifier
                     .clip(RoundedCornerShape(Radius.sm))
                     .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(Radius.sm))
-                    .pressScaleClickable(onClick = onEditProfileClick)
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .testTag("profileSettingsButton")
             ) {
-                Text(
-                    text = stringResource(R.string.user_edit_profile_button),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = stringResource(R.string.user_edit_profile_button),
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
         }

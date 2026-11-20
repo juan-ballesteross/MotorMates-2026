@@ -89,6 +89,9 @@
     {
       "id": "rin_19_mesh_bronce", "name": "Rin 19\" multirradio bronce", "brand": "Aleación forjada (tipo BBS)",
       "category": "RINES",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c0/2007swpsti.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:2007swpsti.jpg",
+      "imageIsReference": false,
       "priceMinCop": 8000000, "priceMaxCop": 16000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": -8, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo", "SUV", "Eléctrico"], "visible": true,
@@ -132,6 +135,9 @@
     {
       "id": "aero_ala_gt", "name": "Ala GT en fibra de carbono", "brand": "Fibra de carbono con soportes de aluminio",
       "category": "AERO",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/2017_Ford_GT_LeMans_Racecar_%2845331846451%29.jpg/960px-2017_Ford_GT_LeMans_Racecar_%2845331846451%29.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:2017_Ford_GT_LeMans_Racecar_(45331846451).jpg",
+      "imageIsReference": false,
       "priceMinCop": 2500000, "priceMaxCop": 6000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 5, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo"], "visible": true,
@@ -153,6 +159,9 @@
     {
       "id": "susp_muelles_30", "name": "Muelles cortos -30 mm", "brand": "Tipo Eibach / H&R",
       "category": "SUSPENSION",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/OxyCutCoilSpring.JPG/960px-OxyCutCoilSpring.JPG",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:OxyCutCoilSpring.JPG",
+      "imageIsReference": false,
       "priceMinCop": 1500000, "priceMaxCop": 3000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": -1, "heightDeltaMm": -30,
       "compatibleCategories": ["Deportivo", "Eléctrico", "Clásico"], "visible": true,
@@ -162,6 +171,8 @@
     {
       "id": "susp_coilovers", "name": "Coilovers regulables -50 mm", "brand": "Tipo KW / Bilstein",
       "category": "SUSPENSION",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/37/Coilovers.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Coilovers.jpg",
       "priceMinCop": 6000000, "priceMaxCop": 14000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": -2, "heightDeltaMm": -50,
       "compatibleCategories": ["Deportivo", "Eléctrico", "Clásico"], "visible": true,
@@ -171,6 +182,9 @@
     {
       "id": "susp_lift_2", "name": "Kit de levante 2\" off-road", "brand": "Tipo Old Man Emu / Rough Country",
       "category": "SUSPENSION",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Lifted_2001_GMC_Sierra.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Lifted_2001_GMC_Sierra.jpg",
+      "imageIsReference": false,
       "priceMinCop": 5000000, "priceMaxCop": 11000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 15, "heightDeltaMm": 50,
       "compatibleCategories": ["SUV", "Pickup"], "visible": true,
@@ -181,6 +195,8 @@
     {
       "id": "escape_catback_inox", "name": "Escape cat-back en acero inoxidable", "brand": "Tipo Borla / MagnaFlow",
       "category": "ESCAPE",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Akrapovic_Slip-On_exhaust_system_for_BMW_E92_M3.jpg/960px-Akrapovic_Slip-On_exhaust_system_for_BMW_E92_M3.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Akrapovic_Slip-On_exhaust_system_for_BMW_E92_M3.jpg",
       "priceMinCop": 5000000, "priceMaxCop": 12000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 4, "torqueDeltaPct": 3, "weightDeltaKg": -8, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo", "SUV", "Clásico", "Pickup"], "visible": true,
@@ -190,6 +206,8 @@
     {
       "id": "escape_titanio_valvulado", "name": "Escape de titanio valvulado", "brand": "Tipo Akrapovič",
       "category": "ESCAPE",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/IPE_wiki_991GT3_fullsystem.jpg/960px-IPE_wiki_991GT3_fullsystem.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:IPE_wiki_991GT3_fullsystem.jpg",
       "priceMinCop": 15000000, "priceMaxCop": 35000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 5, "torqueDeltaPct": 4, "weightDeltaKg": -12, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo"], "visible": true,
@@ -199,6 +217,8 @@
     {
       "id": "escape_silenciador_deportivo", "name": "Silenciador deportivo con puntas dobles", "brand": "Silenciador de flujo recto",
       "category": "ESCAPE",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Akrapovic_Slip-On_exhaust_system_for_the_BMW_E92_M3.jpg/960px-Akrapovic_Slip-On_exhaust_system_for_the_BMW_E92_M3.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Akrapovic_Slip-On_exhaust_system_for_the_BMW_E92_M3.jpg",
       "priceMinCop": 1200000, "priceMaxCop": 2800000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 2, "torqueDeltaPct": 1, "weightDeltaKg": -3, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo", "SUV", "Clásico", "Pickup"], "visible": true,
@@ -209,6 +229,8 @@
     {
       "id": "admision_filtro_alto_flujo", "name": "Filtro de aire de alto flujo", "brand": "Tipo K&N",
       "category": "ADMISION",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/87/Filtro_aria_K%26N.JPG",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Filtro_aria_K%26N.JPG",
       "priceMinCop": 300000, "priceMaxCop": 700000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 1.5, "torqueDeltaPct": 1, "weightDeltaKg": 0, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo", "SUV", "Clásico", "Pickup"], "visible": false,
@@ -241,6 +263,8 @@
     {
       "id": "ecu_stage2", "name": "Reprogramación Stage 2", "brand": "Software de ECU + soporte de hardware",
       "category": "ECU",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/41/Mercedes_Benz_M104_installed_Turbocharger_kit_by_MAD_modify.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Mercedes_Benz_M104_installed_Turbocharger_kit_by_MAD_modify.jpg",
       "priceMinCop": 5000000, "priceMaxCop": 9000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 25, "torqueDeltaPct": 30, "weightDeltaKg": 0, "heightDeltaMm": 0,
       "compatibleCategories": ["Deportivo", "Pickup"], "visible": false,
@@ -251,6 +275,9 @@
     {
       "id": "luces_faros_led", "name": "Faros LED con luz diurna (DRL)", "brand": "Faros LED homologados",
       "category": "LUCES",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/66/Audi_R8_Led_20080225.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Audi_R8_Led_20080225.jpg",
+      "imageIsReference": false,
       "priceMinCop": 2000000, "priceMaxCop": 5000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
       "compatibleCategories": [], "visible": true,
@@ -260,6 +287,9 @@
     {
       "id": "luces_barra_led", "name": "Barra LED off-road en el techo", "brand": "Barra LED 40\"",
       "category": "LUCES",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f6/S404-300TDI-erg-chebbi.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:S404-300TDI-erg-chebbi.jpg",
+      "imageIsReference": false,
       "priceMinCop": 800000, "priceMaxCop": 2200000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 5, "heightDeltaMm": 0,
       "compatibleCategories": ["SUV", "Pickup"], "visible": true,
@@ -269,6 +299,9 @@
     {
       "id": "luces_polarizado_35", "name": "Polarizado 35 %", "brand": "Película de seguridad",
       "category": "LUCES",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Window_tint_car.jpg/960px-Window_tint_car.jpg",
+      "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Window_tint_car.jpg",
+      "imageIsReference": false,
       "priceMinCop": 400000, "priceMaxCop": 1000000, "priceSource": "estimado", "priceCheckedAt": "2026-11",
       "hpDeltaPct": 0, "torqueDeltaPct": 0, "weightDeltaKg": 0, "heightDeltaMm": 0,
       "compatibleCategories": [], "visible": true,

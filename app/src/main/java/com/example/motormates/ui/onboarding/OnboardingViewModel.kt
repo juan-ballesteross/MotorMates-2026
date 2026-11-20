@@ -7,11 +7,8 @@ import com.example.motormates.data.model.Interest
 import com.example.motormates.data.model.MAX_PREFERENCE_SELECTION
 import com.example.motormates.data.model.UserPreferences
 import com.example.motormates.data.model.Vehicle
-import com.example.motormates.data.model.VehicleDraft
 import com.example.motormates.data.repository.AuthRepository
-import com.example.motormates.data.repository.CarCatalogRepository
 import com.example.motormates.data.repository.FollowRepository
-import com.example.motormates.data.repository.GarageRepository
 import com.example.motormates.data.repository.PreferencesRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.UserRepository
@@ -20,13 +17,8 @@ import com.example.motormates.data.source.DeviceLocationDataSource
 import com.example.motormates.data.util.CityCoordinates
 import com.example.motormates.data.util.TimeSource
 import com.example.motormates.data.util.UserSuggester
-import com.example.motormates.data.util.normalizedKey
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Instant
-import java.time.ZoneId
 import javax.inject.Inject
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,8 +35,6 @@ class OnboardingViewModel @Inject constructor(
     private val followRepository: FollowRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    private val carCatalogRepository: CarCatalogRepository,
-    private val garageRepository: GarageRepository,
     private val deviceLocation: DeviceLocationDataSource,
     private val timeSource: TimeSource
 ) : ViewModel() {
@@ -53,10 +43,12 @@ class OnboardingViewModel @Inject constructor(
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
 
     private var vehicles: List<Vehicle> = emptyList()
-    /** El carro que ya tenía guardado: al editar no se vuelve a publicar. */
+    /**
+     * El onboarding ya no pregunta por el carro (no se agrega nada al
+     * garaje). Si alguien lo había dicho en una versión anterior, se conserva.
+     */
     private var previousCar: CarRef? = null
     private var loaded = false
-    private var modelsJob: Job? = null
 
     /**
      * editMode = false: viene del login o del registro. Si ya contestó (o
@@ -65,8 +57,7 @@ class OnboardingViewModel @Inject constructor(
     fun load(editMode: Boolean) {
         if (loaded) return
         loaded = true
-        val currentYear = Instant.ofEpochMilli(timeSource.nowMillis()).atZone(ZoneId.systemDefault()).year
-        _state.update { it.copy(isLoading = true, isEditMode = editMode, currentYear = currentYear) }
+        _state.update { it.copy(isLoading = true, isEditMode = editMode) }
 
         viewModelScope.launch {
             // Con tope: si Firestore no responde, mejor dejar entrar al feed
@@ -95,26 +86,18 @@ class OnboardingViewModel @Inject constructor(
                 categories = preferences.categories.toSet(),
                 brands = preferences.brands.toSet(),
                 interests = preferences.interests.toSet(),
-                city = city,
-                hasCar = preferences.car?.let { true } ?: if (preferences.completed) false else null,
-                carBrand = preferences.car?.brand.orEmpty(),
-                carModel = preferences.car?.model.orEmpty(),
-                carYear = preferences.car?.year?.toString().orEmpty(),
-                carCategory = preferences.categories.firstOrNull()
+                city = city
             )
         }
-        preferences.car?.let { loadCarModels(it.brand) }
     }
 
     private suspend fun loadCatalogs() {
         vehicles = vehicleRepository.getVehicles().getOrNull().orEmpty()
-        val catalogBrands = runCatching { carCatalogRepository.brands() }.getOrDefault(emptyList())
-        // Las marcas del catálogo de la app primero: son las que tienen reseñas.
-        val vehicleBrands = vehicles.map { it.brand }
-        val brandOptions = (vehicleBrands + catalogBrands)
-            .distinctBy { it.normalizedKey() }
-            .sortedWith(compareBy<String> { brand -> vehicleBrands.none { it.normalizedKey() == brand.normalizedKey() } }
-                .thenBy { it.normalizedKey() })
+        // Las marcas que hay en la app (las que tienen carros y reseñas).
+        val brandOptions = vehicles.map { it.brand.trim() }
+            .filter { it.isNotEmpty() }
+            .distinctBy { it.lowercase() }
+            .sortedBy { it.lowercase() }
 
         _state.update { state ->
             state.copy(
@@ -124,7 +107,6 @@ class OnboardingViewModel @Inject constructor(
                 }
             )
         }
-        refreshCarAlreadyInGarage()
     }
 
     // ---- Navegación entre pasos ----
@@ -163,62 +145,6 @@ class OnboardingViewModel @Inject constructor(
 
     fun selectCity(city: String?) = _state.update {
         it.copy(city = if (it.city == city) null else city, errorMessage = null)
-    }
-
-    fun setHasCar(hasCar: Boolean) = _state.update {
-        it.copy(hasCar = hasCar, carCategory = it.carCategory ?: it.categories.firstOrNull())
-    }
-
-    fun updateCarBrand(brand: String) {
-        _state.update { it.copy(carBrand = brand) }
-        loadCarModels(brand)
-        refreshCarAlreadyInGarage()
-    }
-
-    fun updateCarModel(model: String) {
-        _state.update { it.copy(carModel = model) }
-        refreshCarAlreadyInGarage()
-    }
-
-    fun updateCarYear(year: String) {
-        val previousYear = _state.value.carYearNumber
-        _state.update { it.copy(carYear = year.filter(Char::isDigit).take(4)) }
-        // Con el año completo vPIC puede responder por ese año en particular.
-        if (_state.value.carYearNumber != previousYear) loadCarModels(_state.value.carBrand)
-        refreshCarAlreadyInGarage()
-    }
-
-    fun selectCarCategory(category: String) = _state.update { it.copy(carCategory = category) }
-
-    /** Modelos de la marca: lista local más vPIC, con un pequeño respiro mientras escribe. */
-    private fun loadCarModels(brand: String) {
-        modelsJob?.cancel()
-        if (brand.isBlank()) {
-            _state.update { it.copy(carModelOptions = emptyList(), isLoadingCarModels = false) }
-            return
-        }
-        modelsJob = viewModelScope.launch {
-            _state.update { it.copy(isLoadingCarModels = true) }
-            delay(MODEL_LOOKUP_DEBOUNCE_MS)
-            val year = _state.value.carYearNumber ?: _state.value.currentYear
-            val options = carCatalogRepository.models(brand, year)
-            _state.update { it.copy(carModelOptions = options, isLoadingCarModels = false) }
-        }
-    }
-
-    private fun refreshCarAlreadyInGarage() {
-        val uid = authRepository.getCurrentUser()?.id
-        _state.update { state ->
-            val year = state.carYearNumber
-            state.copy(
-                carAlreadyInGarage = uid != null && year != null && vehicles.any { vehicle ->
-                    vehicle.ownerId == uid &&
-                        vehicle.brand.normalizedKey() == state.carBrand.normalizedKey() &&
-                        vehicle.model.normalizedKey() == state.carModel.normalizedKey() &&
-                        vehicle.year == year
-                }
-            )
-        }
     }
 
     /** Lo llama la pantalla cuando ya hay permiso de ubicación. */
@@ -296,17 +222,12 @@ class OnboardingViewModel @Inject constructor(
 
     private fun currentAnswers(): UserPreferences {
         val state = _state.value
-        val car = if (state.hasCar == true && state.isCarComplete) {
-            CarRef(state.carBrand.trim(), state.carModel.trim(), state.carYearNumber!!)
-        } else {
-            null
-        }
         return UserPreferences(
             categories = state.categories.toList(),
             brands = state.brands.toList(),
             interests = state.interests.toList(),
             city = state.city,
-            car = car
+            car = previousCar
         )
     }
 
@@ -322,37 +243,8 @@ class OnboardingViewModel @Inject constructor(
                 }
                 return@launch
             }
-            // Agregar el carro al garaje es un extra: si falla, las
-            // preferencias ya quedaron y el usuario lo puede publicar luego.
-            // Solo un carro nuevo: el que ya había declarado se publicó en su
-            // momento (y si lo borró del garaje, fue a propósito).
-            val carError = answers.car
-                ?.takeIf { it != previousCar && !_state.value.carAlreadyInGarage }
-                ?.let { car -> addCarToGarage(car) }
-            _state.update { it.copy(isSaving = false, isFinished = carError == null, errorMessage = carError) }
-            if (carError != null) {
-                // Se muestra el aviso y se sigue: el usuario no tiene que repetir nada.
-                delay(CAR_ERROR_VISIBLE_MS)
-                _state.update { it.copy(isFinished = true) }
-            }
+            _state.update { it.copy(isSaving = false, isFinished = true) }
         }
-    }
-
-    private suspend fun addCarToGarage(car: CarRef): String? {
-        val category = _state.value.carCategory ?: return null
-        val draft = VehicleDraft(
-            brand = car.brand,
-            model = car.model,
-            year = car.year,
-            category = category,
-            potencia = null,
-            aceleracion = null,
-            velocidadMaxima = null,
-            traccion = null
-        )
-        return garageRepository.publishVehicle(draft, imageUri = null)
-            .exceptionOrNull()
-            ?.let { "Tus gustos quedaron guardados, pero no pudimos agregar tu carro al garaje. Puedes publicarlo desde tu perfil." }
     }
 
     /** "Ahora no": no vuelve a preguntar solo; se puede completar desde el perfil. */
@@ -379,8 +271,6 @@ class OnboardingViewModel @Inject constructor(
 
     private companion object {
         const val LOAD_TIMEOUT_MS = 5_000L
-        const val MODEL_LOOKUP_DEBOUNCE_MS = 300L
-        const val CAR_ERROR_VISIBLE_MS = 2_500L
         const val SUGGESTION_WINDOW_MS = 30L * 24 * 60 * 60 * 1000
     }
 }

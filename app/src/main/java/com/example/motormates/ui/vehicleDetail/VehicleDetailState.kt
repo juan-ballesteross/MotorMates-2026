@@ -14,7 +14,6 @@ data class VehicleDetailState(
     val reviews: List<ReviewUi> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val isBookmarked: Boolean = false,
     val pendingDeleteReviewId: String? = null,
     /** Soy el dueño del vehículo (cambia el texto del botón de AI Tuning). */
     val isOwner: Boolean = false,

@@ -1,6 +1,6 @@
 package com.example.motormates.ui.editProfile.components
 
-import androidx.compose.foundation.Image
+import com.example.motormates.ui.common.components.NeutralCover
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,7 +53,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -153,12 +152,8 @@ fun EditProfileHeader(
                 .testTag("editProfileCover")
         ) {
             if (coverImageUrl == null) {
-                Image(
-                    painter = painterResource(R.drawable.profile_cover),
-                    contentDescription = stringResource(R.string.user_cover_cd),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
+                // Sin portada subida: el mismo degradado neutro del perfil.
+                NeutralCover(Modifier.fillMaxSize())
             } else {
                 AsyncImage(
                     model = coverImageUrl,

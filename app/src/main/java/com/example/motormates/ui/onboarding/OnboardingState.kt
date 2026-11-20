@@ -2,7 +2,6 @@ package com.example.motormates.ui.onboarding
 
 import com.example.motormates.data.model.Interest
 import com.example.motormates.data.model.VEHICLE_CATEGORIES
-import com.example.motormates.data.repository.CarModelOption
 import com.example.motormates.data.util.SuggestedUser
 import com.example.motormates.data.util.normalizedKey
 
@@ -10,7 +9,6 @@ import com.example.motormates.data.util.normalizedKey
 enum class OnboardingStep(val title: String, val subtitle: String) {
     CATEGORIES("¿Qué carros te mueven?", "Elige los que más te gustan. Con esto armamos tu feed."),
     BRANDS("Tus marcas favoritas", "Las que sigues, las que sueñas o las que manejas."),
-    CAR("¿Tienes carro?", "Lo agregamos a tu garaje para que la comunidad lo vea."),
     INTERESTS("¿Qué buscas en MotorMates?", "Así destacamos lo que más te sirve."),
     CITY("¿Dónde ruedas?", "Para mostrarte lo que pasa cerca y centrar el mapa."),
     PEOPLE("Personas que te pueden interesar", "Síguelas y tu feed no arranca vacío.")
@@ -30,17 +28,6 @@ data class OnboardingState(
     val brandOptions: List<String> = emptyList(),
     val brandQuery: String = "",
 
-    /** null = todavía no contestó; false = no tiene carro. */
-    val hasCar: Boolean? = null,
-    val carBrand: String = "",
-    val carModel: String = "",
-    val carYear: String = "",
-    val carCategory: String? = null,
-    val carModelOptions: List<CarModelOption> = emptyList(),
-    val isLoadingCarModels: Boolean = false,
-    /** Ya tiene en su garaje un carro igual: no se vuelve a crear. */
-    val carAlreadyInGarage: Boolean = false,
-
     val interests: Set<Interest> = emptySet(),
 
     val city: String? = null,
@@ -49,9 +36,6 @@ data class OnboardingState(
     val suggestions: List<SuggestedUser> = emptyList(),
     val isLoadingSuggestions: Boolean = false,
     val followed: Set<String> = emptySet(),
-
-    /** Para validar el año del carro; lo pone el ViewModel con TimeSource. */
-    val currentYear: Int = DEFAULT_CURRENT_YEAR,
 
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
@@ -76,31 +60,6 @@ data class OnboardingState(
             return brands.sortedBy { it.normalizedKey() } + matching.filterNot { it in brands }
         }
 
-    val carYearNumber: Int? get() = carYear.toIntOrNull()?.takeIf { it in MIN_CAR_YEAR..currentYear + 1 }
+    val canContinue: Boolean get() = !isSaving
 
-    val isCarComplete: Boolean
-        get() = carBrand.isNotBlank() && carModel.isNotBlank() && carYearNumber != null && carCategory != null
-
-    /** Modelos que coinciden con lo escrito, para el autocompletado. */
-    val visibleCarModels: List<CarModelOption>
-        get() {
-            val query = carModel.normalizedKey()
-            return carModelOptions
-                .filter { query.isEmpty() || it.name.normalizedKey().contains(query) }
-                .filterNot { it.name.normalizedKey() == query }
-                .take(MAX_MODEL_SUGGESTIONS)
-        }
-
-    /** El carro es lo único que, si se empieza, hay que terminar para seguir. */
-    val canContinue: Boolean
-        get() = !isSaving && when (step) {
-            OnboardingStep.CAR -> hasCar != true || isCarComplete
-            else -> true
-        }
-
-    companion object {
-        const val MIN_CAR_YEAR = 1950
-        const val DEFAULT_CURRENT_YEAR = 2026
-        const val MAX_MODEL_SUGGESTIONS = 8
-    }
 }

@@ -1,5 +1,6 @@
 package com.example.motormates.ui.publicProfile.components
 
+import com.example.motormates.ui.common.components.NeutralCover
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,7 +52,6 @@ import com.example.motormates.ui.user.components.COVER_HEIGHT
 
 @Composable
 fun PublicProfileHeader(
-    coverResId: Int,
     coverUrl: String? = null,
     avatarResId: Int,
     avatarUrl: String? = null,
@@ -77,11 +77,9 @@ fun PublicProfileHeader(
                         .clip(RoundedCornerShape(Radius.xl))
                 )
             } else {
-                Image(
-                    painter = painterResource(coverResId),
-                    contentDescription = stringResource(R.string.user_cover_cd),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
+                // Sin portada subida: degradado neutro, no una foto de ejemplo.
+                NeutralCover(
+                    Modifier
                         .fillMaxWidth()
                         .height(COVER_HEIGHT)
                         .clip(RoundedCornerShape(Radius.xl))

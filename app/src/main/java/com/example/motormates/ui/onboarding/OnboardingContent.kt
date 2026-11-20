@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.motormates.data.model.Interest
 import com.example.motormates.ui.onboarding.components.BrandPicker
-import com.example.motormates.ui.onboarding.components.CarPicker
 import com.example.motormates.ui.onboarding.components.CategoryPicker
 import com.example.motormates.ui.onboarding.components.CityPicker
 import com.example.motormates.ui.onboarding.components.InterestPicker
@@ -56,11 +55,6 @@ data class OnboardingActions(
     val onToggleCategory: (String) -> Unit = {},
     val onBrandQueryChange: (String) -> Unit = {},
     val onToggleBrand: (String) -> Unit = {},
-    val onHasCarChange: (Boolean) -> Unit = {},
-    val onCarBrandChange: (String) -> Unit = {},
-    val onCarModelChange: (String) -> Unit = {},
-    val onCarYearChange: (String) -> Unit = {},
-    val onCarCategoryChange: (String) -> Unit = {},
     val onToggleInterest: (Interest) -> Unit = {},
     val onSelectCity: (String) -> Unit = {},
     val onUseMyLocation: () -> Unit = {},
@@ -186,24 +180,6 @@ private fun StepBody(step: OnboardingStep, state: OnboardingState, actions: Onbo
             brands = state.visibleBrands,
             selected = state.brands,
             onToggle = actions.onToggleBrand
-        )
-        OnboardingStep.CAR -> CarPicker(
-            hasCar = state.hasCar,
-            onHasCarChange = actions.onHasCarChange,
-            brand = state.carBrand,
-            onBrandChange = actions.onCarBrandChange,
-            brandOptions = state.brandOptions,
-            model = state.carModel,
-            onModelChange = actions.onCarModelChange,
-            modelOptions = state.visibleCarModels,
-            isLoadingModels = state.isLoadingCarModels,
-            year = state.carYear,
-            onYearChange = actions.onCarYearChange,
-            isYearValid = state.carYearNumber != null,
-            categories = state.categoryOptions,
-            selectedCategory = state.carCategory,
-            onCategoryChange = actions.onCarCategoryChange,
-            alreadyInGarage = state.carAlreadyInGarage
         )
         OnboardingStep.INTERESTS -> InterestPicker(
             selected = state.interests,

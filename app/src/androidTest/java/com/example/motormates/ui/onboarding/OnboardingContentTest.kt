@@ -10,8 +10,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.motormates.data.model.Interest
-import com.example.motormates.data.repository.CarModelOption
-import com.example.motormates.data.repository.CarModelSource
 import com.example.motormates.data.util.RecommendationReason
 import com.example.motormates.data.util.SuggestedUser
 import com.example.motormates.ui.theme.MotorMatesTheme
@@ -49,7 +47,7 @@ class OnboardingContentTest {
         )
 
         composeRule.onNodeWithTag("onboardingTitle").assertTextEquals(OnboardingStep.CATEGORIES.title)
-        composeRule.onNodeWithText("1 de 6").assertIsDisplayed()
+        composeRule.onNodeWithText("1 de 5").assertIsDisplayed()
         composeRule.onNodeWithTag("onboardingCategory_Deportivo").performClick()
         composeRule.onNodeWithTag("onboardingSkip").performClick()
 
@@ -59,35 +57,11 @@ class OnboardingContentTest {
     }
 
     @Test
-    fun el_carro_incompleto_deshabilita_continuar() {
-        setContent(
-            base.copy(
-                step = OnboardingStep.CAR,
-                hasCar = true,
-                carBrand = "Renault",
-                carModel = "Dus",
-                carModelOptions = listOf(CarModelOption("Duster", CarModelSource.LOCAL))
-            )
-        )
+    fun ya_no_hay_paso_del_carro() {
+        setContent(base.copy(step = OnboardingStep.BRANDS, brandOptions = listOf("Mazda")))
 
-        composeRule.onNodeWithTag("onboardingCarBrand").assertIsDisplayed()
-        composeRule.onNodeWithTag("onboardingSuggestion_Duster").assertIsDisplayed()
-        composeRule.onNodeWithTag("onboardingNext").assertIsNotEnabled()
-    }
-
-    @Test
-    fun el_carro_completo_habilita_continuar() {
-        setContent(
-            base.copy(
-                step = OnboardingStep.CAR,
-                hasCar = true,
-                carBrand = "Renault",
-                carModel = "Duster",
-                carYear = "2022",
-                carCategory = "SUV"
-            )
-        )
-
+        composeRule.onNodeWithText("2 de 5").assertIsDisplayed()
+        composeRule.onNodeWithTag("onboardingCarBrand").assertDoesNotExist()
         composeRule.onNodeWithTag("onboardingNext").assertIsEnabled()
     }
 
@@ -129,7 +103,7 @@ class OnboardingContentTest {
     fun al_editar_no_hay_saltar_y_el_ultimo_paso_guarda() {
         setContent(base.copy(isEditMode = true, step = OnboardingStep.CITY, city = "Cali"))
 
-        composeRule.onNodeWithText("5 de 5").assertIsDisplayed()
+        composeRule.onNodeWithText("4 de 4").assertIsDisplayed()
         composeRule.onNodeWithTag("onboardingSkip").assertDoesNotExist()
         composeRule.onNodeWithTag("onboardingNext").assertTextEquals("Guardar")
     }

@@ -7,13 +7,8 @@ import com.example.motormates.data.model.Interest
 import com.example.motormates.data.model.ReviewLocation
 import com.example.motormates.data.model.User
 import com.example.motormates.data.model.UserPreferences
-import com.example.motormates.data.model.VehicleDraft
 import com.example.motormates.data.repository.AuthRepository
-import com.example.motormates.data.repository.CarCatalogRepository
-import com.example.motormates.data.repository.CarModelOption
-import com.example.motormates.data.repository.CarModelSource
 import com.example.motormates.data.repository.FollowRepository
-import com.example.motormates.data.repository.GarageRepository
 import com.example.motormates.data.repository.PreferencesRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.UserRepository
@@ -47,8 +42,6 @@ class OnboardingViewModelTest {
     private val followRepository: FollowRepository = mockk()
     private val authRepository: AuthRepository = mockk()
     private val userRepository: UserRepository = mockk()
-    private val carCatalogRepository: CarCatalogRepository = mockk()
-    private val garageRepository: GarageRepository = mockk()
     private val deviceLocation: DeviceLocationDataSource = mockk()
     private val timeSource: TimeSource = mockk()
 
@@ -66,11 +59,6 @@ class OnboardingViewModelTest {
         coEvery { preferencesRepository.save(any()) } returns Result.success(Unit)
         coEvery { preferencesRepository.skip() } returns Result.success(Unit)
         coEvery { vehicleRepository.getVehicles() } returns Result.success(vehicles)
-        coEvery { carCatalogRepository.brands() } returns listOf("BYD", "Mazda", "Renault", "Toyota")
-        coEvery { carCatalogRepository.models(any(), any()) } returns listOf(
-            CarModelOption("Duster", CarModelSource.LOCAL),
-            CarModelOption("Sandero", CarModelSource.LOCAL)
-        )
         coEvery { userRepository.getCurrentUserProfile("yo") } returns Result.success(
             User("yo", "Yo", "yo@x.com", "yo", "Medellín, Colombia", "", null, null, 0, 0)
         )
@@ -89,7 +77,7 @@ class OnboardingViewModelTest {
 
     private fun newViewModel() = OnboardingViewModel(
         preferencesRepository, vehicleRepository, reviewRepository, followRepository, authRepository,
-        userRepository, carCatalogRepository, garageRepository, deviceLocation, timeSource
+        userRepository, deviceLocation, timeSource
     )
 
     private fun OnboardingViewModel.goTo(step: OnboardingStep) {
@@ -132,8 +120,8 @@ class OnboardingViewModelTest {
         assertThat(state.step).isEqualTo(OnboardingStep.CATEGORIES)
         assertThat(state.categoryImages["SUV"]).isEqualTo("https://example.com/2.jpg")
         assertThat(state.categoryImages["Pickup"]).isNull()
-        // Las marcas del catálogo de la app primero, luego las de la lista local.
-        assertThat(state.brandOptions).containsExactly("Mazda", "Porsche", "Toyota", "BYD", "Renault").inOrder()
+        // Las marcas de los carros que hay en la app, en orden alfabético.
+        assertThat(state.brandOptions).containsExactly("Mazda", "Porsche", "Toyota").inOrder()
         assertThat(state.city).isEqualTo("Medellín")
     }
 
@@ -152,54 +140,20 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `el carro a medias no deja continuar`() = runTest {
+    fun `el onboarding ya no pregunta por el carro y atras vuelve al paso anterior`() = runTest {
         val vm = newViewModel()
         vm.load(editMode = false)
         advanceUntilIdle()
-        vm.goTo(OnboardingStep.CAR)
 
-        vm.setHasCar(true)
-        vm.updateCarBrand("Renault")
-        vm.updateCarModel("Duster")
-        vm.updateCarYear("20a2")
-
-        assertThat(vm.state.value.carYear).isEqualTo("202")
-        assertThat(vm.state.value.canContinue).isFalse()
+        assertThat(vm.state.value.steps).containsExactly(
+            OnboardingStep.CATEGORIES, OnboardingStep.BRANDS, OnboardingStep.INTERESTS,
+            OnboardingStep.CITY, OnboardingStep.PEOPLE
+        ).inOrder()
         vm.next()
-        assertThat(vm.state.value.step).isEqualTo(OnboardingStep.CAR)
-
-        vm.updateCarYear("2022")
-        vm.selectCarCategory("SUV")
-        assertThat(vm.state.value.canContinue).isTrue()
-    }
-
-    @Test
-    fun `sin carro se puede seguir y atras vuelve al paso anterior`() = runTest {
-        val vm = newViewModel()
-        vm.load(editMode = false)
-        advanceUntilIdle()
-        vm.goTo(OnboardingStep.CAR)
-
-        vm.setHasCar(false)
         vm.next()
         assertThat(vm.state.value.step).isEqualTo(OnboardingStep.INTERESTS)
-
         vm.back()
-        assertThat(vm.state.value.step).isEqualTo(OnboardingStep.CAR)
-    }
-
-    @Test
-    fun `al escribir la marca del carro se buscan sus modelos`() = runTest {
-        val vm = newViewModel()
-        vm.load(editMode = false)
-        advanceUntilIdle()
-
-        vm.updateCarBrand("Renault")
-        advanceUntilIdle()
-
-        assertThat(vm.state.value.carModelOptions.map { it.name }).containsExactly("Duster", "Sandero")
-        vm.updateCarModel("dus")
-        assertThat(vm.state.value.visibleCarModels.map { it.name }).containsExactly("Duster")
+        assertThat(vm.state.value.step).isEqualTo(OnboardingStep.BRANDS)
     }
 
     @Test
@@ -233,50 +187,22 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `terminar guarda las respuestas y agrega el carro al garaje`() = runTest {
+    fun `terminar guarda las respuestas sin carro`() = runTest {
         val saved = slot<UserPreferences>()
-        val draft = slot<VehicleDraft>()
         coEvery { preferencesRepository.save(capture(saved)) } returns Result.success(Unit)
-        coEvery { garageRepository.publishVehicle(capture(draft), null) } returns Result.success(vehicles[0])
         val vm = newViewModel()
         vm.load(editMode = false)
         advanceUntilIdle()
 
         vm.toggleCategory("SUV")
         vm.toggleInterest(Interest.MODIFY)
-        vm.setHasCar(true)
-        vm.updateCarBrand("Renault")
-        vm.updateCarModel("Duster")
-        vm.updateCarYear("2022")
         vm.finish()
         advanceUntilIdle()
 
         assertThat(saved.captured.categories).containsExactly("SUV")
         assertThat(saved.captured.interests).containsExactly(Interest.MODIFY)
         assertThat(saved.captured.city).isEqualTo("Medellín")
-        assertThat(saved.captured.car).isEqualTo(CarRef("Renault", "Duster", 2022))
-        // La categoría del carro se propone con la primera favorita.
-        assertThat(draft.captured.category).isEqualTo("SUV")
-        assertThat(vm.state.value.isFinished).isTrue()
-    }
-
-    @Test
-    fun `un carro que ya esta en el garaje no se vuelve a crear`() = runTest {
-        val vm = newViewModel()
-        vm.load(editMode = false)
-        advanceUntilIdle()
-
-        vm.setHasCar(true)
-        vm.updateCarBrand("mazda")
-        vm.updateCarModel("3")
-        vm.updateCarYear("2024")
-        vm.selectCarCategory("SUV")
-        assertThat(vm.state.value.carAlreadyInGarage).isTrue()
-
-        vm.finish()
-        advanceUntilIdle()
-
-        coVerify(exactly = 0) { garageRepository.publishVehicle(any(), any()) }
+        assertThat(saved.captured.car).isNull()
         assertThat(vm.state.value.isFinished).isTrue()
     }
 
@@ -292,25 +218,6 @@ class OnboardingViewModelTest {
 
         assertThat(vm.state.value.isFinished).isFalse()
         assertThat(vm.state.value.errorMessage).isEqualTo("No se pudieron guardar tus preferencias")
-    }
-
-    @Test
-    fun `si falla agregar el carro igual termina despues del aviso`() = runTest {
-        coEvery { garageRepository.publishVehicle(any(), any()) } returns Result.failure(Exception("x"))
-        val vm = newViewModel()
-        vm.load(editMode = false)
-        advanceUntilIdle()
-        vm.setHasCar(true)
-        vm.updateCarBrand("Renault")
-        vm.updateCarModel("Duster")
-        vm.updateCarYear("2022")
-        vm.selectCarCategory("SUV")
-
-        vm.finish()
-        advanceUntilIdle()
-
-        assertThat(vm.state.value.isFinished).isTrue()
-        coVerify { preferencesRepository.save(any()) }
     }
 
     @Test
@@ -348,16 +255,13 @@ class OnboardingViewModelTest {
         assertThat(state.steps).doesNotContain(OnboardingStep.PEOPLE)
         assertThat(state.categories).containsExactly("Clásico")
         assertThat(state.city).isEqualTo("Cali")
-        assertThat(state.hasCar).isTrue()
-        assertThat(state.carYear).isEqualTo("1985")
 
         vm.goTo(OnboardingStep.CITY)
         assertThat(vm.state.value.isLastStep).isTrue()
         vm.next()
         advanceUntilIdle()
-        coVerify { preferencesRepository.save(match { it.city == "Cali" }) }
-        // El carro ya estaba declarado: no se publica otra vez.
-        coVerify(exactly = 0) { garageRepository.publishVehicle(any(), any()) }
+        // El carro que había dicho en una versión anterior se conserva.
+        coVerify { preferencesRepository.save(match { it.city == "Cali" && it.car == CarRef("Renault", "4", 1985) }) }
         assertThat(vm.state.value.isFinished).isTrue()
     }
 

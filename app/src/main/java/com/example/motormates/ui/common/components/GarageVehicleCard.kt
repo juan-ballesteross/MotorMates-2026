@@ -1,5 +1,8 @@
 package com.example.motormates.ui.common.components
 
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -163,5 +166,26 @@ fun GarageEmptyState(
                 Text(text = "Publicar mi vehículo")
             }
         }
+    }
+}
+
+/**
+ * "Agregar vehículo" arriba del garaje propio cuando ya tiene carros: abre
+ * el mismo formulario de publicar. Ocupa todo el ancho para que se vea a la
+ * primera y no se confunda con un carro más.
+ */
+@Composable
+fun AddGarageVehicleButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    OutlinedButton(
+        onClick = onClick,
+        shape = RoundedCornerShape(Radius.md),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.xs)
+            .testTag("garageAddVehicleButton")
+    ) {
+        Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(Spacing.xs))
+        Text(text = "Agregar vehículo", fontWeight = FontWeight.SemiBold)
     }
 }

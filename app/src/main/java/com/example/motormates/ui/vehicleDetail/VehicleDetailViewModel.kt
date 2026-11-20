@@ -179,9 +179,4 @@ class VehicleDetailViewModel @Inject constructor(
             }
         }
     }
-
-    /** Solo visual: el backend no tiene concepto de "guardados". */
-    fun bookmarkButtonPress() {
-        _state.update { it.copy(isBookmarked = !it.isBookmarked) }
-    }
 }

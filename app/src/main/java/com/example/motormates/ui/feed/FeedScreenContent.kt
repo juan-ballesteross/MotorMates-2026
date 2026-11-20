@@ -26,7 +26,6 @@ import com.example.motormates.data.model.FeedTab
 import com.example.motormates.data.model.FeedVehicleUi
 import com.example.motormates.data.model.StoryUser
 import com.example.motormates.data.util.SuggestedUser
-import com.example.motormates.ui.feed.components.AiToolsCard
 import com.example.motormates.ui.feed.components.FeedSectionHeader
 import com.example.motormates.ui.feed.components.FollowSuggestionsSection
 import com.example.motormates.ui.feed.components.ForYouCarousel
@@ -103,22 +102,21 @@ fun FeedScreenContent(
                     }
                 }
 
-                item(key = "aiTools") {
-                    AiToolsCard(
+                // Quien saltó el onboarding (o no marcó nada) recibe la invitación.
+                if (!hasPreferences && !isLoading) {
+                    item(key = "personalize") { PersonalizeFeedCard(onClick = onPersonalizeClick) }
+                }
+                // Siempre está: aunque no haya recomendaciones, abre con las herramientas AI.
+                item(key = "forYou") {
+                    ForYouCarousel(
+                        vehicles = forYou,
+                        onVehicleClick = onVehicleClick,
                         myCarName = myCarForTuning?.let { "${it.brand} ${it.model}" },
                         onTuneClick = { onAiTuningClick(myCarForTuning?.id) },
                         onFindPartClick = onFindPartClick
                     )
                 }
-
-                // Quien saltó el onboarding (o no marcó nada) recibe la invitación.
-                if (!hasPreferences && !isLoading) {
-                    item(key = "personalize") { PersonalizeFeedCard(onClick = onPersonalizeClick) }
-                }
-                if (forYou.isNotEmpty()) {
-                    item(key = "forYou") { ForYouCarousel(vehicles = forYou, onVehicleClick = onVehicleClick) }
-                    item(key = "allVehiclesHeader") { FeedSectionHeader(title = "Todos los vehículos") }
-                }
+                item(key = "allVehiclesHeader") { FeedSectionHeader(title = "Todos los vehículos") }
 
                 // Lo que viene del backend tiene cuatro estados: cargando,
                 // error, vacío o lista con datos.

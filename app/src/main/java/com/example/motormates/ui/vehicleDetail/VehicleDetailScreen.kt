@@ -86,9 +86,7 @@ fun VehicleDetailScreen(
         else -> VehicleDetailContent(
             car = vehicle,
             reviews = state.reviews,
-            isBookmarked = state.isBookmarked,
             onBackClick = onBackClick,
-            onBookmarkClick = viewModel::bookmarkButtonPress,
             onWriteReviewClick = onWriteReviewClick,
             onSeeAllReviewsClick = onSeeAllReviewsClick,
             onAuthorClick = onAuthorClick,

@@ -65,7 +65,6 @@ fun PublicProfileScreen(
             // Si el usuario no ha subido foto (avatarUrl/coverUrl), se usa una
             // local: los usuarios semilla tienen una fija, igual que en las
             // Historias y las reseñas, para no mostrar siempre la misma.
-            coverResId = R.drawable.profile_cover,
             coverUrl = uiState.coverUrl,
             avatarResId = firebaseUid?.let { localAvatarResFor(it) } ?: R.drawable.user_3,
             avatarUrl = uiState.avatarUrl,

@@ -46,24 +46,99 @@ import com.example.motormates.ui.onboarding.components.SuggestedUserRow
 import com.example.motormates.ui.theme.Radius
 import com.example.motormates.ui.theme.Spacing
 
-/** Carrusel "Para ti" de Explorar: lo que más coincide con los gustos del onboarding. */
+/**
+ * Carrusel "Para ti" de Explorar. Abre con las dos herramientas AI
+ * (modificar un carro y encontrar una pieza) y sigue con los carros que más
+ * coinciden con los gustos del onboarding. Si el usuario no ha dicho qué le
+ * gusta, quedan solo las herramientas.
+ */
 @Composable
 fun ForYouCarousel(
     vehicles: List<FeedVehicleUi>,
     onVehicleClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    myCarName: String? = null,
+    onTuneClick: () -> Unit = {},
+    onFindPartClick: () -> Unit = {}
 ) {
     Column(modifier = modifier.testTag("feedForYou")) {
-        SectionHeader(title = "Para ti", subtitle = "Según lo que nos contaste")
+        SectionHeader(
+            title = "Para ti",
+            subtitle = if (vehicles.isEmpty()) "Herramientas AI para tu carro" else "Según lo que nos contaste"
+        )
         Spacer(modifier = Modifier.height(Spacing.xs))
         LazyRow(
             contentPadding = PaddingValues(horizontal = Spacing.gutter),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
+            item(key = "aiTune") {
+                AiToolCard(
+                    icon = Icons.Default.Brush,
+                    title = if (myCarName != null) "Modifica tu $myCarName" else "Modificar con AI",
+                    subtitle = "Rines, color, aero…",
+                    onClick = onTuneClick,
+                    testTag = "feedAiTune"
+                )
+            }
+            item(key = "aiFindPart") {
+                AiToolCard(
+                    icon = Icons.Default.ImageSearch,
+                    title = "Encontrar pieza",
+                    subtitle = "Foto y Google",
+                    onClick = onFindPartClick,
+                    testTag = "feedAiFindPart"
+                )
+            }
             items(vehicles, key = { "forYou_${it.id}" }) { vehicle ->
                 ForYouCard(vehicle = vehicle, onClick = { onVehicleClick(vehicle.id) })
             }
         }
+    }
+}
+
+/** Una herramienta AI dentro del carrusel: mismo alto que las tarjetas de carros. */
+@Composable
+private fun AiToolCard(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    testTag: String
+) {
+    Column(
+        modifier = Modifier
+            .width(150.dp)
+            .height(150.dp)
+            .clip(RoundedCornerShape(Radius.lg))
+            .background(
+                Brush.verticalGradient(
+                    listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), MaterialTheme.colorScheme.surface)
+                )
+            )
+            .clickable(onClick = onClick)
+            .padding(Spacing.sm)
+            .testTag(testTag)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+            Spacer(modifier = Modifier.width(Spacing.xxs))
+            Icon(
+                Icons.Default.AutoAwesome,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.size(14.dp)
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            title,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, maxLines = 1)
     }
 }
 
@@ -213,83 +288,5 @@ private fun SectionHeader(
         if (subtitle != null) {
             Text(text = subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
         }
-    }
-}
-
-/**
- * Herramientas AI a mano en Explorar: modificar un carro (el propio si hay
- * uno en el garaje) o encontrar una pieza con una foto.
- */
-@Composable
-fun AiToolsCard(
-    myCarName: String?,
-    onTuneClick: () -> Unit,
-    onFindPartClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.gutter)
-            .clip(RoundedCornerShape(Radius.lg))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(Spacing.md)
-            .testTag("feedAiTools")
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(modifier = Modifier.width(Spacing.xs))
-            Text("Herramientas AI", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        }
-        Spacer(modifier = Modifier.height(Spacing.sm))
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            AiToolButton(
-                icon = Icons.Default.Brush,
-                title = if (myCarName != null) "Modifica tu $myCarName" else "Modificar con AI",
-                subtitle = "Rines, color, aero…",
-                onClick = onTuneClick,
-                testTag = "feedAiTune",
-                modifier = Modifier.weight(1f)
-            )
-            AiToolButton(
-                icon = Icons.Default.ImageSearch,
-                title = "Encontrar pieza",
-                subtitle = "Con una foto",
-                onClick = onFindPartClick,
-                testTag = "feedAiFindPart",
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun AiToolButton(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-    testTag: String,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(Radius.md))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-            .clickable(onClick = onClick)
-            .padding(Spacing.sm)
-            .testTag(testTag)
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        Spacer(modifier = Modifier.height(Spacing.xxs))
-        Text(
-            title,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 14.sp,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
     }
 }

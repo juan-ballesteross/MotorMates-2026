@@ -24,8 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -72,15 +70,13 @@ import com.example.motormates.ui.theme.rememberHapticClick
 import com.example.motormates.ui.theme.rememberPressScale
 
 /**
- * Foto del vehículo con los botones de "volver" y "guardar" flotando encima.
- * isBookmarked / onBookmarkClick / onBackClick vienen del padre (state hoisting).
+ * Foto del vehículo con el botón de "volver" flotando encima.
+ * onBackClick viene del padre (state hoisting).
  */
 @Composable
 fun VehicleImageHeader(
     imageUrl: String?,
-    isBookmarked: Boolean,
     onBackClick: () -> Unit,
-    onBookmarkClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
@@ -126,14 +122,9 @@ fun VehicleImageHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Start
         ) {
             CircleIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", onClick = onBackClick)
-            CircleIconButton(
-                icon = if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                contentDescription = "Guardar",
-                onClick = onBookmarkClick
-            )
         }
     }
 }

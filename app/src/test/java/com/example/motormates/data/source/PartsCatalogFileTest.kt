@@ -100,4 +100,11 @@ class PartsCatalogFileTest {
         // El color se pinta como muestra; una foto de otro carro confundiría a la AI.
         assertThat(catalog.parts.filter { it.category == PartCategory.COLOR }.all { it.imageUrl == null }).isTrue()
     }
+
+    @Test
+    fun `todas las piezas que no son color tienen foto en su tarjeta`() {
+        val withoutPhoto = catalog.parts.filter { it.category != PartCategory.COLOR && it.imageUrl == null }
+
+        assertThat(withoutPhoto.map { it.id }).isEmpty()
+    }
 }
