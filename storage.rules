@@ -33,6 +33,13 @@ service firebase.storage {
       allow delete: if isOwner(uid);
     }
 
+    // Fotos de los vehículos publicados (Publicar / Editar vehículo): la
+    // carpeta es el uid del dueño (VehicleImageDataSource).
+    match /vehicles/{uid}/{file} {
+      allow write: if isOwner(uid) && isImage();
+      allow delete: if isOwner(uid);
+    }
+
     // Historias: la carpeta es el uid del autor.
     match /stories/{uid}/{file} {
       allow write: if isOwner(uid) && isImage();
