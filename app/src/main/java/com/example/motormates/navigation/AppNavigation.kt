@@ -15,7 +15,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.motormates.data.model.NotificationType
+import com.example.motormates.ui.aiTuning.AiTuningScreen
 import com.example.motormates.ui.alerts.AlertsScreen
+import com.example.motormates.ui.buildDetail.BuildDetailScreen
 import com.example.motormates.ui.chat.ChatListScreen
 import com.example.motormates.ui.chat.ChatScreen
 import com.example.motormates.ui.comments.CommentsScreen
@@ -136,6 +138,9 @@ fun AppNavigation(
 
             UserScreen(
                 onEditProfileClick = { navController.navigate(ScreenRoute.EditProfile.route) },
+                onBuildClick = { buildId ->
+                    navController.navigate(ScreenRoute.BuildDetail.createRoute(buildId))
+                },
                 onVehicleClick = { vehicleId ->
                     navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
                 },
@@ -258,6 +263,12 @@ fun AppNavigation(
                 onCompareClick = {
                     navController.navigate(ScreenRoute.Compare.createRoute(vehicleId))
                 },
+                onAiTuningClick = {
+                    navController.navigate(ScreenRoute.AiTuning.createRoute(vehicleId))
+                },
+                onBuildClick = { buildId ->
+                    navController.navigate(ScreenRoute.BuildDetail.createRoute(buildId))
+                },
                 reloadSignal = reviewsChanged,
                 onReloadHandled = { entry.clearReviewsChanged() }
             )
@@ -289,6 +300,35 @@ fun AppNavigation(
                 onVehicleClick = { vehicleId ->
                     navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
                 }
+            )
+        }
+        composable(
+            route = ScreenRoute.AiTuning.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.AiTuning.ARG_VEHICLE_ID) { type = NavType.StringType }
+            )
+        ) { entry ->
+            val vehicleId = entry.arguments?.getString(ScreenRoute.AiTuning.ARG_VEHICLE_ID).orEmpty()
+            AiTuningScreen(
+                vehicleId = vehicleId,
+                onBackClick = { navController.popBackStack() },
+                onOpenBuild = { buildId ->
+                    navController.navigate(ScreenRoute.BuildDetail.createRoute(buildId))
+                }
+            )
+        }
+        composable(
+            route = ScreenRoute.BuildDetail.route,
+            arguments = listOf(
+                navArgument(ScreenRoute.BuildDetail.ARG_BUILD_ID) { type = NavType.StringType }
+            )
+        ) { entry ->
+            val buildId = entry.arguments?.getString(ScreenRoute.BuildDetail.ARG_BUILD_ID).orEmpty()
+            BuildDetailScreen(
+                buildId = buildId,
+                onBackClick = { navController.popBackStack() },
+                onAuthorClick = { userId -> openAuthor(userId) },
+                onDeleted = { navController.popBackStack() }
             )
         }
         composable(
@@ -447,6 +487,9 @@ fun AppNavigation(
             PublicProfileScreen(
                 firebaseUid = uid,
                 onBackClick = { navController.popBackStack() },
+                onBuildClick = { buildId ->
+                    navController.navigate(ScreenRoute.BuildDetail.createRoute(buildId))
+                },
                 onVehicleClick = { vehicleId ->
                     navController.navigate(ScreenRoute.VehicleDetail.createRoute(vehicleId))
                 },

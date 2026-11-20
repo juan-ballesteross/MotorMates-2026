@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.example.motormates.data.model.Build
 import com.example.motormates.data.model.GarageVehicleUi
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
@@ -28,6 +29,7 @@ import com.example.motormates.data.model.UserReviewUi
 import com.example.motormates.ui.common.components.GarageEmptyState
 import com.example.motormates.ui.common.components.GarageVehicleCard
 import com.example.motormates.ui.publicProfile.components.PublicProfileHeader
+import com.example.motormates.ui.user.components.ProfileBuildCard
 import com.example.motormates.ui.user.components.ProfileEmptyTabState
 import com.example.motormates.ui.user.components.ProfileInfoSection
 import com.example.motormates.ui.user.components.ProfileReviewCard
@@ -54,10 +56,12 @@ fun PublicProfileScreenContent(
     onReviewClick: (String) -> Unit = {},
     onFollowersClick: () -> Unit = {},
     onFollowingClick: () -> Unit = {},
-    modifier: Modifier = Modifier,
     garage: List<GarageVehicleUi> = emptyList(),
     onGarageCarClick: (String) -> Unit = {},
-    onCompareWithMineClick: (String) -> Unit = {}
+    onCompareWithMineClick: (String) -> Unit = {},
+    builds: List<Build> = emptyList(),
+    onBuildClick: (String) -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -113,6 +117,16 @@ fun PublicProfileScreenContent(
                         onClick = { onGarageCarClick(car.id) },
                         onCompareWithMineClick = { onCompareWithMineClick(car.id) }
                     )
+                }
+            }
+            // Solo los builds que este usuario decidió publicar.
+            ProfileTab.BUILDS -> if (builds.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    ProfileEmptyTabState()
+                }
+            } else {
+                gridItems(builds, key = { it.id }) { build ->
+                    ProfileBuildCard(build = build, onClick = onBuildClick)
                 }
             }
             // Las reseñas que ESTE usuario ha realizado.

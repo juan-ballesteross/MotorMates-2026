@@ -341,4 +341,9 @@
       oauth_client de tipo 3, y seria un recurso duplicado.
     -->
     <string name="google_web_client_id" translatable="false">629428696389-mk4kffu0kguc5n0j24gk1ba0oevknhp0.apps.googleusercontent.com</string>
+
+    <!-- AI Tuning -->
+    <string name="car_detail_ai_tuning_owner">Modificar con AI</string>
+    <string name="car_detail_ai_tuning_visitor">Imagínalo modificado</string>
+    <string name="user_tab_builds">Builds</string>
 </resources>

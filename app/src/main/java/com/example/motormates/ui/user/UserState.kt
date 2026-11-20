@@ -1,6 +1,7 @@
 package com.example.motormates.ui.user
 
 import com.example.motormates.data.model.ActivityUi
+import com.example.motormates.data.model.Build
 import com.example.motormates.data.model.GarageVehicleUi
 import com.example.motormates.data.model.ProfileTab
 import com.example.motormates.data.model.UserProfile
@@ -28,5 +29,8 @@ data class UserUiState(
     // Pestaña Actividad: se carga al abrirla.
     val activity: List<ActivityUi> = emptyList(),
     val isActivityLoading: Boolean = false,
-    val activityError: String? = null
+    val activityError: String? = null,
+    /** Mis builds de AI Tuning (publicados y privados). */
+    val builds: List<Build> = emptyList(),
+    val isBuildsLoading: Boolean = false
 )

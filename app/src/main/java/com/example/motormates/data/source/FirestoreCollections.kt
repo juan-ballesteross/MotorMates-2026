@@ -16,3 +16,9 @@ internal const val CHATS_COLLECTION = "chats"
 internal const val MESSAGES_COLLECTION = "messages"
 internal const val EVENTS_COLLECTION = "events"
 internal const val PARTICIPANTS_COLLECTION = "participants"
+
+// AI Tuning
+internal const val PARTS_COLLECTION = "parts"
+internal const val TUNING_PACKAGES_COLLECTION = "tuningPackages"
+internal const val BUILDS_COLLECTION = "builds"
+internal const val AI_USAGE_COLLECTION = "aiUsage"

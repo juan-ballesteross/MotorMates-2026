@@ -27,6 +27,7 @@ fun PublicProfileScreen(
     onFollowingClick: (String) -> Unit = {},
     onMessageClick: (String) -> Unit = {},
     onCompareWithMineClick: (vehicleId: String) -> Unit = {},
+    onBuildClick: (String) -> Unit = {},
     viewModel: PublicProfileViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -81,10 +82,12 @@ fun PublicProfileScreen(
             onReviewClick = onVehicleClick,
             onFollowersClick = { firebaseUid?.let(onFollowersClick) },
             onFollowingClick = { firebaseUid?.let(onFollowingClick) },
-            modifier = modifier,
             garage = uiState.garage,
             onGarageCarClick = onVehicleClick,
-            onCompareWithMineClick = onCompareWithMineClick
+            onCompareWithMineClick = onCompareWithMineClick,
+            builds = uiState.builds,
+            onBuildClick = onBuildClick,
+            modifier = modifier
         )
     }
 }

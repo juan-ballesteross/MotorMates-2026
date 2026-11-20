@@ -6,6 +6,7 @@ import com.example.motormates.data.model.Vehicle
 import com.example.motormates.data.model.toCarDetailUi
 import com.example.motormates.data.model.toReviewUi
 import com.example.motormates.data.repository.AuthRepository
+import com.example.motormates.data.repository.BuildRepository
 import com.example.motormates.data.repository.LikeRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.VehicleRepository
@@ -27,7 +28,8 @@ class VehicleDetailViewModel @Inject constructor(
     private val vehicleRepository: VehicleRepository,
     private val reviewRepository: ReviewRepository,
     private val authRepository: AuthRepository,
-    private val likeRepository: LikeRepository
+    private val likeRepository: LikeRepository,
+    private val buildRepository: BuildRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(VehicleDetailState())
@@ -73,12 +75,28 @@ class VehicleDetailViewModel @Inject constructor(
             currentVehicle = vehicle
 
             observeReviews(vehicleId)
+            loadCommunityBuilds(vehicleId)
+        }
+    }
+
+    /**
+     * Best-effort: si fallan, la sección simplemente no aparece; no es razón
+     * para mostrar un error en el detalle del vehículo.
+     */
+    private fun loadCommunityBuilds(vehicleId: String) {
+        viewModelScope.launch {
+            buildRepository.getPublishedForVehicle(vehicleId).onSuccess { builds ->
+                _state.update { it.copy(communityBuilds = builds) }
+            }
         }
     }
 
     private fun observeReviews(vehicleId: String) {
         val currentUserId = authRepository.getCurrentUser()?.id
+        // Un solo cálculo de dueño: decide si puede borrar reseñas ajenas
+        // y también el texto del botón de AI Tuning.
         val isVehicleOwner = currentUserId != null && currentUserId == currentVehicle?.ownerId
+        _state.update { it.copy(isOwner = isVehicleOwner) }
 
         reviewsJob = viewModelScope.launch {
             // Compartido: lo leen la lista y la escucha de likes, con un

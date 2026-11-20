@@ -2,4 +2,5 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <cache-path name="review_photos" path="review_photos/" />
     <cache-path name="story_photos" path="story_photos/" />
+    <cache-path name="tuning_photos" path="tuning_photos/" />
 </paths>

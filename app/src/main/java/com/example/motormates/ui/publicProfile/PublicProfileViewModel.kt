@@ -7,6 +7,7 @@ import com.example.motormates.data.model.garageOf
 import com.example.motormates.data.model.toUserProfile
 import com.example.motormates.data.model.toUserReviewUi
 import com.example.motormates.data.repository.AuthRepository
+import com.example.motormates.data.repository.BuildRepository
 import com.example.motormates.data.repository.FollowRepository
 import com.example.motormates.data.repository.ReviewRepository
 import com.example.motormates.data.repository.UserRepository
@@ -30,7 +31,8 @@ class PublicProfileViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val vehicleRepository: VehicleRepository,
     private val followRepository: FollowRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val buildRepository: BuildRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PublicProfileUiState())
@@ -53,6 +55,7 @@ class PublicProfileViewModel @Inject constructor(
 
         loadVehicles(uid)
         loadIsFollowing(uid)
+        loadBuilds(uid)
 
         profileJob?.cancel()
         profileJob = viewModelScope.launch {
@@ -144,5 +147,13 @@ class PublicProfileViewModel @Inject constructor(
 
     fun updateSelectedTab(tab: ProfileTab) {
         _uiState.update { it.copy(selectedTab = tab) }
+    }
+
+    /** Best-effort: si falla, la pestaña de builds queda vacía. */
+    private fun loadBuilds(uid: String) {
+        viewModelScope.launch {
+            val builds = buildRepository.getPublishedByOwner(uid).getOrElse { emptyList() }
+            _uiState.update { it.copy(builds = builds) }
+        }
     }
 }

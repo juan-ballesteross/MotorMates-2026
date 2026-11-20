@@ -20,4 +20,4 @@ data class GarageCar(
     val categoryLabel: String = ""
 )
 
-enum class ProfileTab { REVIEWS, GARAGE, ACTIVITY }
+enum class ProfileTab { REVIEWS, GARAGE, BUILDS, ACTIVITY }
