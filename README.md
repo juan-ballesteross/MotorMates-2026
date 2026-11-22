@@ -16,7 +16,16 @@ Jose Alejandro Villarroel Marcano
 
 ## 🎬 Demo
 
-<!-- Arrastra aquí el video desde el editor de GitHub -->
+<p align="center">
+  <a href="https://youtu.be/U5mdVr6K2O0">
+    <img src="promo-assets/shots/09-build-antesdespues-medio.png" width="260" alt="Ver el demo de MotorMates en YouTube">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/U5mdVr6K2O0"><b>▶ Ver el demo completo</b></a><br>
+  <sub>Recorrido por el feed, Explorar, AI Tuning y el mapa de Car Meets</sub>
+</p>
 
 ## Características
 
@@ -158,9 +167,45 @@ El mockup completo de la aplicación puede encontrarse en: https://www.figma.com
 
 1. Clona el repositorio.
 2. Abre el proyecto en Android Studio.
-3. Configura tu API key de Google Maps (ver la sección siguiente).
-4. Sincroniza Gradle (o desde consola: `./gradlew build`).
-5. Ejecuta la app en un emulador o dispositivo físico con Android 8.0 (API 26) o superior.
+3. Pon tu `app/google-services.json` (ver la sección siguiente). **Sin este archivo el
+   proyecto no compila.**
+4. Configura tu API key de Google Maps.
+5. Sincroniza Gradle (o desde consola: `./gradlew build`).
+6. Ejecuta la app en un emulador o dispositivo físico con Android 8.0 (API 26) o superior.
+
+### Configuración de Firebase
+
+`app/google-services.json` **no está en el repositorio**: lleva los identificadores del
+proyecto de cada uno, así que está en `.gitignore`. El proyecto aplica el plugin
+`google-services`, que **aborta la compilación** si el archivo falta — por eso este paso
+no es opcional, a diferencia de las API keys de más abajo.
+
+1. Crea un proyecto en la [consola de Firebase](https://console.firebase.google.com/) y
+   registra una app Android con el package `com.example.motormates`.
+2. Descarga el `google-services.json` que te entrega la consola y déjalo en `app/`.
+3. Habilita **Authentication** (Correo/contraseña y Google), **Cloud Firestore**,
+   **Storage**, **Remote Config** y **App Check**.
+4. Despliega las reglas de Firestore, que ya vienen en el repo:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+> **No hace falta ninguna API key de Gemini.** AI Tuning habla con Gemini a través de
+> **Firebase AI Logic** (`com.google.firebase:firebase-ai`), que se autentica con la
+> identidad de la app — el `google-services.json` más App Check — y no con una llave.
+> Por eso no hay un `GEMINI_API_KEY` en `local.properties`: una key de Gemini dentro del
+> APK sería extraíble por cualquiera, y es justo lo que AI Logic existe para evitar.
+
+Para que **AI Tuning** genere imágenes hacen falta además el plan **Blaze** (los modelos
+de imagen lo exigen) y activar **AI Logic** en la consola. Los nombres de los modelos y el
+backend (`vertex_ai` o `google_ai`) se controlan desde **Remote Config**, sin publicar otra
+versión de la app; la app trae valores por defecto si no configuras nada. El procedimiento
+completo — alerta de presupuesto, tokens de depuración de App Check y la tabla de
+parámetros — está en [docs/ai-tuning.md](docs/ai-tuning.md).
+
+Si te saltas el setup de AI Tuning, la app **compila y corre igual**: solo falla al tocar
+"Modificar con AI", con un mensaje de error en pantalla en vez de la imagen generada.
 
 ### API key de Google Maps
 
