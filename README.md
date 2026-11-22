@@ -16,7 +16,16 @@ Jose Alejandro Villarroel Marcano
 
 ## 🎬 Demo
 
-<!-- Arrastra aquí el video desde el editor de GitHub -->
+<p align="center">
+  <a href="https://youtu.be/U5mdVr6K2O0">
+    <img src="promo-assets/shots/09-build-antesdespues-medio.png" width="260" alt="Ver el demo de MotorMates en YouTube">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/U5mdVr6K2O0"><b>▶ Ver el demo completo</b></a><br>
+  <sub>Recorrido por el feed, Explorar, AI Tuning y el mapa de Car Meets</sub>
+</p>
 
 ## Características
 
