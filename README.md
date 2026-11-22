@@ -1,5 +1,7 @@
 # MotorMates
 
+<p align="center">Red social para entusiastas de los autos: reseña carros, encuentra Car Meets en el mapa y modifica tu carro con IA antes de gastar un peso.</p>
+
 MotorMates es una aplicación Android como proyecto para la clase de Computacion Movil de la Pontificia Universidad Javeriana, construida con Jetpack Compose, pensada como una red social para entusiastas de los autos: permite iniciar sesión/registrarse, ver un feed de reseñas de vehículos publicadas por otros usuarios y buscar/explorar autos por categoría.
 
 Realizada por: 
@@ -11,6 +13,10 @@ Juan Diego Rojas Osorio
 Diego Alejandro Melgarejo Bejarano
 
 Jose Alejandro Villarroel Marcano
+
+## 🎬 Demo
+
+<!-- Arrastra aquí el video desde el editor de GitHub -->
 
 ## Características
 
@@ -51,31 +57,96 @@ app/src/main/java/com/example/motormates/
     └── theme/                    # Color, tipografía y tema de Compose
 ```
 
-## Mockups
+## 📱 Capturas
 
-A continuación se presentan los mockups de las principales pantallas de MotorMates.
+Capturas reales de la app corriendo en un dispositivo Android.
+
+### Comunidad
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="promo-assets/shots/02-login.png" width="230" alt="Acceso"></td>
+    <td align="center"><img src="promo-assets/shots/03-feed.png" width="230" alt="Feed"></td>
+    <td align="center"><img src="promo-assets/shots/12-perfil-garaje.png" width="230" alt="Perfil"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Acceso</b><br>Correo o Google</sub></td>
+    <td align="center"><sub><b>Feed</b><br>Historias, Para ti y reseñas</sub></td>
+    <td align="center"><sub><b>Perfil</b><br>Reseñas, garaje y builds</sub></td>
+  </tr>
+</table>
+
+### Descubre carros
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="promo-assets/shots/04-explorar-deportivos.png" width="230" alt="Explorar"></td>
+    <td align="center"><img src="promo-assets/shots/05-vehicle-detail.png" width="230" alt="Ficha del vehículo"></td>
+    <td align="center"><img src="promo-assets/shots/07-comparador.png" width="230" alt="Comparador"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Explorar</b><br>Búsqueda por marca y categoría</sub></td>
+    <td align="center"><sub><b>Ficha del vehículo</b><br>Especificaciones y reseñas</sub></td>
+    <td align="center"><sub><b>Comparador</b><br>Tu carro frente a otro</sub></td>
+  </tr>
+</table>
+
+### AI Tuning ✨
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="promo-assets/shots/08-aituning-piezas.png" width="230" alt="Elige las piezas"></td>
+    <td align="center"><img src="promo-assets/shots/09-build-antesdespues-medio.png" width="230" alt="Antes / después"></td>
+    <td align="center"><img src="promo-assets/shots/09c-build-costo-rendimiento.png" width="230" alt="Tu Build"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Elige las piezas</b><br>Catálogo, foto propia o idea libre</sub></td>
+    <td align="center"><sub><b>Antes / después</b><br>Imagen generada con Gemini</sub></td>
+    <td align="center"><sub><b>Tu Build</b><br>Costo en COP y rendimiento</sub></td>
+  </tr>
+</table>
+
+### En la calle
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="promo-assets/shots/10-mapa.png" width="230" alt="Mapa"></td>
+    <td align="center"><img src="promo-assets/shots/10b-mapa-tarjeta-evento.png" width="230" alt="Car Meets y piques"></td>
+    <td align="center"><img src="promo-assets/shots/11-evento.png" width="230" alt="Eventos"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Mapa</b><br>Reseñas de las últimas 24 h</sub></td>
+    <td align="center"><sub><b>Car Meets y piques</b><br>Toca un marcador para ver el detalle</sub></td>
+    <td align="center"><sub><b>Eventos</b><br>Organiza y únete a encuentros</sub></td>
+  </tr>
+</table>
+
+<details>
+<summary><b>Ver los mockups originales de Figma</b></summary>
 
 <p align="center">
-  <img src="imgs/Splash.png" width="200" alt="Splash">
-  <img src="imgs/Bienvenida.png" width="200" alt="Bienvenida">
-  <img src="imgs/Registro.png" width="200" alt="Registro">
-  <img src="imgs/CodigoVerificacion.png" width="200" alt="Código de Verificación">
+  <img src="imgs/Splash.png" width="150" alt="Splash">
+  <img src="imgs/Bienvenida.png" width="150" alt="Bienvenida">
+  <img src="imgs/Registro.png" width="150" alt="Registro">
+  <img src="imgs/CodigoVerificacion.png" width="150" alt="Código de Verificación">
 </p>
 
 <p align="center">
-  <img src="imgs/Feed.png" width="200" alt="Feed">
-  <img src="imgs/Explorar.png" width="200" alt="Explorar">
-  <img src="imgs/DetalleVehiculo.png" width="200" alt="Detalle del Vehículo">
-  <img src="imgs/Resena.png" width="200" alt="Reseña">
+  <img src="imgs/Feed.png" width="150" alt="Feed">
+  <img src="imgs/Explorar.png" width="150" alt="Explorar">
+  <img src="imgs/DetalleVehiculo.png" width="150" alt="Detalle del Vehículo">
+  <img src="imgs/Resena.png" width="150" alt="Reseña">
 </p>
 
 <p align="center">
-  <img src="imgs/Publicar.png" width="200" alt="Publicar">
-  <img src="imgs/Perfil.png" width="200" alt="Perfil">
-  <img src="imgs/RecuperarContrasena.png" width="200" alt="Recuperar Contraseña">
+  <img src="imgs/Publicar.png" width="150" alt="Publicar">
+  <img src="imgs/Perfil.png" width="150" alt="Perfil">
+  <img src="imgs/RecuperarContrasena.png" width="150" alt="Recuperar Contraseña">
 </p>
 
 El mockup completo de la aplicación puede encontrarse en: https://www.figma.com/design/XQnzsdVDgozx4DGIly9Frd/MotorMates?node-id=0-1&t=FVrxFJMQnO9jtzlo-1
+
+</details>
 
 ## Requisitos
 
